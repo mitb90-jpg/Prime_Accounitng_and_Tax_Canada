@@ -22,7 +22,7 @@ with col2:
     )
 
     st.markdown(
-        "<p style='font-size:30px; color:gray; margin-top:0;'>2331061 Ontario Inc.</p>",
+        "<p style='font-size:30px; color:gray; margin-top:0;'>World Eyewear</p>",
         unsafe_allow_html=True
     )
 
