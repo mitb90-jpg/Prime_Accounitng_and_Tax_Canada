@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
+import os
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -55,8 +56,17 @@ if uploaded_file is not None:
     df = df.dropna(axis=1, how="all")
     df = df.dropna(how="all")
 
+rules_path = f"rules/{client}.xlsx"
+
+if not os.path.exists(rules_path):
+    st.error(f"Rules file missing: {rules_path}")
+    st.stop()
+
+rules_df = pd.read_excel(rules_path)
+
     # ---------------- LOAD RULES ----------------
-    rules_df = pd.read_excel("rules.xlsx", sheet_name=client)
+rules_path = f"rules/{client}.xlsx"
+rules_df = pd.read_excel(rules_path)
 
     # ---------------- DATE FIX ----------------
     if "Date" in df.columns:
