@@ -55,8 +55,18 @@ if uploaded_file is not None:
     df = df.dropna(axis=1, how="all")
     df = df.dropna(how="all")
 
-    # ---------------- LOAD RULES (GLOBAL FILE) ----------------
-    rules_df = pd.read_excel("rules.xlsx")
+rules_file = f"rules/{client}.xlsx"
+rules_df = pd.read_excel(rules_file)
+
+for _, rule in rules_df.iterrows():
+
+    keyword = str(rule["Keyword"])
+    category = str(rule["Category"])
+
+    df.loc[
+        df["Description"].astype(str).str.contains(keyword, case=False, na=False),
+        "Category"
+    ] = category
 
     # ---------------- DATE FIX ----------------
     if "Date" in df.columns:
