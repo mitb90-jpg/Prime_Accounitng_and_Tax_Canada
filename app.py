@@ -54,7 +54,7 @@ df = df.dropna(how="all")
 rules_df = pd.read_excel("rules.xlsx", sheet_name=client)    
 
     # ---------------- DATE FIX ----------------
-    if "Date" in df.columns:
+if "Date" in df.columns:
         df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
 
     # ---------------- CATEGORY COLUMN ----------------
