@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
-import os
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -27,17 +26,6 @@ with col2:
         unsafe_allow_html=True
     )
 
-# ---------------- CLIENT SELECTION ----------------
-client = st.sidebar.selectbox(
-    "Select Statement",
-    [
-        "Scotia_Bank",
-        "Triangle_Master_Card",
-        "Visa_card_6023",
-        "Visa_card_7866"
-    ]
-)
-
 # ---------------- FILE UPLOAD ----------------
 uploaded_file = st.sidebar.file_uploader(
     "Upload Excel File",
@@ -56,7 +44,8 @@ if uploaded_file is not None:
     df = df.dropna(axis=1, how="all")
     df = df.dropna(how="all")
 
-rules_df = pd.read_excel("rules.xlsx")
+    # ---------------- LOAD RULES ----------------
+    rules_df = pd.read_excel("rules.xlsx")
 
     # ---------------- DATE FIX ----------------
     if "Date" in df.columns:
@@ -90,7 +79,7 @@ rules_df = pd.read_excel("rules.xlsx")
     bank_charge_amount = df.loc[df["Category"] == "Interest and Bank charges", "Debit"].fillna(0).sum()
     loan_amount = df.loc[df["Category"] == "Loan to world eyewear", "Debit"].fillna(0).sum()
 
-    # ---------------- SUMMARY DATA ----------------
+    # ---------------- SUMMARY ----------------
     amounts = {
         "Revenue": revenue_amount,
         "Investment": investment_amount,
@@ -98,15 +87,14 @@ rules_df = pd.read_excel("rules.xlsx")
         "Bank Charges": bank_charge_amount
     }
 
-    # ---------------- SUMMARY DASHBOARD ----------------
     st.subheader("📊 Summary Dashboard")
 
-    col1, col2, col3, col4 = st.columns(4)
+    c1, c2, c3, c4 = st.columns(4)
 
-    col1.metric("Revenue", revenue_amount)
-    col2.metric("Investment", investment_amount)
-    col3.metric("Loans", loan_amount)
-    col4.metric("Bank Charges", bank_charge_amount)
+    c1.metric("Revenue", revenue_amount)
+    c2.metric("Investment", investment_amount)
+    c3.metric("Loans", loan_amount)
+    c4.metric("Bank Charges", bank_charge_amount)
 
     # ---------------- PIE CHART ----------------
     amounts = {k: v for k, v in amounts.items() if v > 0}
