@@ -56,14 +56,7 @@ if uploaded_file is not None:
     df = df.dropna(axis=1, how="all")
     df = df.dropna(how="all")
 
-    # ---------------- LOAD RULES ----------------
-    rules_path = f"rules/{client}.xlsx"
-
-    if not os.path.exists(rules_path):
-        st.error(f"Rules file missing: {rules_path}")
-        st.stop()
-
-    rules_df = pd.read_excel(rules_path)
+rules_df = pd.read_excel("rules.xlsx")
 
     # ---------------- DATE FIX ----------------
     if "Date" in df.columns:
