@@ -69,14 +69,14 @@ rules_path = f"rules/{client}.xlsx"
 rules_df = pd.read_excel(rules_path)
 
     # ---------------- DATE FIX ----------------
-    if "Date" in df.columns:
-        df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
+if "Date" in df.columns:
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
 
     # ---------------- CATEGORY COLUMN ----------------
     df["Category"] = ""
 
     # ---------------- APPLY RULES ----------------
-    for _, rule in rules_df.iterrows():
+for _, rule in rules_df.iterrows():
 
         keyword = str(rule["Keyword"])
         category = str(rule["Category"])
