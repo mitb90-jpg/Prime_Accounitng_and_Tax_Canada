@@ -10,32 +10,21 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- HEADER ----------------
 col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image("Logo.jpeg", width=100)
+    st.image("WhatsApp Image 2026-06-12 at 5.22.49 PM.jpeg", width=100)
 
 with col2:
     st.markdown(
-        "<h1 style='color:#1f4e79; font-size:42px; font-weight:bold;'>Prime Accounting and Tax</h1>",
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        "<p style='font-size:30px; color:gray;'>World Eyewear</p>",
+        "<h1 style='color:#1f4e79; font-size:42px; font-weight:bold; margin-bottom:0;'>Prime Accounting and Tax</h1>",
         unsafe_allow_html=True
     )
 
-# ---------------- CLIENT SELECTION ----------------
-client = st.sidebar.selectbox(
-    "Select Statement",
-    [
-        "Scotia_Bank",
-        "Triangle_Master_Card",
-        "Visa_card_6023",
-        "Visa_card_7866"
-    ]
-)
+    st.markdown(
+        "<p style='font-size:30px; color:gray; margin-top:0;'>2331061 Ontario Inc.</p>",
+        unsafe_allow_html=True
+    )
 
 # ---------------- FILE UPLOAD ----------------
 uploaded_file = st.sidebar.file_uploader(
@@ -43,30 +32,16 @@ uploaded_file = st.sidebar.file_uploader(
     type=["xlsx"]
 )
 
-# ---------------- MAIN APP ----------------
 if uploaded_file is not None:
 
-    # ---------------- READ DATA ----------------
     df = pd.read_excel(uploaded_file)
 
     # ---------------- CLEAN DATA ----------------
     df.columns = df.columns.astype(str).str.strip()
+
     df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
     df = df.dropna(axis=1, how="all")
     df = df.dropna(how="all")
-
-rules_file = f"rules/{client}.xlsx"
-rules_df = pd.read_excel(rules_file)
-
-for _, rule in rules_df.iterrows():
-
-    keyword = str(rule["Keyword"])
-    category = str(rule["Category"])
-
-    df.loc[
-        df["Description"].astype(str).str.contains(keyword, case=False, na=False),
-        "Category"
-    ] = category
 
     # ---------------- DATE FIX ----------------
     if "Date" in df.columns:
@@ -75,52 +50,82 @@ for _, rule in rules_df.iterrows():
     # ---------------- CATEGORY COLUMN ----------------
     df["Category"] = ""
 
-    # ---------------- APPLY RULES ----------------
-    for _, rule in rules_df.iterrows():
+    # ---------------- CREDIT RULE ----------------
+    credit_mask = (
+        df["Credit"].notna() &
+        df["Description"].astype(str).str.contains("Proceeds|Deposit", case=False, na=False)
+    )
+    df.loc[credit_mask, "Category"] = "Revenue"
 
-        keyword = str(rule["Keyword"])
-        category = str(rule["Category"])
+    # ---------------- DEBIT RULES ----------------
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("CHQ", na=False),
+        "Category"
+    ] = "Loan to world eyewear"
 
-        df.loc[
-            df["Description"].astype(str).str.contains(keyword, case=False, na=False),
-            "Category"
-        ] = category
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("TRANSFER TO", case=False, na=False),
+        "Category"
+    ] = "Loan to world eyewear"
 
-    # ---------------- ADD SERIAL NUMBER ----------------
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("TRANSFER OTHER", case=False, na=False),
+        "Category"
+    ] = "Investment income"
+
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("SERVICE CHARGE", case=False, na=False),
+        "Category"
+    ] = "Interest and Bank charges"
+
+    # ---------------- ADD Sr. No ----------------
     df = df.reset_index(drop=True)
     df.insert(0, "Sr. No", range(1, len(df) + 1))
 
-    # ---------------- TABLE ----------------
+    # ---------------- FINAL TABLE ----------------
     st.subheader("📊 Categorized Transactions")
     st.dataframe(df, use_container_width=True, hide_index=True)
 
     # ---------------- SUMMARY ----------------
-    revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
-    investment = df.loc[df["Category"] == "Investment income", "Debit"].fillna(0).sum()
-    loan = df.loc[df["Category"] == "Loan to world eyewear", "Debit"].fillna(0).sum()
-    bank_charges = df.loc[df["Category"] == "Interest and Bank charges", "Debit"].fillna(0).sum()
-
     st.subheader("📊 Summary Dashboard")
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Revenue", revenue)
-    c2.metric("Investment", investment)
-    c3.metric("Loans", loan)
-    c4.metric("Bank Charges", bank_charges)
+    revenue_count = (df["Category"] == "Revenue").sum()
+    bank_charges_count = (df["Category"] == "Interest and Bank charges").sum()
+    loan_count = (df["Category"] == "Loan to world eyewear").sum()
+    investment_count = (df["Category"] == "Investment income").sum()
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    col1.metric("Revenue", revenue_count)
+    col2.metric("Bank Charges", bank_charges_count)
+    col3.metric("Loans", loan_count)
+    col4.metric("Investment", investment_count)
+
+    # ---------------- AMOUNTS ----------------
+    revenue_amount = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
+    investment_amount = df.loc[df["Category"] == "Investment income", "Debit"].fillna(0).sum()
+    bank_charge_amount = df.loc[df["Category"] == "Interest and Bank charges", "Debit"].fillna(0).sum()
+    loan_amount = df.loc[df["Category"] == "Loan to world eyewear", "Debit"].fillna(0).sum()
 
     # ---------------- PIE CHART ----------------
-    data = {
-        "Revenue": revenue,
-        "Investment": investment,
-        "Loan": loan,
-        "Bank Charges": bank_charges
+    st.subheader("🥧 Financial Distribution")
+
+    amounts = {
+        "Revenue": revenue_amount,
+        "Investment": investment_amount,
+        "Loan": loan_amount,
+        "Bank Charges": bank_charge_amount
     }
 
-    data = {k: v for k, v in data.items() if v > 0}
+    amounts = {k: v for k, v in amounts.items() if v > 0}
 
-    if data:
+    if amounts:
         fig, ax = plt.subplots()
-        ax.pie(data.values(), labels=data.keys(), autopct="%1.1f%%")
+        ax.pie(amounts.values(), labels=amounts.keys(), autopct="%1.1f%%")
         ax.set_title("Financial Distribution")
         st.pyplot(fig)
 
@@ -128,8 +133,8 @@ for _, rule in rules_df.iterrows():
     st.subheader("📋 Category Summary")
 
     summary_df = pd.DataFrame({
-        "Category": list(data.keys()),
-        "Amount": [f"${v:,.2f}" for v in data.values()]
+        "Category": list(amounts.keys()),
+        "Amount": [f"${v:,.2f}" for v in amounts.values()]
     })
 
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
@@ -145,7 +150,7 @@ for _, rule in rules_df.iterrows():
     st.download_button(
         "⬇️ Download Excel File",
         data=output,
-        file_name="Auto_categorised_file.xlsx",
+        file_name="Auto_categorised_file_2331061_Ontario_Inc.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
