@@ -1,11 +1,6 @@
-Prime-Categorizer
+rules.xlsx
 │
-├── streamlit_app.py
-├── Logo.jpeg
-├── requirements.txt
-│
-└── rules
-    ├── Company_A.xlsx
-    ├── Company_B.xlsx
-    ├── Company_C.xlsx
-    └── Company_D.xlsx
+├── Company_A
+├── Company_B
+├── Company_C
+└── Company_D
