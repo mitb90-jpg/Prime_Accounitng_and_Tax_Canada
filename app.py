@@ -10,6 +10,41 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown("""
+    <style>
+    .export-box {
+        background-color: #1f4e79;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 20px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .export-title {
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    div.stDownloadButton > button {
+        background-color: #ffffff;
+        color: #1f4e79;
+        font-weight: bold;
+        padding: 0.6em 1.2em;
+        border-radius: 8px;
+        border: none;
+        transition: 0.3s;
+    }
+
+    div.stDownloadButton > button:hover {
+        background-color: #e6f0ff;
+        transform: scale(1.02);
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # ---------------- HEADER ----------------
 col1, col2 = st.columns([1, 6])
 
@@ -178,19 +213,18 @@ if uploaded_file is not None:
     st.dataframe(pl_df, use_container_width=True, hide_index=True)
 
     # ---------------- ✅ P&L DOWNLOAD (FIXED & CORRECT PLACE) ----------------
-    pl_output = io.BytesIO()
+st.markdown("""
+<div class="export-box">
+    <div class="export-title">📊 Export Profit & Loss Statement</div>
+</div>
+""", unsafe_allow_html=True)
 
-    with pd.ExcelWriter(pl_output, engine="openpyxl") as writer:
-        pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
-
-    pl_output.seek(0)
-
-    st.download_button(
-        label="⬇️ Export Profit & Loss Statement",
-        data=pl_output,
-        file_name="Profit_and_Loss.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+st.download_button(
+    "⬇️ Download P&L Excel",
+    data=pl_output,
+    file_name="Profit_and_Loss.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 
     # ---------------- FULL AMOUNTS BLOCK ----------------
     revenue_amount = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
@@ -243,19 +277,15 @@ if uploaded_file is not None:
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
     # ---------------- DOWNLOAD TRANSACTIONS ----------------
-    output = io.BytesIO()
+st.markdown("""
+<div class="export-box">
+    <div class="export-title">📤 Export Categorized Data</div>
+</div>
+""", unsafe_allow_html=True)
 
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Transactions")
-
-    output.seek(0)
-
-    st.download_button(
-        "⬇️ Export Categorized Data",
-        data=output,
-        file_name="Auto_categorised_file_Erin_Mills.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-else:
-    st.info("Please upload an Excel file to begin.")
+st.download_button(
+    "⬇️ Download Excel File",
+    data=output,
+    file_name="Auto_categorised_file.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
