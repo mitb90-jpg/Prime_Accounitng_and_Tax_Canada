@@ -183,19 +183,27 @@ if uploaded_file is not None:
         pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
     pl_output.seek(0)
 
-    # ---------------- P&L DOWNLOAD ----------------
-    st.markdown("""
-    <div class="export-box">
-        <div class="export-title">📊 Export Profit & Loss Statement</div>
-    </div>
-    """, unsafe_allow_html=True)
+# ---------------- CREATE P&L EXPORT ----------------
+pl_output = io.BytesIO()
 
-    st.download_button(
-        "⬇️ Download P&L Excel",
-        data=pl_output,
-        file_name="Profit_and_Loss.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+with pd.ExcelWriter(pl_output, engine="openpyxl") as writer:
+    pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
+
+pl_output.seek(0)
+
+# ---------------- EXPORT BOX (CLICK FEEL UI) ----------------
+st.markdown("""
+<div class="export-box">
+    <div class="export-title">📊 Export Profit & Loss Statement</div>
+</div>
+""", unsafe_allow_html=True)
+
+st.download_button(
+    label="📥 Click to Export Profit & Loss",
+    data=pl_output,
+    file_name="Profit_and_Loss.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 
     # ================= CATEGORY SUMMARY =================
     amounts = df.groupby("Category")[["Credit", "Debit"]].sum()
