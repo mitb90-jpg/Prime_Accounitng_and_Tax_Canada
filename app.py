@@ -189,20 +189,20 @@ summary_df = pd.DataFrame({
 
 st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
-    # ---------------- DOWNLOAD ----------------
-    output = io.BytesIO()
+# ---------------- DOWNLOAD ----------------
+output = io.BytesIO()
 
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Transactions")
+with pd.ExcelWriter(output, engine="openpyxl") as writer:
+    df.to_excel(writer, index=False, sheet_name="Transactions")
 
-    output.seek(0)
+output.seek(0)
 
-    st.download_button(
-        "⬇️ Download Excel File",
-        data=output,
-        file_name="Auto_categorised_file_2331061_Ontario_Inc.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+st.download_button(
+    "⬇️ Download Excel File",
+    data=output,
+    file_name="Auto_categorised_file_2331061_Ontario_Inc.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 
 else:
     st.info("Please upload an Excel file to begin.")
