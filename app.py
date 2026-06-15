@@ -204,6 +204,19 @@ if uploaded_file is not None:
     st.subheader("📋 Category Summary")
     st.dataframe(summary, use_container_width=True, hide_index=True)
 
+    # ---------------- MAIN DOWNLOAD ----------------
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Transactions")
+    output.seek(0)
+
+    st.download_button(
+        "⬇️ Export Summary Data",
+        data=output,
+        file_name="Auto_Summary_Categorized_Data.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 st.markdown("""
 <div style="
     background-color:#f8f9fa;
