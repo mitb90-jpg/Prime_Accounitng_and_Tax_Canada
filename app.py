@@ -202,7 +202,7 @@ else:
 
     st.markdown("""
     <div style="
-        background: linear-gradient(135deg,#1f4e79,#2e75b6);
+        background-color:#1f4e79;
         padding:50px;
         border-radius:20px;
         text-align:center;
@@ -213,11 +213,11 @@ else:
 
         <h3>Prime Accounting and Tax</h3>
 
-        <p style="font-size:18px;">
+        <p>
             Upload an Excel file from the sidebar to generate:
         </p>
 
-        <p style="font-size:17px;">
+        <p>
             📋 Category Summary<br>
             📈 Profit & Loss Statement<br>
             📤 Export Categorized Data<br>
