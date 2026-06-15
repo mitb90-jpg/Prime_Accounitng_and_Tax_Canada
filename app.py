@@ -26,6 +26,17 @@ with col2:
         unsafe_allow_html=True
     )
 
+# ---------------- COMPANY SELECTION ----------------
+company = st.sidebar.selectbox(
+    "Select Account",
+    [
+        "Scotia Bank",
+        "Triangle Master Card",
+        "Visa - 6023",
+        "Visa - 7866"
+    ]
+)
+
 # ---------------- FILE UPLOAD ----------------
 uploaded_file = st.sidebar.file_uploader(
     "Upload Excel File",
