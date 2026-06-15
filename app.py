@@ -179,30 +179,43 @@ amounts = {
 # Remove zero balances
 amounts = {k: v for k, v in amounts.items() if v != 0}
 
-# ---------------- SUMMARY TABLE ----------------
-st.subheader("📋 Category Summary")
-
-summary_df = pd.DataFrame({
-    "Category": list(amounts.keys()),
-    "Amount": [f"${v:,.2f}" for v in amounts.values()]
-})
-
-st.dataframe(summary_df, use_container_width=True, hide_index=True)
-
-# ---------------- DOWNLOAD ----------------
-output = io.BytesIO()
-
-with pd.ExcelWriter(output, engine="openpyxl") as writer:
-    df.to_excel(writer, index=False, sheet_name="Transactions")
-
-output.seek(0)
-
-st.download_button(
-    "⬇️ Download Excel File",
-    data=output,
-    file_name="Auto_categorised_file_2331061_Ontario_Inc.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+# ---------------- FILE UPLOAD ----------------
+uploaded_file = st.sidebar.file_uploader(
+    "Upload Excel File",
+    type=["xlsx"]
 )
+
+if uploaded_file is not None:
+
+    df = pd.read_excel(uploaded_file)
+
+    # ---------------- ALL YOUR PROCESSING ----------------
+    # (cleaning, categorization, summary, etc.)
+
+    # ---------------- SUMMARY TABLE ----------------
+    st.subheader("📋 Category Summary")
+
+    summary_df = pd.DataFrame({
+        "Category": list(amounts.keys()),
+        "Amount": [f"${v:,.2f}" for v in amounts.values()]
+    })
+
+    st.dataframe(summary_df, use_container_width=True, hide_index=True)
+
+    # ---------------- DOWNLOAD ----------------
+    output = io.BytesIO()
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Transactions")
+
+    output.seek(0)
+
+    st.download_button(
+        "⬇️ Download Excel File",
+        data=output,
+        file_name="Auto_categorised_file_2331061_Ontario_Inc.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 else:
     st.info("Please upload an Excel file to begin.")
