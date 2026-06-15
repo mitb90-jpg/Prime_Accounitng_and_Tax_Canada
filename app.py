@@ -132,7 +132,11 @@ if uploaded_file is not None:
             display_df[col] = display_df[col].apply(format_amount)
 
     st.subheader("📊 Categorized Transactions")
-    st.dataframe(display_df, use_container_width=True)
+    st.dataframe(
+    display_df,
+    use_container_width=True,
+    hide_index=True
+)
 
     # ---------------- PROFIT & LOSS ----------------
     st.subheader("📊 Profit & Loss Statement")
