@@ -245,18 +245,3 @@ if uploaded_file is not None:
 
 else:
     st.info("Please upload an Excel file to begin.")
-
-# ---------------- DOWNLOAD PROFIT & LOSS ----------------
-output = io.BytesIO()
-
-with pd.ExcelWriter(output, engine="openpyxl") as writer:
-    pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
-
-output.seek(0)
-
-st.download_button(
-    "⬇️ Download Profit & Loss Statement",
-    data=output,
-    file_name="Profit_and_Loss.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
