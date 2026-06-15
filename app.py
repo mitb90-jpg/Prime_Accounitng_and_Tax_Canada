@@ -137,44 +137,23 @@ if uploaded_file is not None:
     st.subheader("📊 Categorized Transactions")
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-    # ---------------- SUMMARY ----------------
-    st.subheader("📊 Summary Dashboard")
-
-    revenue_count = (df["Category"] == "Revenue").sum()
-    bank_charges_count = (df["Category"] == "Interest and Bank charges").sum()
-    loan_count = (df["Category"] == "Loan to world eyewear").sum()
-    investment_count = (df["Category"] == "Investment income").sum()
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric("Revenue", revenue_count)
-    col2.metric("Bank Charges", bank_charges_count)
-    col3.metric("Loans", loan_count)
-    col4.metric("Investment", investment_count)
-
     # ---------------- AMOUNTS ----------------
     revenue_amount = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
-    investment_amount = df.loc[df["Category"] == "Investment income", "Debit"].fillna(0).sum()
-    bank_charge_amount = df.loc[df["Category"] == "Interest and Bank charges", "Debit"].fillna(0).sum()
-    loan_amount = df.loc[df["Category"] == "Loan to world eyewear", "Debit"].fillna(0).sum()
-
-    # ---------------- PIE CHART ----------------
-    st.subheader("🥧 Financial Distribution")
-
-    amounts = {
-        "Revenue": revenue_amount,
-        "Investment": investment_amount,
-        "Loan": loan_amount,
-        "Bank Charges": bank_charge_amount
-    }
-
-    amounts = {k: v for k, v in amounts.items() if v > 0}
-
-    if amounts:
-        fig, ax = plt.subplots()
-        ax.pie(amounts.values(), labels=amounts.keys(), autopct="%1.1f%%")
-        ax.set_title("Financial Distribution")
-        st.pyplot(fig)
+    other_income_amount = df.loc[df["Category"] == "Other Income", "Credit"].fillna(0).sum()
+    associates_&_opticians_amount = df.loc[df["Category"] == "Associates & Opticians", "Debit"].fillna(0).sum()
+    car_loan_amount = df.loc[df["Category"] == "Car Loan", "Debit"].fillna(0).sum()    
+    cdn_tire_options_mc_amount = df.loc[df["Category"] == "Cdn Tire Options MC", "Debit"].fillna(0).sum()    
+    Drawings_amount = df.loc[df["Category"] == "Drawings", "Debit"].fillna(0).sum()    
+    erin_mills_optical_amount = df.loc[df["Category"] == "Erin Mills Optical", "Debit"].fillna(0).sum()    
+    insurance_amount = df.loc[df["Category"] == "Insurance", "Debit"].fillna(0).sum()    
+    legal_and_professional_fee_amount = df.loc[df["Category"] == "Legal and professional fee", "Debit"].fillna(0).sum()    
+    misc_expenses_amount = df.loc[df["Category"] == "Misc Expenses", "Debit"].fillna(0).sum()
+    interest_and_bank_charges_amount = df.loc[df["Category"] == "Interest and Bank charges", "Debit"].fillna(0).sum()
+    parking_and_toll_amount = df.loc[df["Category"] == "Parking and Toll", "Debit"].fillna(0).sum()
+    personal_expense_amount = df.loc[df["Category"] == "Personal Expenses", "Debit"].fillna(0).sum()    
+    purchases_amount = df.loc[df["Category"] == "Purchases", "Debit"].fillna(0).sum()
+    repairs_and_maintenance_amount = df.loc[df["Category"] == "Repairs and Maintenance", "Debit"].fillna(0).sum()
+    vehicle_expense_amount = df.loc[df["Category"] == "Vehicle Expense", "Debit"].fillna(0).sum()
 
     # ---------------- SUMMARY TABLE ----------------
     st.subheader("📋 Category Summary")
