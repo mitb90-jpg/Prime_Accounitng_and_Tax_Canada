@@ -157,7 +157,6 @@ if uploaded_file is not None:
     expense_summary.columns = ["Category", "Amount"]
 
     total_expenses = expense_summary["Amount"].sum()
-
     net_profit = total_revenue - total_expenses
 
     pl_data = []
@@ -177,6 +176,21 @@ if uploaded_file is not None:
     )
 
     st.dataframe(pl_df, use_container_width=True, hide_index=True)
+
+    # ---------------- ✅ P&L DOWNLOAD (FIXED & CORRECT PLACE) ----------------
+    pl_output = io.BytesIO()
+
+    with pd.ExcelWriter(pl_output, engine="openpyxl") as writer:
+        pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
+
+    pl_output.seek(0)
+
+    st.download_button(
+        label="⬇️ Download Profit & Loss Statement",
+        data=pl_output,
+        file_name="Profit_and_Loss.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
     # ---------------- FULL AMOUNTS BLOCK ----------------
     revenue_amount = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
@@ -228,7 +242,7 @@ if uploaded_file is not None:
 
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
-    # ---------------- DOWNLOAD ----------------
+    # ---------------- DOWNLOAD TRANSACTIONS ----------------
     output = io.BytesIO()
 
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
@@ -239,7 +253,7 @@ if uploaded_file is not None:
     st.download_button(
         "⬇️ Download Excel File",
         data=output,
-        file_name="Auto_categorised_file.xlsx",
+        file_name="Auto_categorised_file_Erin_Mills.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
