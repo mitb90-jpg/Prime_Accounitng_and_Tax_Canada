@@ -146,53 +146,39 @@ if uploaded_file is not None:
     st.subheader("📊 Categorized Transactions")
     st.dataframe(df, use_container_width=True, hide_index=True)
 
-    # ---------------- PROFIT & LOSS TABLE ----------------
+    # ---------------- PROFIT & LOSS ----------------
+    st.subheader("📊 Profit & Loss Statement")
 
-st.subheader("📊 Profit & Loss Statement")
+    total_revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
 
-# Revenue
-total_revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
+    expense_df = df[df["Category"] != "Revenue"]
 
-# Expenses breakdown
-expense_df = df[df["Category"] != "Revenue"]
+    expense_summary = expense_df.groupby("Category")["Debit"].sum().reset_index()
+    expense_summary.columns = ["Category", "Amount"]
 
-expense_summary = expense_df.groupby("Category")["Debit"].sum().reset_index()
-expense_summary.columns = ["Category", "Amount"]
+    total_expenses = expense_summary["Amount"].sum()
 
-total_expenses = expense_summary["Amount"].sum()
+    net_profit = total_revenue - total_expenses
 
-net_profit = total_revenue - total_expenses
+    pl_data = []
+    pl_data.append(["Revenue", total_revenue])
+    pl_data.append(["Less: Expenses", ""])
 
-# ---------------- P&L STRUCTURE ----------------
-pl_data = []
+    for _, row in expense_summary.iterrows():
+        pl_data.append([row["Category"], row["Amount"]])
 
-# Revenue line
-pl_data.append(["Revenue", total_revenue])
+    pl_data.append(["Total Expenses", total_expenses])
+    pl_data.append(["Net Profit", net_profit])
 
-# Spacer line
-pl_data.append(["Less: Expenses", ""])
+    pl_df = pd.DataFrame(pl_data, columns=["Description", "Amount"])
 
-# Expense lines
-for _, row in expense_summary.iterrows():
-    pl_data.append([row["Category"], row["Amount"]])
+    pl_df["Amount"] = pl_df["Amount"].apply(
+        lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x
+    )
 
-# Total expenses
-pl_data.append(["Total Expenses", total_expenses])
+    st.dataframe(pl_df, use_container_width=True, hide_index=True)
 
-# Net profit
-pl_data.append(["Net Profit", net_profit])
-
-# Convert to DataFrame
-pl_df = pd.DataFrame(pl_data, columns=["Description", "Amount"])
-
-# Format display
-pl_df["Amount"] = pl_df["Amount"].apply(
-    lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x
-)
-
-st.dataframe(pl_df, use_container_width=True, hide_index=True)
-
-    # ---------------- AMOUNTS (FULL BLOCK - YOUR VERSION) ----------------
+    # ---------------- FULL AMOUNTS BLOCK ----------------
     revenue_amount = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
     other_income_amount = df.loc[df["Category"] == "Other Income", "Credit"].fillna(0).sum()
 
