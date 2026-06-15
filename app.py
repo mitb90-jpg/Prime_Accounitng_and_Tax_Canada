@@ -192,22 +192,6 @@ pl_df["Amount"] = pl_df["Amount"].apply(
 
 st.dataframe(pl_df, use_container_width=True, hide_index=True)
 
-    # ---------------- P&L CALCULATION ----------------
-    total_revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
-
-    expense_df = df[df["Category"] != "Revenue"]
-    total_expenses = expense_df["Debit"].fillna(0).sum()
-
-    net_profit = total_revenue - total_expenses
-
-    st.subheader("📈 Profit & Loss Statement")
-
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric("Total Revenue", f"${total_revenue:,.2f}")
-    col2.metric("Total Expenses", f"${total_expenses:,.2f}")
-    col3.metric("Net Profit", f"${net_profit:,.2f}")
-
     # ---------------- AMOUNTS (FULL BLOCK - YOUR VERSION) ----------------
     revenue_amount = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
     other_income_amount = df.loc[df["Category"] == "Other Income", "Credit"].fillna(0).sum()
