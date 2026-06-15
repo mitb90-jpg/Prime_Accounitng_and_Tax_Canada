@@ -64,9 +64,15 @@ if uploaded_file is not None:
     # ---------------- CREDIT RULE ----------------
     credit_mask = (
         df["Credit"].notna() &
-        df["Description"].astype(str).str.contains("Proceeds|Deposit", case=False, na=False)
+        df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY", case=False, na=False)
     )
     df.loc[credit_mask, "Category"] = "Revenue"
+
+    credit_mask = (
+        df["Credit"].notna() &
+        df["Description"].astype(str).str.contains("Insurance|HEALTH/DENTAL CLAIM", case=False, na=False)
+    )
+    df.loc[credit_mask, "Category"] = "Other Income"
 
     # ---------------- DEBIT RULES ----------------
     df.loc[
