@@ -186,7 +186,7 @@ if uploaded_file is not None:
     pl_output.seek(0)
 
     st.download_button(
-        label="⬇️ Download Profit & Loss Statement",
+        label="⬇️ Export Profit & Loss Statement",
         data=pl_output,
         file_name="Profit_and_Loss.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -251,7 +251,7 @@ if uploaded_file is not None:
     output.seek(0)
 
     st.download_button(
-        "⬇️ Download categorised File",
+        "⬇️ Export Categorized Data",
         data=output,
         file_name="Auto_categorised_file_Erin_Mills.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
