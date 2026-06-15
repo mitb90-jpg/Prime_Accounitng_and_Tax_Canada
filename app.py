@@ -155,7 +155,7 @@ if uploaded_file is not None:
     pl_df = pd.DataFrame(pl_rows, columns=["Description", "Amount"])
     pl_df["Amount"] = pl_df["Amount"].apply(format_amount)
 
-    st.dataframe(pl_df, use_container_width=True)
+    st.dataframe(pl_df, use_container_width=True, hide_index=True)
 
     # ---------------- P&L DOWNLOAD ----------------
     pl_output = io.BytesIO()
@@ -179,7 +179,7 @@ if uploaded_file is not None:
         summary[col] = summary[col].apply(format_amount)
 
     st.subheader("📋 Category Summary")
-    st.dataframe(summary, use_container_width=True)
+    st.dataframe(summary, use_container_width=True, hide_index=True)
 
     # ---------------- MAIN DOWNLOAD ----------------
     output = io.BytesIO()
