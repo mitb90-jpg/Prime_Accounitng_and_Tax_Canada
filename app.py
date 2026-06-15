@@ -235,13 +235,4 @@ Upload a bank statement or credit card statement to automatically:
 </div>
 """, unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric("Categories", "15+")
-
-with col2:
-    st.metric("Reports", "P&L")
-
-with col3:
-    st.metric("Export Format", "Excel")
+st.caption("Powered by Prime Accounting and Tax")
