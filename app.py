@@ -9,37 +9,24 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- CSS ----------------
+# ---------------- CSS (BUTTON STYLING) ----------------
 st.markdown("""
 <style>
-.export-box {
+div.stDownloadButton > button {
+    width: 100%;
     background-color: #1f4e79;
-    padding: 18px;
-    border-radius: 12px;
-    text-align: center;
-    margin-top: 15px;
-    margin-bottom: 10px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-}
-
-.export-title {
     color: white;
     font-size: 18px;
     font-weight: bold;
-}
-
-div.stDownloadButton > button {
-    background-color: #ffffff;
-    color: #1f4e79;
-    font-weight: bold;
-    padding: 0.6em 1.2em;
-    border-radius: 8px;
+    padding: 14px;
+    border-radius: 12px;
     border: none;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
     transition: 0.3s;
 }
 
 div.stDownloadButton > button:hover {
-    background-color: #e6f0ff;
+    background-color: #163a5c;
     transform: scale(1.02);
 }
 </style>
@@ -52,8 +39,14 @@ with col1:
     st.image("Logo.jpeg", width=100)
 
 with col2:
-    st.markdown("<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:22px; color:gray;'>World Eyewear</p>", unsafe_allow_html=True)
+    st.markdown(
+        "<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='font-size:22px; color:gray;'>World Eyewear</p>",
+        unsafe_allow_html=True
+    )
 
 # ---------------- SIDEBAR ----------------
 company = st.sidebar.selectbox(
@@ -71,26 +64,35 @@ if uploaded_file is not None:
     # ---------------- CLEAN ----------------
     df.columns = df.columns.astype(str).str.strip()
     df = df.dropna(how="all")
+
     df["Category"] = ""
 
     # ---------------- RULES ----------------
-    df.loc[df["Credit"].notna() &
-           df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT", case=False),
-           "Category"] = "Revenue"
+    df.loc[
+        df["Credit"].notna() &
+        df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT", case=False),
+        "Category"
+    ] = "Revenue"
 
-    df.loc[df["Debit"].notna() &
-           df["Description"].astype(str).str.strip().str.lower().eq("misc payment"),
-           "Category"] = "Misc Expenses"
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.strip().str.lower().eq("misc payment"),
+        "Category"
+    ] = "Misc Expenses"
 
-    df.loc[df["Debit"].notna() &
-           df["Description"].astype(str).str.contains("INSURANCE", case=False),
-           "Category"] = "Insurance"
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("INSURANCE", case=False),
+        "Category"
+    ] = "Insurance"
 
-    # ---------------- TRANSACTIONS ----------------
+    # ---------------- TABLE ----------------
     st.subheader("📊 Categorized Transactions")
     st.dataframe(df, use_container_width=True)
 
     # ================= PROFIT & LOSS =================
+    st.subheader("📊 Profit & Loss Statement")
+
     total_revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
 
     expense_df = df[df["Category"] != "Revenue"]
@@ -107,23 +109,17 @@ if uploaded_file is not None:
         ["Net Profit", net_profit]
     ], columns=["Description", "Amount"])
 
-    st.subheader("📊 Profit & Loss Statement")
     st.dataframe(pl_df, use_container_width=True)
 
-    # ---------------- P&L DOWNLOAD (CLICK STYLE) ----------------
+    # ---------------- EXPORT P&L FILE ----------------
     pl_output = io.BytesIO()
     with pd.ExcelWriter(pl_output, engine="openpyxl") as writer:
-        pl_df.to_excel(writer, index=False, sheet_name="P&L")
+        pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
+
     pl_output.seek(0)
 
-    st.markdown("""
-    <div class="export-box">
-        <div class="export-title">📊 Export Profit & Loss Statement</div>
-    </div>
-    """, unsafe_allow_html=True)
-
     st.download_button(
-        "📥 Click to Export P&L",
+        "📊 Export Profit & Loss Statement",
         data=pl_output,
         file_name="Profit_and_Loss.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -136,21 +132,15 @@ if uploaded_file is not None:
     st.subheader("📋 Category Summary")
     st.dataframe(summary.reset_index()[["Category", "Net"]])
 
-    # ---------------- MAIN DOWNLOAD ----------------
+    # ---------------- EXPORT TRANSACTIONS ----------------
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Transactions")
 
     output.seek(0)
 
-    st.markdown("""
-    <div class="export-box">
-        <div class="export-title">📤 Export Categorized Data</div>
-    </div>
-    """, unsafe_allow_html=True)
-
     st.download_button(
-        "⬇️ Download Excel File",
+        "⬇️ Export Categorized Data",
         data=output,
         file_name="Categorized_Data.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
