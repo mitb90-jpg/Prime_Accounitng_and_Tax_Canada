@@ -198,30 +198,39 @@ if uploaded_file is not None:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-else:
+st.markdown("""
+<div style="
+    background-color:#f8f9fa;
+    padding:40px;
+    border-radius:15px;
+    text-align:center;
+    border:1px solid #e0e0e0;
+">
 
-    st.markdown("""
-    <div style="
-        background: linear-gradient(135deg,#1f4e79,#2e75b6);
-        padding:50px;
-        border-radius:20px;
-        text-align:center;
-        margin-top:30px;
-        color:white;
-    ">
-        <h1>📊 Smart Transaction Categorizer</h1>
+<h1 style="color:#1f4e79;">
+📊 Smart Transaction Categorizer
+</h1>
 
-        <h3>Prime Accounting and Tax</h3>
+<h3 style="color:gray;">
+Prime Accounting and Tax
+</h3>
 
-        <p style="font-size:18px;">
-            Upload an Excel file from the sidebar to generate:
-        </p>
+<p style="font-size:18px;">
+Upload a bank statement or credit card statement to automatically:
+</p>
 
-        <p style="font-size:17px;">
-            📋 Category Summary<br>
-            📈 Profit & Loss Statement<br>
-            📤 Export Categorized Data<br>
-            ⚡ Automated Transaction Classification
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+<p style="font-size:17px;">
+✅ Categorize Transactions<br>
+✅ Generate Category Summary<br>
+✅ Create Profit & Loss Statement<br>
+✅ Export Professional Excel Reports
+</p>
+
+<br>
+
+<p style="color:#1f4e79;font-size:18px;font-weight:bold;">
+⬅ Upload your Excel file from the sidebar to begin
+</p>
+
+</div>
+""", unsafe_allow_html=True)
