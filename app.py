@@ -198,28 +198,30 @@ if uploaded_file is not None:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-st.markdown("""
-<div style="
-    background: linear-gradient(135deg,#1f4e79,#2e75b6);
-    padding:50px;
-    border-radius:20px;
-    text-align:center;
-    margin-top:30px;
-    color:white;
-">
-    <h1>📊 Smart Transaction Categorizer</h1>
+else:
 
-    <h3>Prime Accounting and Tax</h3>
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg,#1f4e79,#2e75b6);
+        padding:50px;
+        border-radius:20px;
+        text-align:center;
+        margin-top:30px;
+        color:white;
+    ">
+        <h1>📊 Smart Transaction Categorizer</h1>
 
-    <p style="font-size:18px;">
-        Upload an Excel file from the sidebar to generate:
-    </p>
+        <h3>Prime Accounting and Tax</h3>
 
-    <p style="font-size:17px;">
-        📋 Category Summary<br>
-        📈 Profit & Loss Statement<br>
-        📤 Export Categorized Data<br>
-        ⚡ Automated Transaction Classification
-    </p>
-</div>
-""", unsafe_allow_html=True)
+        <p style="font-size:18px;">
+            Upload an Excel file from the sidebar to generate:
+        </p>
+
+        <p style="font-size:17px;">
+            📋 Category Summary<br>
+            📈 Profit & Loss Statement<br>
+            📤 Export Categorized Data<br>
+            ⚡ Automated Transaction Classification
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
