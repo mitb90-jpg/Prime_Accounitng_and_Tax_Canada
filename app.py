@@ -146,6 +146,52 @@ if uploaded_file is not None:
     st.subheader("📊 Categorized Transactions")
     st.dataframe(df, use_container_width=True, hide_index=True)
 
+    # ---------------- PROFIT & LOSS TABLE ----------------
+
+st.subheader("📊 Profit & Loss Statement")
+
+# Revenue
+total_revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
+
+# Expenses breakdown
+expense_df = df[df["Category"] != "Revenue"]
+
+expense_summary = expense_df.groupby("Category")["Debit"].sum().reset_index()
+expense_summary.columns = ["Category", "Amount"]
+
+total_expenses = expense_summary["Amount"].sum()
+
+net_profit = total_revenue - total_expenses
+
+# ---------------- P&L STRUCTURE ----------------
+pl_data = []
+
+# Revenue line
+pl_data.append(["Revenue", total_revenue])
+
+# Spacer line
+pl_data.append(["Less: Expenses", ""])
+
+# Expense lines
+for _, row in expense_summary.iterrows():
+    pl_data.append([row["Category"], row["Amount"]])
+
+# Total expenses
+pl_data.append(["Total Expenses", total_expenses])
+
+# Net profit
+pl_data.append(["Net Profit", net_profit])
+
+# Convert to DataFrame
+pl_df = pd.DataFrame(pl_data, columns=["Description", "Amount"])
+
+# Format display
+pl_df["Amount"] = pl_df["Amount"].apply(
+    lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x
+)
+
+st.dataframe(pl_df, use_container_width=True, hide_index=True)
+
     # ---------------- P&L CALCULATION ----------------
     total_revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
 
