@@ -251,7 +251,7 @@ if uploaded_file is not None:
     output.seek(0)
 
     st.download_button(
-        "⬇️ Download Excel File",
+        "⬇️ Download categorised File",
         data=output,
         file_name="Auto_categorised_file_Erin_Mills.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
