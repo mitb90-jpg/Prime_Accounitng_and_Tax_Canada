@@ -208,7 +208,7 @@ st.markdown("""
 ">
 
 <h1 style="color:#1f4e79;">
-📊 Smart Transaction Categorizer
+📊 Prime Automated Categorization & Reporting System
 </h1>
 
 <h3 style="color:gray;">
