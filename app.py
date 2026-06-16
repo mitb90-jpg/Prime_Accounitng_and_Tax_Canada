@@ -109,8 +109,7 @@ if uploaded_file is not None:
 
     all_rows.append(row)
 
-
-        df = pd.DataFrame(all_rows)
+df = pd.DataFrame(all_rows)
 
         # Remove empty columns
         df = df.dropna(axis=1, how="all")
