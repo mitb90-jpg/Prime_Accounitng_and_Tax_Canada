@@ -71,7 +71,10 @@ if uploaded_file is not None:
     # ---------------- RULES ----------------
     df.loc[
         df["Credit"].notna() &
-        df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY", case=False),
+        df["Description"].astype(str).str.contains(
+            "MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY",
+            case=False
+        ),
         "Category"
     ] = "Revenue"
 
@@ -92,12 +95,6 @@ if uploaded_file is not None:
         df["Description"].astype(str).str.contains("INSURANCE", case=False),
         "Category"
     ] = "Insurance"
-
-    df.loc[
-        df["Debit"].notna() &
-        df["Description"].astype(str).str.contains("Debit Memo", case=False),
-        "Category"
-    ] = "Ask From Customer"
 
     df.loc[
         df["Debit"].notna() &
@@ -150,20 +147,16 @@ if uploaded_file is not None:
     st.dataframe(display_df, use_container_width=True, hide_index=True)
 
     # ---------------- CATEGORY STATUS COUNT ----------------
-total_entries = len(df)
+    total_entries = len(df)
+    categorized_entries = df["Category"].astype(str).str.strip().ne("").sum()
+    uncategorized_entries = total_entries - categorized_entries
 
-categorized_entries = df["Category"].astype(str).str.strip().ne("").sum()
-uncategorized_entries = total_entries - categorized_entries
-
-st.markdown("### 📌 Categorization Summary")
-
-st.markdown(f"""
-- ✅ **Total Transactions:** {total_entries:,}
-- 🟢 **Categorized Transactions:** {categorized_entries:,}
-- ⚪ **Uncategorized Transactions:** {uncategorized_entries:,}
-""")
-
-    
+    st.markdown("### 📌 Categorization Summary")
+    st.markdown(f"""
+    - ✅ **Total Transactions:** {total_entries:,}
+    - 🟢 **Categorized Transactions:** {categorized_entries:,}
+    - ⚪ **Uncategorized Transactions:** {uncategorized_entries:,}
+    """)
 
     # ---------------- DOWNLOAD TRANSACTIONS ----------------
     output = io.BytesIO()
@@ -214,7 +207,7 @@ st.markdown(f"""
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    # ---------------- CATEGORY SUMMARY (FIXED - NO NET COLUMN) ----------------
+    # ---------------- CATEGORY SUMMARY ----------------
     summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0).reset_index()
 
     display_summary = summary.copy()
@@ -224,7 +217,7 @@ st.markdown(f"""
     st.subheader("📋 Category Summary")
     st.dataframe(display_summary, use_container_width=True, hide_index=True)
 
-    # ---------------- SUMMARY DOWNLOAD (FIXED) ----------------
+    # ---------------- SUMMARY DOWNLOAD ----------------
     summary_output = io.BytesIO()
     with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
         summary.to_excel(writer, index=False, sheet_name="Category Summary")
