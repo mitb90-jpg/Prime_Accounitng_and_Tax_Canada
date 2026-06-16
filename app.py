@@ -112,7 +112,7 @@ if uploaded_file is not None:
 df = pd.DataFrame(all_rows)
 
         # Remove empty columns
-        df = df.dropna(axis=1, how="all")
+df = df.dropna(axis=1, how="all")
 
         # Assign bank statement columns
         df.columns = [
