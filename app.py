@@ -61,12 +61,9 @@ if uploaded_file is not None:
 
     df = pd.read_excel(uploaded_file)
 
-    # ---------------- CLEAN (FIXED UNNAMED COLUMN HERE) ----------------
+    # ---------------- CLEAN DATA ----------------
     df.columns = df.columns.astype(str).str.strip()
-
-    # ✅ REMOVE UNNAMED COLUMNS (FINAL FIX)
     df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
-
     df = df.dropna(how="all")
 
     df["Category"] = ""
@@ -138,13 +135,9 @@ if uploaded_file is not None:
             display_df[col] = display_df[col].apply(format_amount)
 
     st.subheader("📊 Categorized Transactions")
-    st.dataframe(
-    display_df,
-    use_container_width=True,
-    hide_index=True
-)
+    st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-        # ---------------- MAIN DOWNLOAD ----------------
+    # ---------------- DOWNLOAD TRANSACTIONS ----------------
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Transactions")
@@ -193,35 +186,20 @@ if uploaded_file is not None:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    # ---------------- CATEGORY SUMMARY ----------------
-summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0)
+    # ---------------- CATEGORY SUMMARY (FIXED - NO NET COLUMN) ----------------
+    summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0).reset_index()
 
-summary = summary.reset_index()
+    display_summary = summary.copy()
+    for col in ["Credit", "Debit"]:
+        display_summary[col] = display_summary[col].apply(format_amount)
 
-display_summary = summary.copy()
+    st.subheader("📋 Category Summary")
+    st.dataframe(display_summary, use_container_width=True, hide_index=True)
 
-for col in ["Credit", "Debit"]:
-    display_summary[col] = display_summary[col].apply(format_amount)
-
-st.subheader("📋 Category Summary")
-
-st.dataframe(
-    display_summary,
-    use_container_width=True,
-    hide_index=True
-)
-
-
-
-    # ---------------- SUMMARY DOWNLOAD ----------------
+    # ---------------- SUMMARY DOWNLOAD (FIXED) ----------------
     summary_output = io.BytesIO()
-
     with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
-        summary.to_excel(
-            writer,
-            index=False,
-            sheet_name="Category Summary"
-        )
+        summary.to_excel(writer, index=False, sheet_name="Category Summary")
 
     summary_output.seek(0)
 
@@ -233,7 +211,6 @@ st.dataframe(
     )
 
 else:
-
     st.markdown("""
     <div style="
         background-color:#f8f9fa;
@@ -242,31 +219,29 @@ else:
         text-align:center;
         border:1px solid #e0e0e0;
     ">
+        <h1 style="color:#1f4e79;">
+        📊 Prime Automated Categorization & Reporting System
+        </h1>
 
-    <h1 style="color:#1f4e79;">
-    📊 Prime Automated Categorization & Reporting System
-    </h1>
+        <h3 style="color:gray;">
+        Prime Accounting and Tax
+        </h3>
 
-    <h3 style="color:gray;">
-    Prime Accounting and Tax
-    </h3>
+        <p style="font-size:18px;">
+        Upload a bank statement or credit card statement to automatically:
+        </p>
 
-    <p style="font-size:18px;">
-    Upload a bank statement or credit card statement to automatically:
-    </p>
+        <p style="font-size:17px;">
+        ✅ Categorize Transactions<br>
+        ✅ Generate Category Summary<br>
+        ✅ Create Profit & Loss Statement<br>
+        ✅ Export Professional Excel Reports
+        </p>
 
-    <p style="font-size:17px;">
-    ✅ Categorize Transactions<br>
-    ✅ Generate Category Summary<br>
-    ✅ Create Profit & Loss Statement<br>
-    ✅ Export Professional Excel Reports
-    </p>
+        <br>
 
-    <br>
-
-    <p style="color:#1f4e79;font-size:18px;font-weight:bold;">
-    ⬅ Upload your Excel file from the sidebar to begin
-    </p>
-
+        <p style="color:#1f4e79;font-size:18px;font-weight:bold;">
+        ⬅ Upload your Excel file from the sidebar to begin
+        </p>
     </div>
     """, unsafe_allow_html=True)
