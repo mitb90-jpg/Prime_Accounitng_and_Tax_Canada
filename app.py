@@ -83,39 +83,39 @@ if uploaded_file is not None:
 
         df = pd.DataFrame(all_rows[1:], columns=all_rows[0])
 
-# ---------------- CLEAN ----------------
-df.columns = df.columns.astype(str).str.strip()
-df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
-df = df.dropna(how="all")
+    # ---------------- CLEAN ----------------
+    df.columns = df.columns.astype(str).str.strip()
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
+    df = df.dropna(how="all")
 
 
-# ---------------- NORMALIZE COLUMNS ----------------
-# Make PDF columns behave like Excel columns
+    # ---------------- NORMALIZE COLUMNS ----------------
+    # Make PDF columns behave like Excel columns
 
-if "Deposits/Credits" in df.columns:
-    df["Credit"] = df["Deposits/Credits"]
+    if "Deposits/Credits" in df.columns:
+        df["Credit"] = df["Deposits/Credits"]
 
-if "Withdrawals/Debits" in df.columns:
-    df["Debit"] = df["Withdrawals/Debits"]
-
-
-# Convert amounts to numbers
-for col in ["Credit", "Debit"]:
-    if col in df.columns:
-        df[col] = (
-            df[col]
-            .astype(str)
-            .str.replace(",", "", regex=False)
-            .str.replace("$", "", regex=False)
-        )
-
-        df[col] = pd.to_numeric(
-            df[col],
-            errors="coerce"
-        )
+    if "Withdrawals/Debits" in df.columns:
+        df["Debit"] = df["Withdrawals/Debits"]
 
 
-df["Category"] = ""
+    # Convert amounts to numbers
+    for col in ["Credit", "Debit"]:
+        if col in df.columns:
+            df[col] = (
+                df[col]
+                .astype(str)
+                .str.replace(",", "", regex=False)
+                .str.replace("$", "", regex=False)
+            )
+
+            df[col] = pd.to_numeric(
+                df[col],
+                errors="coerce"
+            )
+
+
+    df["Category"] = ""
 
     # ---------------- CREDIT RULES ----------------
     df.loc[
@@ -123,6 +123,7 @@ df["Category"] = ""
         df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY", case=False),
         "Category"
     ] = "Revenue"
+
 
     df.loc[
         df["Deposits/Credits"].notna() &
@@ -138,11 +139,13 @@ df["Category"] = ""
         "Category"
     ] = "Misc Expenses"
 
+
     df.loc[
         df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("INSURANCE", case=False),
         "Category"
     ] = "Insurance"
+
 
     df.loc[
         df["Withdrawals/Debits"].notna() &
@@ -150,11 +153,13 @@ df["Category"] = ""
         "Category"
     ] = "Ask from Customer"
 
+
     df.loc[
         df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("LOANS", case=False),
         "Category"
     ] = "Car Loan"
+
 
     df.loc[
         df["Withdrawals/Debits"].notna() &
@@ -162,11 +167,13 @@ df["Category"] = ""
         "Category"
     ] = "Purchases"
 
+
     df.loc[
         df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("GOODLIFE FITNESS", case=False),
         "Category"
     ] = "Personal Expenses"
+
 
     df.loc[
         df["Withdrawals/Debits"].notna() &
@@ -174,11 +181,13 @@ df["Category"] = ""
         "Category"
     ] = "Parking and Toll"
 
+
     df.loc[
         df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("TSCC|POINT OF SALE PURCHASE", case=False),
         "Category"
     ] = "Vehicle Expense"
+
 
     df.loc[
         df["Withdrawals/Debits"].notna() &
