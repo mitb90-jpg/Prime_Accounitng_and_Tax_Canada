@@ -83,12 +83,39 @@ if uploaded_file is not None:
 
         df = pd.DataFrame(all_rows[1:], columns=all_rows[0])
 
-    # ---------------- CLEAN (FIXED UNNAMED COLUMN HERE) ----------------
-    df.columns = df.columns.astype(str).str.strip()
-    df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
-    df = df.dropna(how="all")
+# ---------------- CLEAN ----------------
+df.columns = df.columns.astype(str).str.strip()
+df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
+df = df.dropna(how="all")
 
-    df["Category"] = ""
+
+# ---------------- NORMALIZE COLUMNS ----------------
+# Make PDF columns behave like Excel columns
+
+if "Deposits/Credits" in df.columns:
+    df["Credit"] = df["Deposits/Credits"]
+
+if "Withdrawals/Debits" in df.columns:
+    df["Debit"] = df["Withdrawals/Debits"]
+
+
+# Convert amounts to numbers
+for col in ["Credit", "Debit"]:
+    if col in df.columns:
+        df[col] = (
+            df[col]
+            .astype(str)
+            .str.replace(",", "", regex=False)
+            .str.replace("$", "", regex=False)
+        )
+
+        df[col] = pd.to_numeric(
+            df[col],
+            errors="coerce"
+        )
+
+
+df["Category"] = ""
 
     # ---------------- CREDIT RULES ----------------
     df.loc[
@@ -106,7 +133,7 @@ if uploaded_file is not None:
 
     # ---------------- DEBIT RULES ----------------
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.strip().str.lower().eq("misc payment"),
         "Category"
     ] = "Misc Expenses"
