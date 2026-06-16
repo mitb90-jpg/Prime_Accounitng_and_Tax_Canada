@@ -66,120 +66,87 @@ if uploaded_file is not None:
 
     file_type = uploaded_file.name.split(".")[-1].lower()
 
+    # ---------------- READ FILE ----------------
+
     if file_type == "xlsx":
+
         df = pd.read_excel(uploaded_file)
 
     elif file_type == "pdf":
+
         all_rows = []
 
-    st.write("Total PDF Pages:", len(pdf.pages))
+        with pdfplumber.open(uploaded_file) as pdf:
 
-    for page_num, page in enumerate(pdf.pages, start=1):
+            st.write("Total PDF Pages:", len(pdf.pages))
 
-        table = page.extract_table()
+            for page_num, page in enumerate(pdf.pages, start=1):
 
-        st.write(
-            f"Page {page_num} - Table Found:",
-            table is not None
-        )
+                table = page.extract_table()
 
-        if table:
-            all_rows.extend(table)
+                if table is not None:
+
+                    for row in table:
+
+                        row_text = " ".join(
+                            str(x) for x in row if x
+                        )
+
+                        if "Date" in row_text and "Description" in row_text:
+                            continue
+
+                        all_rows.append(row)
+
 
         df = pd.DataFrame(all_rows)
 
-        st.write("Rows extracted:", len(df))
-        st.write("Shape:", df.shape)
+    else:
+        st.error("Unsupported file format")
+        st.stop()
 
-        st.write("First 20 Rows")
-        st.dataframe(df.head(20))
-
-        st.write("Last 20 Rows")
-        st.dataframe(df.tail(20))
-
-
-
-    row_text = " ".join(
-        str(x) for x in row if x
-    )
-
-    # remove repeated headers
-    if "Date" in row_text and "Description" in row_text:
-        continue
-
-    all_rows.append(row)
-
-df = pd.DataFrame(all_rows)
-
-        # Remove empty columns
-df = df.dropna(axis=1, how="all")
-
-        # Assign bank statement columns
-df.columns = [
-            "Date",
-            "Description",
-            "Withdrawals/Debits",
-            "Deposits/Credits",
-            "Balance"
-        ]
-
-all_rows = []
-
-with pdfplumber.open(uploaded_file) as pdf:
-    st.write("Total PDF Pages:", len(pdf.pages))
-
-    for page_num, page in enumerate(pdf.pages, start=1):
-
-        table = page.extract_table()
-
-        if table is not None:
-            for row in table:
-
-                row_text = " ".join(
-                    str(x) for x in row if x
-                )
-
-                if "Date" in row_text and "Description" in row_text:
-                    continue
-
-                all_rows.append(row)
-                
-
-df = pd.DataFrame(all_rows)
 
     # ---------------- CLEAN ----------------
-df.columns = (
-        df.columns
-        .astype(str)
-        .str.strip()
-        .str.replace(r"\s*\(\$\)", "", regex=True)
-    )
 
-df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
-df = df.dropna(how="all")
+    df = df.dropna(axis=1, how="all")
 
-
-    # ---------------- FIX PDF HEADERS ----------------
-
-df.columns = (
+    df.columns = (
         df.columns
         .astype(str)
         .str.replace("\n", " ", regex=False)
         .str.strip()
+        .str.replace(r"\s*\(\$\)", "", regex=True)
     )
 
-for col in df.columns:
+
+    df = df.loc[
+        :,
+        ~df.columns.str.contains("^Unnamed", na=False)
+    ]
+
+    df = df.dropna(how="all")
+
+
+    # ---------------- FIX COLUMN NAMES ----------------
+
+    for col in df.columns:
+
         if "Deposits" in col:
-            df.rename(columns={col: "Deposits/Credits"}, inplace=True)
+            df.rename(
+                columns={col: "Deposits/Credits"},
+                inplace=True
+            )
 
         if "Withdrawals" in col:
-            df.rename(columns={col: "Withdrawals/Debits"}, inplace=True)
+            df.rename(
+                columns={col: "Withdrawals/Debits"},
+                inplace=True
+            )
 
-    st.write("PDF Columns:", df.columns.tolist())
+
+    st.write("Columns:", df.columns.tolist())
 
 
-    # ---------------- NORMALIZE COLUMNS ----------------
-    # Make PDF columns behave like Excel columns
+    # ---------------- NORMALIZE AMOUNTS ----------------
 
     if "Deposits/Credits" in df.columns:
         df["Credit"] = df["Deposits/Credits"]
@@ -188,9 +155,10 @@ for col in df.columns:
         df["Debit"] = df["Withdrawals/Debits"]
 
 
-    # Convert amounts to numbers
     for col in ["Credit", "Debit"]:
+
         if col in df.columns:
+
             df[col] = (
                 df[col]
                 .astype(str)
@@ -204,94 +172,98 @@ for col in df.columns:
             )
 
 
+    # ---------------- CATEGORY ----------------
+
     df["Category"] = ""
 
-    # ---------------- CREDIT RULES ----------------
+
+    # CREDIT RULES
+
     df.loc[
-        df["Deposits/Credits"].notna() &
-        df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY", case=False),
+        df["Deposits/Credits"].notna()
+        &
+        df["Description"].astype(str).str.contains(
+            "MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY",
+            case=False
+        ),
         "Category"
     ] = "Revenue"
 
 
     df.loc[
-        df["Deposits/Credits"].notna() &
-        df["Description"].astype(str).str.contains("Insurance|HEALTH/DENTAL CLAIM", case=False),
+        df["Deposits/Credits"].notna()
+        &
+        df["Description"].astype(str).str.contains(
+            "Insurance|HEALTH/DENTAL CLAIM",
+            case=False
+        ),
         "Category"
     ] = "Other Income"
 
 
-    # ---------------- DEBIT RULES ----------------
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.strip().str.lower().eq("misc payment"),
-        "Category"
-    ] = "Misc Expenses"
+
+    # DEBIT RULES
+
+    rules = {
+
+        "Misc Expenses":
+        "misc payment",
+
+        "Insurance":
+        "INSURANCE",
+
+        "Ask from Customer":
+        "Debit Memo",
+
+        "Car Loan":
+        "LOANS",
+
+        "Purchases":
+        "PC Bill Payment",
+
+        "Personal Expenses":
+        "GOODLIFE FITNESS",
+
+        "Parking and Toll":
+        "HIGHWAY",
+
+        "Vehicle Expense":
+        "TSCC|POINT OF SALE PURCHASE",
+
+        "Interest and Bank charges":
+        "SERVICE CHARGE|FEE"
+    }
 
 
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("INSURANCE", case=False),
-        "Category"
-    ] = "Insurance"
+    for category, keyword in rules.items():
+
+        df.loc[
+            df["Withdrawals/Debits"].notna()
+            &
+            df["Description"].astype(str).str.contains(
+                keyword,
+                case=False
+            ),
+            "Category"
+        ] = category
 
 
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("Debit Memo", case=False),
-        "Category"
-    ] = "Ask from Customer"
 
+    # ---------------- SR NO ----------------
 
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("LOANS", case=False),
-        "Category"
-    ] = "Car Loan"
-
-
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("PC Bill Payment", case=False),
-        "Category"
-    ] = "Purchases"
-
-
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("GOODLIFE FITNESS", case=False),
-        "Category"
-    ] = "Personal Expenses"
-
-
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("HIGHWAY", case=False),
-        "Category"
-    ] = "Parking and Toll"
-
-
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("TSCC|POINT OF SALE PURCHASE", case=False),
-        "Category"
-    ] = "Vehicle Expense"
-
-
-    df.loc[
-        df["Withdrawals/Debits"].notna() &
-        df["Description"].astype(str).str.contains("SERVICE CHARGE|FEE", case=False),
-        "Category"
-    ] = "Interest and Bank charges"
-
-    # ---------------- Sr No ----------------
     df = df.reset_index(drop=True)
-    df.insert(0, "Sr. No", range(1, len(df) + 1))
 
-    # ---------------- DISPLAY TABLE ----------------
+    df.insert(
+        0,
+        "Sr. No",
+        range(1, len(df)+1)
+    )
+
+
+    # ---------------- DISPLAY ----------------
+
     display_df = df.copy()
 
-    # Remove extra columns only from display
     display_df = display_df.drop(
         columns=[
             "Balance",
@@ -300,6 +272,7 @@ for col in df.columns:
         ],
         errors="ignore"
     )
+
 
     st.subheader("📊 Categorized Transactions")
 
