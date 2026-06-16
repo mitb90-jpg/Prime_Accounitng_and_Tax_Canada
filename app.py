@@ -168,7 +168,7 @@ df.columns = (
         .str.strip()
     )
 
-    for col in df.columns:
+for col in df.columns:
         if "Deposits" in col:
             df.rename(columns={col: "Deposits/Credits"}, inplace=True)
 
