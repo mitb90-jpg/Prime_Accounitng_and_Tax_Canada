@@ -202,7 +202,7 @@ if uploaded_file is not None:
 
     display_summary = summary.copy()
 
-    for col in ["Credit", "Debit", "Net"]:
+    for col in ["Credit", "Debit"]:
         display_summary[col] = display_summary[col].apply(format_amount)
 
     st.subheader("📋 Category Summary")
