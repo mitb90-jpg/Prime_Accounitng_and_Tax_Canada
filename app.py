@@ -71,7 +71,7 @@ if uploaded_file is not None:
     # ---------------- RULES ----------------
     df.loc[
         df["Credit"].notna() &
-        df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT", case=False),
+        df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT|Insurance|HEALTH/DENTAL CLAIM", case=False),
         "Category"
     ] = "Revenue"
 
