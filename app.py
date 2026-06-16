@@ -127,7 +127,6 @@ if uploaded_file is not None:
 all_rows = []
 
 with pdfplumber.open(uploaded_file) as pdf:
-
     st.write("Total PDF Pages:", len(pdf.pages))
 
     for page_num, page in enumerate(pdf.pages, start=1):
@@ -141,7 +140,6 @@ with pdfplumber.open(uploaded_file) as pdf:
                     str(x) for x in row if x
                 )
 
-                # remove repeated headers
                 if "Date" in row_text and "Description" in row_text:
                     continue
 
