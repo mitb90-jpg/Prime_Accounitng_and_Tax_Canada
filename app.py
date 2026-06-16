@@ -196,8 +196,6 @@ if uploaded_file is not None:
     # ---------------- CATEGORY SUMMARY ----------------
     summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0)
 
-    summary["Net"] = summary["Credit"] - summary["Debit"]
-
     summary = summary.reset_index()
 
     display_summary = summary.copy()
@@ -205,7 +203,7 @@ if uploaded_file is not None:
     for col in ["Credit", "Debit"]:
         display_summary[col] = display_summary[col].apply(format_amount)
 
-    st.subheader("📋 Category Summary")
+        st.subheader("📋 Category Summary")
 
     st.dataframe(
         display_summary,
