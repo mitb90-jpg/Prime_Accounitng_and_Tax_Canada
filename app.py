@@ -124,27 +124,27 @@ if uploaded_file is not None:
             "Balance"
         ]
 
-        with pdfplumber.open(uploaded_file) as pdf:
+all_rows = []
 
-            st.write(
-                "Total PDF Pages:",
-                len(pdf.pages)
-            )
+with pdfplumber.open(uploaded_file) as pdf:
 
-            for page_num, page in enumerate(
-                pdf.pages,
-                start=1
-            ):
+    st.write("Total PDF Pages:", len(pdf.pages))
 
-                table = page.extract_table()
+    for page_num, page in enumerate(pdf.pages, start=1):
 
-                st.write(
-                    f"Page {page_num} - Table Found:",
-                    table is not None
-                )
+        table = page.extract_table()
 
-                if table:
-                    all_rows.extend(table)
+        if table is not None:
+
+            for row in table:
+
+                row_text = " ".join(str(x) for x in row if x)
+
+                # remove repeated headers
+                if "Date" in row_text and "Description" in row_text:
+                    continue
+
+                all_rows.append(row)
 
     # ---------------- CLEAN ----------------
     df.columns = (
