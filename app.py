@@ -245,7 +245,6 @@ if uploaded_file is not None:
     # categorization
     # reports
 
-
 else:
 
     st.markdown("""
@@ -257,86 +256,17 @@ else:
         text-align:center;
     ">
 
-    <h1 style="
-        color:#1f4e79;
-        font-size:42px;
-    ">
+    <h1 style="color:#1f4e79;">
     📊 Prime Automated Categorization System
     </h1>
 
-
-    <h3 style="
-        color:#555;
-    ">
+    <h3 style="color:#555;">
     Prime Accounting and Tax
     </h3>
 
-
-    <p style="
-        font-size:20px;
-        color:#333;
-    ">
-    Upload your bank statement and let the system automatically:
+    <p style="font-size:18px;">
+    Upload your file from the sidebar to begin
     </p>
-
-
-    <p style="
-        font-size:18px;
-        color:#444;
-    ">
-    ✅ Categorize Transactions<br>
-    ✅ Generate Category Summary<br>
-    ✅ Create Profit & Loss Statement<br>
-    ✅ Export Excel Reports
-    </p>
-
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-    st.write("")
-
-
-    col1, col2, col3 = st.columns(3)
-
-
-    with col1:
-        st.info("""
-        ### 📂 Upload File
-
-        Excel or PDF bank statement
-        """)
-
-
-    with col2:
-        st.success("""
-        ### 🤖 Auto Categorization
-
-        Smart transaction classification
-        """)
-
-
-    with col3:
-        st.warning("""
-        ### 📈 Reports
-
-        P&L and summaries
-        """)
-
-
-    st.markdown("""
-    <div style="
-        margin-top:30px;
-        padding:20px;
-        background:#f8f9fa;
-        border-radius:15px;
-        text-align:center;
-    ">
-
-    <h3 style="color:#1f4e79;">
-    👈 Upload your file from the sidebar to begin
-    </h3>
 
     </div>
     """, unsafe_allow_html=True)
