@@ -194,22 +194,24 @@ if uploaded_file is not None:
     )
 
     # ---------------- CATEGORY SUMMARY ----------------
-    summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0)
+summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0)
 
-    summary = summary.reset_index()
+summary = summary.reset_index()
 
-    display_summary = summary.copy()
+display_summary = summary.copy()
 
-    for col in ["Credit", "Debit"]:
-        display_summary[col] = display_summary[col].apply(format_amount)
+for col in ["Credit", "Debit"]:
+    display_summary[col] = display_summary[col].apply(format_amount)
+
+st.subheader("📋 Category Summary")
+
+st.dataframe(
+    display_summary,
+    use_container_width=True,
+    hide_index=True
+)
 
 
-
-    st.dataframe(
-        display_summary,
-        use_container_width=True,
-        hide_index=True
-    )
 
     # ---------------- SUMMARY DOWNLOAD ----------------
     summary_output = io.BytesIO()
