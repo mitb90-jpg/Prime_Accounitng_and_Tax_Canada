@@ -110,6 +110,18 @@ if uploaded_file is not None:
             "Balance"
         ]
 
+    with pdfplumber.open(uploaded_file) as pdf:
+
+    st.write("Total PDF Pages:", len(pdf.pages))
+
+    for page_num, page in enumerate(pdf.pages, start=1):
+        table = page.extract_table()
+
+        st.write(f"Page {page_num} - Table Found:", table is not None)
+
+        if table:
+            all_rows.extend(table)
+
     # ---------------- CLEAN ----------------
     df.columns = (
         df.columns
