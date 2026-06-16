@@ -92,13 +92,13 @@ if uploaded_file is not None:
 
     # ---------------- CREDIT RULES ----------------
     df.loc[
-        df["Credit"].notna() &
+        df["Deposits/Credits"].notna() &
         df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY", case=False),
         "Category"
     ] = "Revenue"
 
     df.loc[
-        df["Credit"].notna() &
+        df["Deposits/Credits"].notna() &
         df["Description"].astype(str).str.contains("Insurance|HEALTH/DENTAL CLAIM", case=False),
         "Category"
     ] = "Other Income"
@@ -112,49 +112,49 @@ if uploaded_file is not None:
     ] = "Misc Expenses"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("INSURANCE", case=False),
         "Category"
     ] = "Insurance"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("Debit Memo", case=False),
         "Category"
     ] = "Ask from Customer"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("LOANS", case=False),
         "Category"
     ] = "Car Loan"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("PC Bill Payment", case=False),
         "Category"
     ] = "Purchases"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("GOODLIFE FITNESS", case=False),
         "Category"
     ] = "Personal Expenses"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("HIGHWAY", case=False),
         "Category"
     ] = "Parking and Toll"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("TSCC|POINT OF SALE PURCHASE", case=False),
         "Category"
     ] = "Vehicle Expense"
 
     df.loc[
-        df["Debit"].notna() &
+        df["Withdrawals/Debits"].notna() &
         df["Description"].astype(str).str.contains("SERVICE CHARGE|FEE", case=False),
         "Category"
     ] = "Interest and Bank charges"
