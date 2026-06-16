@@ -193,6 +193,26 @@ if uploaded_file is not None:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+    # ---------------- CATEGORY SUMMARY ----------------
+    summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0)
+
+    summary["Net"] = summary["Credit"] - summary["Debit"]
+
+    summary = summary.reset_index()
+
+    display_summary = summary.copy()
+
+    for col in ["Credit", "Debit", "Net"]:
+        display_summary[col] = display_summary[col].apply(format_amount)
+
+    st.subheader("📋 Category Summary")
+
+    st.dataframe(
+        display_summary,
+        use_container_width=True,
+        hide_index=True
+    )
+
     # ---------------- SUMMARY DOWNLOAD ----------------
     summary_output = io.BytesIO()
 
@@ -203,48 +223,50 @@ if uploaded_file is not None:
             sheet_name="Category Summary"
         )
 
-summary_output.seek(0)
+    summary_output.seek(0)
 
-st.download_button(
-    "⬇️ Export Summary Data",
-    data=summary_output,
-    file_name="Category_Summary.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+    st.download_button(
+        "⬇️ Export Summary Data",
+        data=summary_output,
+        file_name="Category_Summary.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
-st.markdown("""
-<div style="
-    background-color:#f8f9fa;
-    padding:40px;
-    border-radius:15px;
-    text-align:center;
-    border:1px solid #e0e0e0;
-">
+else:
 
-<h1 style="color:#1f4e79;">
-📊 Prime Automated Categorization & Reporting System
-</h1>
+    st.markdown("""
+    <div style="
+        background-color:#f8f9fa;
+        padding:40px;
+        border-radius:15px;
+        text-align:center;
+        border:1px solid #e0e0e0;
+    ">
 
-<h3 style="color:gray;">
-Prime Accounting and Tax
-</h3>
+    <h1 style="color:#1f4e79;">
+    📊 Prime Automated Categorization & Reporting System
+    </h1>
 
-<p style="font-size:18px;">
-Upload a bank statement or credit card statement to automatically:
-</p>
+    <h3 style="color:gray;">
+    Prime Accounting and Tax
+    </h3>
 
-<p style="font-size:17px;">
-✅ Categorize Transactions<br>
-✅ Generate Category Summary<br>
-✅ Create Profit & Loss Statement<br>
-✅ Export Professional Excel Reports
-</p>
+    <p style="font-size:18px;">
+    Upload a bank statement or credit card statement to automatically:
+    </p>
 
-<br>
+    <p style="font-size:17px;">
+    ✅ Categorize Transactions<br>
+    ✅ Generate Category Summary<br>
+    ✅ Create Profit & Loss Statement<br>
+    ✅ Export Professional Excel Reports
+    </p>
 
-<p style="color:#1f4e79;font-size:18px;font-weight:bold;">
-⬅ Upload your Excel file from the sidebar to begin
-</p>
+    <br>
 
-</div>
-""", unsafe_allow_html=True)
+    <p style="color:#1f4e79;font-size:18px;font-weight:bold;">
+    ⬅ Upload your Excel file from the sidebar to begin
+    </p>
+
+    </div>
+    """, unsafe_allow_html=True)
