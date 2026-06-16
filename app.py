@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import pdfplumber
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
