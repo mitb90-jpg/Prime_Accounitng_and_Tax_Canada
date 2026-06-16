@@ -115,7 +115,7 @@ df = pd.DataFrame(all_rows)
 df = df.dropna(axis=1, how="all")
 
         # Assign bank statement columns
-        df.columns = [
+df.columns = [
             "Date",
             "Description",
             "Withdrawals/Debits",
