@@ -70,11 +70,7 @@ if uploaded_file is not None:
         df = pd.read_excel(uploaded_file)
 
     elif file_type == "pdf":
-        import pdfplumber
-
         all_rows = []
-
-with pdfplumber.open(uploaded_file) as pdf:
 
     st.write("Total PDF Pages:", len(pdf.pages))
 
@@ -101,7 +97,7 @@ with pdfplumber.open(uploaded_file) as pdf:
         st.write("Last 20 Rows")
         st.dataframe(df.tail(20))
 
-for row in table:
+            for row in table:
 
     row_text = " ".join(
         str(x) for x in row if x
