@@ -156,7 +156,7 @@ df.columns = (
     )
 
 df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
-    df = df.dropna(how="all")
+df = df.dropna(how="all")
 
 
     # ---------------- FIX PDF HEADERS ----------------
