@@ -128,14 +128,14 @@ if uploaded_file is not None:
 
     # ---------------- CREDIT RULES ----------------
     df.loc[
-        df["Deposits/Credits"].notna() &
+        df[" Deposits/Credits ($)"].notna() &
         df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY", case=False),
         "Category"
     ] = "Revenue"
 
 
     df.loc[
-        df["Deposits/Credits"].notna() &
+        df[" Deposits/Credits ($)"].notna() &
         df["Description"].astype(str).str.contains("Insurance|HEALTH/DENTAL CLAIM", case=False),
         "Category"
     ] = "Other Income"
