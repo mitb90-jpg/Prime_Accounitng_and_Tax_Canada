@@ -85,14 +85,30 @@ if uploaded_file is not None:
 
     # ---------------- CLEAN ----------------
     df.columns = (
-        df.columns
-        .astype(str)
-        .str.strip()
-        .str.replace(r"\s*\(\$\)", "", regex=True)
-    )
+    df.columns
+    .astype(str)
+    .str.strip()
+    .str.replace(r"\s*\(\$\)", "", regex=True)
+)
 
-    df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
-    df = df.dropna(how="all")
+df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
+df = df.dropna(how="all")
+
+
+    # ---------------- FIX PDF HEADERS ----------------
+
+    df.columns = (
+    df.columns
+    .astype(str)
+    .str.strip()
+)
+
+for col in df.columns:
+    if "Deposits" in col:
+        df.rename(columns={col: "Deposits/Credits"}, inplace=True)
+
+    if "Withdrawals" in col:
+        df.rename(columns={col: "Withdrawals/Debits"}, inplace=True)
 
 
     # ---------------- NORMALIZE COLUMNS ----------------
@@ -122,15 +138,6 @@ if uploaded_file is not None:
 
 
     df["Category"] = ""
-
-    # ---------------- FIX PDF COLUMN NAMES ----------------
-    if "Deposits/Credits" not in df.columns:
-        if "Credit" in df.columns:
-            df["Deposits/Credits"] = df["Credit"]
-
-    if "Withdrawals/Debits" not in df.columns:
-        if "Debit" in df.columns:
-            df["Withdrawals/Debits"] = df["Debit"]
 
     # ---------------- CREDIT RULES ----------------
     df.loc[
