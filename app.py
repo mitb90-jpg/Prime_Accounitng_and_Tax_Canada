@@ -79,7 +79,12 @@ if uploaded_file is not None:
                 table = page.extract_table()
 
                 if table:
+                    # skip repeated headers after first page
+                    if len(all_rows) > 0:
+                        table = table[1:]
+
                     all_rows.extend(table)
+
 
         # Create dataframe without assuming first row is header
         df = pd.DataFrame(all_rows)
