@@ -101,13 +101,17 @@ with pdfplumber.open(uploaded_file) as pdf:
         st.write("Last 20 Rows")
         st.dataframe(df.tail(20))
 
-                        row_text = " ".join(str(x) for x in row if x)
+for row in table:
 
-                        # remove repeated headers
-                        if "Date" in row_text and "Description" in row_text:
-                            continue
+    row_text = " ".join(
+        str(x) for x in row if x
+    )
 
-                        all_rows.append(row)
+    # remove repeated headers
+    if "Date" in row_text and "Description" in row_text:
+        continue
+
+    all_rows.append(row)
 
 
         df = pd.DataFrame(all_rows)
