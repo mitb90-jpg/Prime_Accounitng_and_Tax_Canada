@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import pdfplumber
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -20,7 +19,6 @@ def format_amount(x):
         return x
     except:
         return x
-
 
 # ---------------- CSS ----------------
 st.markdown("""
@@ -56,262 +54,97 @@ company = st.sidebar.selectbox(
     ["Scotia Bank", "Triangle Master Card", "Visa - 6023", "Visa - 7866"]
 )
 
-uploaded_file = st.sidebar.file_uploader(
-    "Upload File (Excel or PDF)",
-    type=["xlsx", "pdf"]
-)
+uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsx"])
 
 # ================= MAIN =================
 if uploaded_file is not None:
 
-    file_type = uploaded_file.name.split(".")[-1].lower()
+    df = pd.read_excel(uploaded_file)
 
-    # ---------------- READ FILE ----------------
+    # ---------------- CLEAN (FIXED UNNAMED COLUMN HERE) ----------------
+    df.columns = df.columns.astype(str).str.strip()
 
-    if file_type == "xlsx":
-
-        df = pd.read_excel(uploaded_file)
-
-    elif file_type == "pdf":
-
-        all_rows = []
-
-        with pdfplumber.open(uploaded_file) as pdf:
-
-            st.write("Total PDF Pages:", len(pdf.pages))
-
-            for page_num, page in enumerate(pdf.pages, start=1):
-
-                table = page.extract_table()
-
-                if table is not None:
-
-                    for row in table:
-
-                        row_text = " ".join(
-                            str(x) for x in row if x
-                        )
-
-                        if "Date" in row_text and "Description" in row_text:
-                            continue
-
-                        all_rows.append(row)
-
-
-        df = pd.DataFrame(all_rows)
-
-    else:
-        st.error("Unsupported file format")
-        st.stop()
-
-
-    # ---------------- CLEAN ----------------
-
-    df = df.dropna(axis=1, how="all")
-
-    df.columns = (
-        df.columns
-        .astype(str)
-        .str.replace("\n", " ", regex=False)
-        .str.strip()
-        .str.replace(r"\s*\(\$\)", "", regex=True)
-    )
-
-
-    df = df.loc[
-        :,
-        ~df.columns.str.contains("^Unnamed", na=False)
-    ]
+    # ✅ REMOVE UNNAMED COLUMNS (FINAL FIX)
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
 
     df = df.dropna(how="all")
 
-
-    # ---------------- FIX COLUMN NAMES ----------------
-
-    for col in df.columns:
-
-        if "Deposits" in col:
-            df.rename(
-                columns={col: "Deposits/Credits"},
-                inplace=True
-            )
-
-        if "Withdrawals" in col:
-            df.rename(
-                columns={col: "Withdrawals/Debits"},
-                inplace=True
-            )
-
-
-    st.write("Columns:", df.columns.tolist())
-
-
-    # ---------------- NORMALIZE AMOUNTS ----------------
-
-    if "Deposits/Credits" in df.columns:
-        df["Credit"] = df["Deposits/Credits"]
-
-    if "Withdrawals/Debits" in df.columns:
-        df["Debit"] = df["Withdrawals/Debits"]
-
-
-    for col in ["Credit", "Debit"]:
-
-        if col in df.columns:
-
-            df[col] = (
-                df[col]
-                .astype(str)
-                .str.replace(",", "", regex=False)
-                .str.replace("$", "", regex=False)
-            )
-
-            df[col] = pd.to_numeric(
-                df[col],
-                errors="coerce"
-            )
-
-
-    # ---------------- CATEGORY ----------------
-
     df["Category"] = ""
 
-
-# ---------------- CATEGORY ----------------
-
-df["Category"] = ""
-
-
-# Make sure columns exist
-
-if "Deposits/Credits" not in df.columns:
-    df["Deposits/Credits"] = None
-
-if "Withdrawals/Debits" not in df.columns:
-    df["Withdrawals/Debits"] = None
-
-if "Description" not in df.columns:
-    df["Description"] = ""
-
-
-# ---------------- CREDIT RULES ----------------
-
-df.loc[
-    df["Deposits/Credits"].notna()
-    &
-    df["Description"].astype(str).str.contains(
-        "MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY",
-        case=False
-    ),
-    "Category"
-] = "Revenue"
-
-
-df.loc[
-    df["Deposits/Credits"].notna()
-    &
-    df["Description"].astype(str).str.contains(
-        "Insurance|HEALTH/DENTAL CLAIM",
-        case=False
-    ),
-    "Category"
-] = "Other Income"
-
-
-
-# ---------------- DEBIT RULES ----------------
-
-rules = {
-
-    "Misc Expenses":
-    "misc payment",
-
-    "Insurance":
-    "INSURANCE",
-
-    "Ask from Customer":
-    "Debit Memo",
-
-    "Car Loan":
-    "LOANS",
-
-    "Purchases":
-    "PC Bill Payment",
-
-    "Personal Expenses":
-    "GOODLIFE FITNESS",
-
-    "Parking and Toll":
-    "HIGHWAY",
-
-    "Vehicle Expense":
-    "TSCC|POINT OF SALE PURCHASE",
-
-    "Interest and Bank charges":
-    "SERVICE CHARGE|FEE"
-}
-
-
-for category, keyword in rules.items():
+    # ---------------- RULES ----------------
+    df.loc[
+        df["Credit"].notna() &
+        df["Description"].astype(str).str.contains("MISC PAYMENT|TRANSFER FROM|DEPOSIT", case=False),
+        "Category"
+    ] = "Revenue"
 
     df.loc[
-        df["Withdrawals/Debits"].notna()
-        &
-        df["Description"].astype(str).str.contains(
-            keyword,
-            case=False
-        ),
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.strip().str.lower().eq("misc payment"),
         "Category"
-    ] = category
+    ] = "Misc Expenses"
 
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("INSURANCE", case=False),
+        "Category"
+    ] = "Insurance"
 
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("LOANS", case=False),
+        "Category"
+    ] = "Car Loan"
 
-    # ---------------- SR NO ----------------
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("PC Bill Payment", case=False),
+        "Category"
+    ] = "Purchases"
 
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("GOODLIFE FITNESS", case=False),
+        "Category"
+    ] = "Personal Expenses"
+
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("HIGHWAY", case=False),
+        "Category"
+    ] = "Parking and Toll"
+
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("TSCC", case=False),
+        "Category"
+    ] = "Vehicle Expense"
+
+    df.loc[
+        df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("SERVICE CHARGE|FEE", case=False),
+        "Category"
+    ] = "Interest and Bank charges"
+
+    # ---------------- Sr No ----------------
     df = df.reset_index(drop=True)
+    df.insert(0, "Sr. No", range(1, len(df) + 1))
 
-    df.insert(
-        0,
-        "Sr. No",
-        range(1, len(df)+1)
-    )
-
-
-    # ---------------- DISPLAY ----------------
-
+    # ---------------- DISPLAY TABLE ----------------
     display_df = df.copy()
 
-    display_df = display_df.drop(
-        columns=[
-            "Balance",
-            "Credit",
-            "Debit"
-        ],
-        errors="ignore"
-    )
-
+    for col in ["Credit", "Debit"]:
+        if col in display_df.columns:
+            display_df[col] = display_df[col].apply(format_amount)
 
     st.subheader("📊 Categorized Transactions")
-
     st.dataframe(
-        display_df,
-        use_container_width=True,
-        hide_index=True
-    )
+    display_df,
+    use_container_width=True,
+    hide_index=True
+)
 
-    # ---------------- CATEGORY STATUS COUNT ----------------
-    total_entries = len(df)
-    categorized_entries = df["Category"].astype(str).str.strip().ne("").sum()
-    uncategorized_entries = total_entries - categorized_entries
-
-    st.markdown("### 📌 Categorization Summary")
-    st.markdown(f"""
-    - ✅ **Total Transactions:** {total_entries:,}
-    - 🟢 **Categorized Transactions:** {categorized_entries:,}
-    - ⚪ **Uncategorized Transactions:** {uncategorized_entries:,}
-    """)
-
-    # ---------------- EXPORT TRANSACTIONS ----------------
+        # ---------------- MAIN DOWNLOAD ----------------
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Transactions")
@@ -347,7 +180,7 @@ for category, keyword in rules.items():
 
     st.dataframe(pl_df, use_container_width=True, hide_index=True)
 
-    # ---------------- P&L EXPORT ----------------
+    # ---------------- P&L DOWNLOAD ----------------
     pl_output = io.BytesIO()
     with pd.ExcelWriter(pl_output, engine="openpyxl") as writer:
         pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
@@ -361,64 +194,62 @@ for category, keyword in rules.items():
     )
 
     # ---------------- CATEGORY SUMMARY ----------------
-    summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0).reset_index()
+    summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0)
+    summary["Net"] = summary["Credit"] - summary["Debit"]
+    summary = summary.reset_index()
 
-    display_summary = summary.copy()
-    for col in ["Credit", "Debit"]:
-        display_summary[col] = display_summary[col].apply(format_amount)
+    for col in ["Credit", "Debit", "Net"]:
+        summary[col] = summary[col].apply(format_amount)
 
     st.subheader("📋 Category Summary")
-    st.dataframe(display_summary, use_container_width=True, hide_index=True)
+    st.dataframe(summary, use_container_width=True, hide_index=True)
 
-    # ---------------- SUMMARY EXPORT ----------------
-    summary_output = io.BytesIO()
-    with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
-        summary.to_excel(writer, index=False, sheet_name="Category Summary")
-
-    summary_output.seek(0)
+    # ---------------- MAIN DOWNLOAD ----------------
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Transactions")
+    output.seek(0)
 
     st.download_button(
         "⬇️ Export Summary Data",
-        data=summary_output,
-        file_name="Category_Summary.xlsx",
+        data=output,
+        file_name="Auto_Summary_Categorized_Data.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-else:
+st.markdown("""
+<div style="
+    background-color:#f8f9fa;
+    padding:40px;
+    border-radius:15px;
+    text-align:center;
+    border:1px solid #e0e0e0;
+">
 
-    st.markdown("""
-    <div style="
-        background-color:#f8f9fa;
-        padding:40px;
-        border-radius:15px;
-        text-align:center;
-        border:1px solid #e0e0e0;
-    ">
+<h1 style="color:#1f4e79;">
+📊 Prime Automated Categorization & Reporting System
+</h1>
 
-    <h1 style="color:#1f4e79;">
-    📊 Prime Automated Categorization & Reporting System
-    </h1>
+<h3 style="color:gray;">
+Prime Accounting and Tax
+</h3>
 
-    <h3 style="color:gray;">
-    Prime Accounting and Tax
-    </h3>
+<p style="font-size:18px;">
+Upload a bank statement or credit card statement to automatically:
+</p>
 
-    <p style="font-size:18px;">
-    Upload a bank statement or credit card statement to automatically:
-    </p>
+<p style="font-size:17px;">
+✅ Categorize Transactions<br>
+✅ Generate Category Summary<br>
+✅ Create Profit & Loss Statement<br>
+✅ Export Professional Excel Reports
+</p>
 
-    <p style="font-size:17px;">
-    ✅ Categorize Transactions<br>
-    ✅ Generate Category Summary<br>
-    ✅ Create Profit & Loss Statement<br>
-    ✅ Export Professional Excel Reports
-    </p>
+<br>
 
-    <br>
+<p style="color:#1f4e79;font-size:18px;font-weight:bold;">
+⬅ Upload your Excel file from the sidebar to begin
+</p>
 
-    <p style="color:#1f4e79;font-size:18px;font-weight:bold;">
-    ⬅ Upload your Excel file from the sidebar to begin
-    </p>
-
-    </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
