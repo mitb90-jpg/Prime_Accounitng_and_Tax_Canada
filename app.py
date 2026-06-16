@@ -75,17 +75,28 @@ if uploaded_file is not None:
         all_rows = []
 
         with pdfplumber.open(uploaded_file) as pdf:
-            for page in pdf.pages:
 
-                table = page.extract_table(
-                    {
-                        "vertical_strategy": "lines",
-                        "horizontal_strategy": "lines"
-                    }
-                )
+            st.write("Total PDF Pages:", len(pdf.pages))
+
+            for page_num, page in enumerate(pdf.pages, start=1):
+
+                table = page.extract_table()
+
+                st.write(f"Page {page_num} - Table Found:", table is not None)
 
                 if table:
-                    for row in table:
+                    all_rows.extend(table)
+
+        df = pd.DataFrame(all_rows)
+
+        st.write("Rows extracted:", len(df))
+        st.write("Shape:", df.shape)
+
+        st.write("First 20 Rows")
+        st.dataframe(df.head(20))
+
+        st.write("Last 20 Rows")
+        st.dataframe(df.tail(20))
 
                         row_text = " ".join(str(x) for x in row if x)
 
