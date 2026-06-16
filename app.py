@@ -203,7 +203,7 @@ if uploaded_file is not None:
     for col in ["Credit", "Debit"]:
         display_summary[col] = display_summary[col].apply(format_amount)
 
-        st.subheader("📋 Category Summary")
+
 
     st.dataframe(
         display_summary,
