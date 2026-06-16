@@ -100,6 +100,7 @@ if uploaded_file is not None:
     df.columns = (
         df.columns
         .astype(str)
+        .str.replace("\n", " ", regex=False)
         .str.strip()
     )
 
@@ -109,6 +110,8 @@ if uploaded_file is not None:
 
         if "Withdrawals" in col:
             df.rename(columns={col: "Withdrawals/Debits"}, inplace=True)
+
+    st.write("PDF Columns:", df.columns.tolist())
 
 
     # ---------------- NORMALIZE COLUMNS ----------------
