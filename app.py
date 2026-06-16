@@ -79,14 +79,18 @@ if uploaded_file is not None:
                 table = page.extract_table()
 
                 if table:
-                    # skip repeated headers after first page
-                    if len(all_rows) > 0:
-                        table = table[1:]
+                    for row in table:
 
-                    all_rows.extend(table)
+                        # Skip repeated headers only
+                        row_text = " ".join(str(x) for x in row if x)
+
+                        if "Date" in row_text and "Description" in row_text:
+                            continue
+
+                        all_rows.append(row)
 
 
-        # Create dataframe without assuming first row is header
+        # Create dataframe
         df = pd.DataFrame(all_rows)
 
         # Remove empty columns
