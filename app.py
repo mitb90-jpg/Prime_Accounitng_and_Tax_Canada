@@ -76,27 +76,32 @@ if uploaded_file is not None:
 
         with pdfplumber.open(uploaded_file) as pdf:
             for page in pdf.pages:
-                table = page.extract_table()
+
+                table = page.extract_table(
+                    {
+                        "vertical_strategy": "lines",
+                        "horizontal_strategy": "lines"
+                    }
+                )
 
                 if table:
                     for row in table:
 
-                        # Skip repeated headers only
                         row_text = " ".join(str(x) for x in row if x)
 
+                        # remove repeated headers
                         if "Date" in row_text and "Description" in row_text:
                             continue
 
                         all_rows.append(row)
 
 
-        # Create dataframe
         df = pd.DataFrame(all_rows)
 
         # Remove empty columns
         df = df.dropna(axis=1, how="all")
 
-        # Assign bank statement columns manually
+        # Assign bank statement columns
         df.columns = [
             "Date",
             "Description",
