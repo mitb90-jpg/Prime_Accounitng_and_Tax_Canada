@@ -149,6 +149,22 @@ if uploaded_file is not None:
     st.subheader("📊 Categorized Transactions")
     st.dataframe(display_df, use_container_width=True, hide_index=True)
 
+    # ---------------- CATEGORY STATUS COUNT ----------------
+total_entries = len(df)
+
+categorized_entries = df["Category"].astype(str).str.strip().ne("").sum()
+uncategorized_entries = total_entries - categorized_entries
+
+st.markdown("### 📌 Categorization Summary")
+
+st.markdown(f"""
+- ✅ **Total Transactions:** {total_entries:,}
+- 🟢 **Categorized Transactions:** {categorized_entries:,}
+- ⚪ **Uncategorized Transactions:** {uncategorized_entries:,}
+""")
+
+    
+
     # ---------------- DOWNLOAD TRANSACTIONS ----------------
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
