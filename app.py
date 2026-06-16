@@ -128,6 +128,12 @@ if uploaded_file is not None:
 
     df.loc[
         df["Debit"].notna() &
+        df["Description"].astype(str).str.contains("Debit Memo", case=False),
+        "Category"
+    ] = "Ask from Customer"
+
+    df.loc[
+        df["Debit"].notna() &
         df["Description"].astype(str).str.contains("SERVICE CHARGE|FEE", case=False),
         "Category"
     ] = "Interest and Bank charges"
