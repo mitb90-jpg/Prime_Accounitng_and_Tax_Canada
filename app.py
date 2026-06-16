@@ -148,7 +148,7 @@ with pdfplumber.open(uploaded_file) as pdf:
 df = pd.DataFrame(all_rows)
 
     # ---------------- CLEAN ----------------
-    df.columns = (
+df.columns = (
         df.columns
         .astype(str)
         .str.strip()
@@ -161,7 +161,7 @@ df = pd.DataFrame(all_rows)
 
     # ---------------- FIX PDF HEADERS ----------------
 
-    df.columns = (
+df.columns = (
         df.columns
         .astype(str)
         .str.replace("\n", " ", regex=False)
