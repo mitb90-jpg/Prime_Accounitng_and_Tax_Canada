@@ -247,14 +247,6 @@ if uploaded_excel is not None:
 
 if uploaded_file is not None:
 
-    pass
-
-    # YOUR OLD WORKING CODE MUST BE HERE
-    # Excel
-    # PDF
-    # categorization
-    # reports
-
 else:
 
     st.markdown("""
