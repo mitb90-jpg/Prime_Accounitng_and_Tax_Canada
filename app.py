@@ -129,54 +129,65 @@ elif uploaded_pdf is not None:
                     continue
 
 
-first = line_words[0]["text"]
-
-# combine split dates
-if len(line_words) > 1:
-    possible_date = first + line_words[1]["text"]
-
-    if (
-        "/" in possible_date
-        or "-" in possible_date
-        or "." in possible_date
-    ):
-        first = possible_date
+                first = line_words[0]["text"]
 
 
-# new transaction
-if (
-    "/" in first
-    or "-" in first
-    or "." in first
-) and len(first) >= 6:
+                # combine split dates
+                if len(line_words) > 1:
 
-    if current:
-        transactions.append(current)
+                    possible_date = (
+                        first +
+                        line_words[1]["text"]
+                    )
 
-    current = {
-        "Date": first,
-        "Description": "",
-        "Debit": "",
-        "Credit": "",
-        "Balance": ""
-    }
+                    if (
+                        "/" in possible_date
+                        or "-" in possible_date
+                        or "." in possible_date
+                    ):
+                        first = possible_date
 
-    for w in line_words[1:]:
 
-        x = float(w["x0"])
-        value = w["text"]
 
-        if x < 280:
-            current["Description"] += " " + value
+                # new transaction
+                if (
+                    "/" in first
+                    or "-" in first
+                    or "." in first
+                ) and len(first) >= 6:
 
-        elif x < 400:
-            current["Debit"] += " " + value
 
-        elif x < 545:
-            current["Credit"] += " " + value
+                    if current:
+                        transactions.append(current)
 
-        else:
-            current["Balance"] += " " + value
+
+                    current = {
+                        "Date": first,
+                        "Description": "",
+                        "Debit": "",
+                        "Credit": "",
+                        "Balance": ""
+                    }
+
+
+                    for w in line_words[1:]:
+
+                        x = float(w["x0"])
+                        value = w["text"]
+
+
+                        if x < 280:
+                            current["Description"] += " " + value
+
+                        elif x < 400:
+                            current["Debit"] += " " + value
+
+                        elif x < 545:
+                            current["Credit"] += " " + value
+
+                        else:
+                            current["Balance"] += " " + value
+
 
 
                 else:
@@ -194,8 +205,8 @@ if (
 
 
 
-        if current:
-            transactions.append(current)
+            if current:
+                transactions.append(current)
 
 
 
@@ -207,7 +218,6 @@ if (
         st.stop()
 
 
-    # clean spaces
     df = df.apply(
         lambda x: x.str.strip()
         if x.dtype == "object"
@@ -215,7 +225,6 @@ if (
     )
 
 
-    # make sure columns exist
     for col in ["Description", "Debit", "Credit", "Balance"]:
         if col not in df.columns:
             df[col] = ""
