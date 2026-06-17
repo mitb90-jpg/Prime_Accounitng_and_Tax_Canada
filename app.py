@@ -103,44 +103,8 @@ with col2:
     st.markdown("<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:20px; color:gray;'>World Eyewear</p>", unsafe_allow_html=True)
 
-# ---------------- CLIENT MANAGEMENT ----------------
-
-if page == "👥 Clients":
-
-    st.title("👥 Client Management")
-
-
-    st.subheader("Existing Clients")
-
-    clients = get_clients()
-
-
-    for c in clients:
-        st.write("👤", c)
-
-
-    st.divider()
-
-
-    st.subheader("Delete Client")
-
-
-    delete_client_name = st.selectbox(
-        "Select client to delete",
-        clients
-    )
-
-
-    if st.button("🗑️ Delete Client"):
-
-        delete_client(delete_client_name)
-
-        st.success(
-            "Client deleted"
-        )
-
-        st.rerun()
 # ---------------- SIDEBAR ----------------
+
 company = st.sidebar.selectbox(
     "Select Account",
     ["Scotia Bank", "Triangle Master Card", "Visa - 6023", "Visa - 7866"]
@@ -155,6 +119,37 @@ uploaded_pdf = st.sidebar.file_uploader(
     "Upload PDF File",
     type=["pdf"]
 )
+
+
+# ---------------- CLIENT MANAGEMENT ----------------
+
+st.sidebar.markdown("## 👥 Clients")
+
+
+new_client = st.sidebar.text_input(
+    "Add New Client"
+)
+
+
+if st.sidebar.button("➕ Add Client"):
+
+    if new_client.strip():
+
+        add_client(new_client)
+
+        st.sidebar.success(
+            "Client Added"
+        )
+
+
+clients = get_clients()
+
+
+selected_client = st.sidebar.selectbox(
+    "Select Client",
+    ["Select Client"] + clients
+)
+
 
 # ---------------- APP MENU ----------------
 
