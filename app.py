@@ -196,20 +196,17 @@ elif uploaded_pdf is not None:
                             current["Description"] += " " + value
 
 
-                        # amount columns based on PDF layout
-
-                        if x < 260:
-                            current["Description"] += " " + value
-
-
-                        elif x < 430:
+                        # debit column
+                        elif x >= 260 and x < 360:
                             current["Debit"] += " " + value
 
 
-                        elif x < 560:
+                        # credit column
+                        elif x >= 360 and x < 470:
                             current["Credit"] += " " + value
 
 
+                        # balance column
                         else:
                             current["Balance"] += " " + value
 
@@ -243,12 +240,6 @@ elif uploaded_pdf is not None:
     st.dataframe(
         df,
         use_container_width=True
-    )
-
-
-    # temporary PDF check
-    st.write(
-        df[["Description", "Debit", "Credit", "Balance"]].head(20)
     )
 
 # ---------------- CLEAN DATA ----------------
