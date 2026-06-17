@@ -386,7 +386,14 @@ if uploaded_excel is not None or uploaded_pdf is not None:
 
     # ---------------- CATEGORY STATUS COUNT ----------------
     total_entries = len(df)
-    categorized_entries = df["Category"].astype(str).str.strip().ne("").sum()
+    categorized_entries = (
+    df["Category"]
+    .fillna("")
+    .astype(str)
+    .str.strip()
+    .ne("")
+    .sum()
+)
     uncategorized_entries = total_entries - categorized_entries
 
     st.markdown("### 📌 Categorization Summary")
