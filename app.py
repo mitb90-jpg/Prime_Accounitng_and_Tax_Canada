@@ -82,6 +82,10 @@ elif uploaded_pdf is not None:
 
     with pdfplumber.open(uploaded_pdf) as pdf:
 
+        current = None
+        started = False
+
+
         for page in pdf.pages:
 
             words = page.extract_words()
@@ -96,10 +100,6 @@ elif uploaded_pdf is not None:
                     rows[y] = []
 
                 rows[y].append(w)
-
-
-            current = None
-            started = False
 
 
             for y in sorted(rows):
