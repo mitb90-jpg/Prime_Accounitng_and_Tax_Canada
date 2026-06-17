@@ -353,31 +353,20 @@ else:
 
     st.markdown("""
     <div style="
-        background:linear-gradient(135deg,#eaf3ff,#ffffff);
-        padding:50px;
-        border-radius:25px;
+        background:#f5f9ff;
+        padding:25px;
+        border-radius:20px;
         text-align:center;
         border:1px solid #d6e4f0;
     ">
 
-    <h1 style="
-        color:#1f4e79;
-    ">
-    📊 Prime Automated Accounting System
-    </h1>
+    <h2 style="color:#1f4e79;">
+    👋 Welcome to Prime Accounting Dashboard
+    </h2>
 
-    <h3 style="
-        color:#555;
-    ">
-    Prime Accounting and Tax
-    </h3>
-
-    <p style="
-        font-size:20px;
-        color:#333;
-    ">
-    Transform statements into categorized transactions,
-    summaries, and reports automatically.
+    <p style="font-size:18px;color:#555;">
+    Upload a bank statement or credit card statement
+    to start automated categorization and reporting.
     </p>
 
     </div>
