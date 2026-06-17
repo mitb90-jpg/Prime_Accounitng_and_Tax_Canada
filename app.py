@@ -156,6 +156,20 @@ uploaded_pdf = st.sidebar.file_uploader(
     type=["pdf"]
 )
 
+# ---------------- APP MENU ----------------
+
+st.sidebar.markdown("---")
+
+page = st.sidebar.radio(
+    "Navigation",
+    [
+        "🏠 Dashboard",
+        "👥 Clients",
+        "📂 Statements",
+        "📊 Reports"
+    ]
+)
+
 # ================= MAIN =================
 
 if uploaded_excel is not None:
