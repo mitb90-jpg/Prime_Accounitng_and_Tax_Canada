@@ -212,7 +212,6 @@ elif x >= 420 and x < 560:
 else:
     current["Balance"] += " " + value
 
-
                 else:
 
                     # continuation description
