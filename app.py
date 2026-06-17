@@ -531,73 +531,73 @@ if uploaded_excel is not None or uploaded_pdf is not None:
     )
 
 
-display_summary = summary.copy()
+    display_summary = summary.copy()
 
 
-display_summary["Amount"] = (
-    display_summary["Amount"]
-    .apply(format_amount)
-)
-
-
-# ---------------- TOTAL ROW ----------------
-
-summary_total = summary["Amount"].sum()
-
-
-total_summary_row = pd.DataFrame([{
-    "Category": "TOTAL",
-    "Amount": format_amount(summary_total)
-}])
-
-
-display_summary = pd.concat(
-    [
-        display_summary,
-        total_summary_row
-    ],
-    ignore_index=True
-)
-
-
-st.subheader("📋 Category Summary")
-
-
-# ---------------- BOLD TOTAL ROW ----------------
-
-def bold_total(row):
-
-    if row["Category"] == "TOTAL":
-        return ["font-weight: bold"] * len(row)
-
-    return [""] * len(row)
-
-
-styled_summary = display_summary.style.apply(
-    bold_total,
-    axis=1
-)
-
-
-st.dataframe(
-    styled_summary,
-    use_container_width=True,
-    hide_index=True
-)
-
-
-# ---------------- SUMMARY DOWNLOAD ----------------
-
-summary_output = io.BytesIO()
-
-
-with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
-
-    summary.to_excel(
-        writer,
-        index=False,
-        sheet_name="Category Summary"
+    display_summary["Amount"] = (
+        display_summary["Amount"]
+        .apply(format_amount)
     )
+
+
+    # ---------------- TOTAL ROW ----------------
+
+    summary_total = summary["Amount"].sum()
+
+
+    total_summary_row = pd.DataFrame([{
+        "Category": "TOTAL",
+        "Amount": format_amount(summary_total)
+    }])
+
+
+    display_summary = pd.concat(
+        [
+            display_summary,
+            total_summary_row
+        ],
+        ignore_index=True
+    )
+
+
+    st.subheader("📋 Category Summary")
+
+
+    # ---------------- BOLD TOTAL ROW ----------------
+
+    def bold_total(row):
+
+        if row["Category"] == "TOTAL":
+            return ["font-weight: bold"] * len(row)
+
+        return [""] * len(row)
+
+
+    styled_summary = display_summary.style.apply(
+        bold_total,
+        axis=1
+    )
+
+
+    st.dataframe(
+        styled_summary,
+        use_container_width=True,
+        hide_index=True
+    )
+
+
+    # ---------------- SUMMARY DOWNLOAD ----------------
+
+    summary_output = io.BytesIO()
+
+
+    with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
+
+        summary.to_excel(
+            writer,
+            index=False,
+            sheet_name="Category Summary"
+        )
 
 
     summary_output.seek(0)
