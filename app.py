@@ -378,6 +378,36 @@ if uploaded_excel is not None or uploaded_pdf is not None:
 
     st.subheader("📊 Categorized Transactions")
 
+
+    # ---------------- TOTAL ROW ----------------
+
+    total_row = pd.DataFrame([{
+        "Sr. No": "",
+        "Date": "",
+        "Description": "TOTAL",
+        "Debit": df["Debit"].fillna(0).sum(),
+        "Credit": df["Credit"].fillna(0).sum(),
+        "Balance": ""
+    }])
+
+
+    display_df = pd.concat(
+        [
+            display_df,
+            total_row
+        ],
+        ignore_index=True
+    )
+
+
+    # format amounts again
+
+    for col in ["Credit", "Debit"]:
+
+        if col in display_df.columns:
+            display_df[col] = display_df[col].apply(format_amount)
+
+
     st.dataframe(
         display_df,
         use_container_width=True,
