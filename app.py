@@ -217,29 +217,6 @@ elif uploaded_pdf is not None:
         else x
     )
 
-
-    st.write("PDF Converted Table")
-
-    st.dataframe(
-        df,
-        use_container_width=True
-    )
-
-
-    st.write("Column check")
-
-    st.dataframe(
-        df[
-            [
-                "Date",
-                "Description",
-                "Debit",
-                "Credit"               
-            ]
-        ].head(30),
-        use_container_width=True
-    )
-
 # ---------------- CLEAN DATA ----------------
 
 if uploaded_excel is not None or uploaded_pdf is not None:
