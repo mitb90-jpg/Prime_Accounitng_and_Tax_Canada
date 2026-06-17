@@ -195,20 +195,22 @@ elif uploaded_pdf is not None:
                         if x < 260:
                             current["Description"] += " " + value
 
+# amount columns based on PDF layout
 
-                        # debit column
-                        elif x >= 260 and x < 360:
-                            current["Debit"] += " " + value
-
-
-                        # credit column
-                        elif x >= 360 and x < 470:
-                            current["Credit"] += " " + value
+if x < 260:
+    current["Description"] += " " + value
 
 
-                        # balance column
-                        else:
-                            current["Balance"] += " " + value
+elif x >= 260 and x < 420:
+    current["Debit"] += " " + value
+
+
+elif x >= 420 and x < 560:
+    current["Credit"] += " " + value
+
+
+else:
+    current["Balance"] += " " + value
 
 
                 else:
