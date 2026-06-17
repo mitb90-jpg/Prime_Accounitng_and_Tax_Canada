@@ -75,28 +75,147 @@ if uploaded_excel is not None:
 elif uploaded_pdf is not None:
 
     import pdfplumber
-    import pandas as pd
 
     st.success("PDF uploaded successfully")
 
     transactions = []
 
     with pdfplumber.open(uploaded_pdf) as pdf:
-        ...
-        ...
+
+        for page in pdf.pages:
+
+            words = page.extract_words()
+
+            rows = {}
+
+            for w in words:
+
+                y = round(float(w["top"]), 1)
+
+                if y not in rows:
+                    rows[y] = []
+
+                rows[y].append(w)
+
+
+            current = None
+            started = False
+
+
+            for y in sorted(rows):
+
+                line_words = sorted(
+                    rows[y],
+                    key=lambda x: float(x["x0"])
+                )
+
+                text = " ".join(
+                    w["text"] for w in line_words
+                )
+
+
+                # start after Account Details
+                if "Account Details" in text:
+                    started = True
+                    continue
+
+
+                if not started:
+                    continue
+
+
+                # ignore headers
+                if "Date" in text and "Description" in text:
+                    continue
+
+
+                first = line_words[0]["text"]
+
+
+                # new transaction
+                if "/" in first and len(first) >= 8:
+
+
+                    if current:
+                        transactions.append(current)
+
+
+                    current = {
+                        "Date": first,
+                        "Description": "",
+                        "Debit": "",
+                        "Credit": "",
+                        "Balance": ""
+                    }
+
+
+                    for w in line_words[1:]:
+
+                        x = float(w["x0"])
+                        value = w["text"]
+
+
+                        if x < 280:
+                            current["Description"] += " " + value
+
+                        elif x < 400:
+                            current["Debit"] += " " + value
+
+                        elif x < 545:
+                            current["Credit"] += " " + value
+
+                        else:
+                            current["Balance"] += " " + value
+
+
+                else:
+
+                    # continuation line
+
+                    if current:
+
+                        for w in line_words:
+
+                            x = float(w["x0"])
+
+                            if x < 280:
+                                current["Description"] += " " + w["text"]
+
+
+
+        if current:
+            transactions.append(current)
+
+
 
     df = pd.DataFrame(transactions)
 
 
+    if df.empty:
+        st.error("PDF could not be read. No transactions found.")
+        st.stop()
+
+
     # clean spaces
     df = df.apply(
-        lambda x: x.str.strip() if x.dtype == "object" else x
+        lambda x: x.str.strip()
+        if x.dtype == "object"
+        else x
     )
+
+
+    # make sure columns exist
+    for col in ["Description", "Debit", "Credit", "Balance"]:
+        if col not in df.columns:
+            df[col] = ""
 
 
     st.write("PDF Converted Table")
 
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(
+        df,
+        use_container_width=True
+    )
 
 # ---------------- CLEAN DATA ----------------
 
