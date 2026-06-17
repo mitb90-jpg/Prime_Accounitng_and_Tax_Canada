@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import re
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -81,110 +82,8 @@ elif uploaded_pdf is not None:
     transactions = []
 
     with pdfplumber.open(uploaded_pdf) as pdf:
-
-        for page_num, page in enumerate(pdf.pages, start=1):
-
-            words = page.extract_words()
-
-            # group words by visual row
-            rows = {}
-
-            for w in words:
-
-                y = round(float(w["top"]), 1)
-
-                if y not in rows:
-                    rows[y] = []
-
-                rows[y].append(w)
-
-
-            current = None
-
-
-            for y in sorted(rows):
-
-                line_words = sorted(
-                    rows[y],
-                    key=lambda x: float(x["x0"])
-                )
-
-                text = " ".join(
-                    w["text"] for w in line_words
-                )
-
-
-                # Start reading after Account Details
-                if "Account Details" in text:
-                    current = "START"
-                    continue
-
-
-                if current != "START":
-                    continue
-
-
-                # Ignore header
-                if "Date Description" in text:
-                    continue
-
-
-                # New transaction starts with date
-                first_word = line_words[0]["text"]
-
-                if "/" in first_word and len(first_word) >= 8:
-
-
-                    # save previous transaction
-                    if current and isinstance(current, dict):
-                        transactions.append(current)
-
-
-                    current = {
-                        "Date": first_word,
-                        "Description": "",
-                        "Debit": "",
-                        "Credit": "",
-                        "Balance": ""
-                    }
-
-
-                    for w in line_words[1:]:
-
-                        x = float(w["x0"])
-                        value = w["text"]
-
-
-                        if x < 280:
-                            current["Description"] += " " + value
-
-                        elif x < 400:
-                            current["Debit"] += " " + value
-
-                        elif x < 545:
-                            current["Credit"] += " " + value
-
-                        else:
-                            current["Balance"] += " " + value
-
-
-                else:
-
-                    # continuation description lines
-                    if isinstance(current, dict):
-
-                        for w in line_words:
-
-                            x = float(w["x0"])
-
-                            if x < 280:
-                                current["Description"] += " " + w["text"]
-
-
-        if isinstance(current, dict):
-            transactions.append(current)
-
-
+        ...
+        ...
 
     df = pd.DataFrame(transactions)
 
@@ -198,82 +97,6 @@ elif uploaded_pdf is not None:
     st.write("PDF Converted Table")
 
     st.dataframe(df, use_container_width=True)
-
-    # ---------------- SPLIT PDF DATA ----------------
-
-    data = []
-
-    for row in df["Raw"]:
-
-        parts = row.split()
-
-        date = parts[0]
-
-        text = " ".join(parts[1:])
-
-        numbers = re.findall(
-            r"\d{1,3}(?:,\d{3})*\.\d{2}",
-            text
-        )
-
-        description = text
-
-        debit = ""
-        credit = ""
-        balance = ""
-
-        if len(numbers) >= 2:
-
-            balance = numbers[-1]
-
-            amount = numbers[-2]
-
-            description = text.replace(
-                amount,
-                ""
-            ).replace(
-                balance,
-                ""
-            ).strip()
-
-
-            # PDF statement rule:
-            # if amount appears before balance,
-            # determine side from context
-
-            if "DEP" in description.upper() or "CREDIT" in description.upper():
-                credit = amount
-
-            else:
-                debit = amount
-
-
-        data.append(
-            [
-                date,
-                description,
-                debit,
-                credit,
-                balance
-            ]
-        )
-
-
-    df = pd.DataFrame(
-        data,
-        columns=[
-            "Date",
-            "Description",
-            "Debit",
-            "Credit",
-            "Balance"
-        ]
-    )
-
-
-    st.write("Converted PDF Columns")
-
-    st.dataframe(df.head(30))
 
 # ---------------- CLEAN DATA ----------------
 
