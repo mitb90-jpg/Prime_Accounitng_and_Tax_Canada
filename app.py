@@ -269,6 +269,123 @@ selected_client = st.sidebar.selectbox(
     ["Select Client"] + clients
 )
 
+# ================= ACCOUNT PAGE =================
+
+if page == "🏦 Accounts":
+
+    st.title("🏦 Account Management")
+
+
+    clients = get_clients()
+
+
+    if not clients:
+
+        st.info(
+            "Please add a client first"
+        )
+
+    else:
+
+
+        selected_client_account = st.selectbox(
+            "Select Client",
+            ["Select Client"] + clients,
+            key="account_client_select"
+        )
+
+
+        if selected_client_account != "Select Client":
+
+
+            st.success(
+                f"Active Client: {selected_client_account}"
+            )
+
+
+            st.divider()
+
+
+            st.subheader("Add New Account")
+
+
+            account_name = st.text_input(
+                "Account Name",
+                placeholder="Example: Scotia Bank"
+            )
+
+
+            account_type = st.selectbox(
+                "Account Type",
+                [
+                    "Bank Account",
+                    "Credit Card"
+                ]
+            )
+
+
+
+            if st.button(
+                "➕ Add Account"
+            ):
+
+
+                if account_name.strip():
+
+
+                    add_account(
+                        selected_client_account,
+                        account_name,
+                        account_type
+                    )
+
+
+                    st.success(
+                        "Account Added Successfully"
+                    )
+
+
+                    st.rerun()
+
+
+
+            st.divider()
+
+
+            st.subheader("Existing Accounts")
+
+
+            accounts = get_accounts(
+                selected_client_account
+            )
+
+
+            if accounts:
+
+
+                account_df = pd.DataFrame(
+                    accounts,
+                    columns=[
+                        "Account Name",
+                        "Account Type"
+                    ]
+                )
+
+
+                st.dataframe(
+                    account_df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+
+            else:
+
+                st.info(
+                    "No accounts added for this client"
+                )
+
+
 
 # ---------------- APP MENU ----------------
 
@@ -280,6 +397,7 @@ page = st.sidebar.radio(
     [
         "🏠 Dashboard",
         "👥 Clients",
+        "🏦 Accounts",
         "📂 Statements",
         "📊 Reports"
     ]
