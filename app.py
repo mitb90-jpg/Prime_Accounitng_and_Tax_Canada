@@ -351,7 +351,37 @@ if uploaded_excel is not None or uploaded_pdf is not None:
 
 else:
 
-    st.markdown("Your beautiful opening screen")
+    st.markdown("""
+    <div style="
+        background:linear-gradient(135deg,#eaf3ff,#ffffff);
+        padding:50px;
+        border-radius:25px;
+        text-align:center;
+        border:1px solid #d6e4f0;
+    ">
+
+    <h1 style="
+        color:#1f4e79;
+    ">
+    📊 Prime Automated Accounting System
+    </h1>
+
+    <h3 style="
+        color:#555;
+    ">
+    Prime Accounting and Tax
+    </h3>
+
+    <p style="
+        font-size:20px;
+        color:#333;
+    ">
+    Transform statements into categorized transactions,
+    summaries, and reports automatically.
+    </p>
+
+    </div>
+    """, unsafe_allow_html=True)
 
 if uploaded_excel is not None or uploaded_pdf is not None:
 
