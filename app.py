@@ -381,24 +381,38 @@ if uploaded_excel is not None or uploaded_pdf is not None:
 
     # ---------------- TOTAL ROW ----------------
 
-    total_debit = pd.to_numeric(
-        df["Debit"],
-        errors="coerce"
-    ).fillna(0).sum()
+    debit_total = (
+        pd.to_numeric(
+            df["Debit"]
+            .astype(str)
+            .str.replace(",", "", regex=False)
+            .str.replace("$", "", regex=False),
+            errors="coerce"
+        )
+        .fillna(0)
+        .sum()
+    )
 
 
-    total_credit = pd.to_numeric(
-        df["Credit"],
-        errors="coerce"
-    ).fillna(0).sum()
+    credit_total = (
+        pd.to_numeric(
+            df["Credit"]
+            .astype(str)
+            .str.replace(",", "", regex=False)
+            .str.replace("$", "", regex=False),
+            errors="coerce"
+        )
+        .fillna(0)
+        .sum()
+    )
 
 
     total_row = pd.DataFrame([{
         "Sr. No": "",
         "Date": "",
         "Description": "TOTAL",
-        "Debit": total_debit,
-        "Credit": total_credit,
+        "Debit": debit_total,
+        "Credit": credit_total,
         "Balance": ""
     }])
 
@@ -411,8 +425,6 @@ if uploaded_excel is not None or uploaded_pdf is not None:
         ignore_index=True
     )
 
-
-    # format amounts
 
     for col in ["Credit", "Debit"]:
 
