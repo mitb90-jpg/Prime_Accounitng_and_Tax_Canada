@@ -101,11 +101,8 @@ if uploaded_excel is not None or uploaded_pdf is not None:
     df["Category"] = ""
 
 
-else:
-
-    st.markdown("Your beautiful opening screen")
-
     # ---------------- RULES ----------------
+
     df.loc[
         df["Credit"].notna() &
         df["Description"].astype(str).str.contains(
@@ -115,11 +112,16 @@ else:
         "Category"
     ] = "Revenue"
 
+
     df.loc[
         df["Credit"].notna() &
-        df["Description"].astype(str).str.contains("Insurance|HEALTH/DENTAL CLAIM", case=False),
+        df["Description"].astype(str).str.contains(
+            "Insurance|HEALTH/DENTAL CLAIM",
+            case=False
+        ),
         "Category"
     ] = "Other Income"
+
 
     df.loc[
         df["Debit"].notna() &
@@ -127,11 +129,13 @@ else:
         "Category"
     ] = "Misc Expenses"
 
+
     df.loc[
         df["Debit"].notna() &
         df["Description"].astype(str).str.contains("INSURANCE", case=False),
         "Category"
     ] = "Insurance"
+
 
     df.loc[
         df["Debit"].notna() &
@@ -139,11 +143,13 @@ else:
         "Category"
     ] = "Car Loan"
 
+
     df.loc[
         df["Debit"].notna() &
         df["Description"].astype(str).str.contains("PC Bill Payment", case=False),
         "Category"
     ] = "Purchases"
+
 
     df.loc[
         df["Debit"].notna() &
@@ -151,11 +157,13 @@ else:
         "Category"
     ] = "Personal Expenses"
 
+
     df.loc[
         df["Debit"].notna() &
         df["Description"].astype(str).str.contains("HIGHWAY", case=False),
         "Category"
     ] = "Parking and Toll"
+
 
     df.loc[
         df["Debit"].notna() &
@@ -163,17 +171,24 @@ else:
         "Category"
     ] = "Vehicle Expense"
 
+
     df.loc[
         df["Debit"].notna() &
         df["Description"].astype(str).str.contains("Debit Memo", case=False),
         "Category"
     ] = "Ask from Customer"
 
+
     df.loc[
         df["Debit"].notna() &
         df["Description"].astype(str).str.contains("SERVICE CHARGE|FEE", case=False),
         "Category"
     ] = "Interest and Bank charges"
+
+
+else:
+
+    st.markdown("Your beautiful opening screen")
 
     # ---------------- Sr No ----------------
     df = df.reset_index(drop=True)
