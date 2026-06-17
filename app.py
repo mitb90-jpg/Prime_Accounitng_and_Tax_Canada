@@ -245,7 +245,7 @@ if uploaded_excel is not None:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-if uploaded_file is not None:
+if uploaded_excel is not None:
 
 else:
 
