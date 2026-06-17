@@ -49,6 +49,42 @@ with col2:
     st.markdown("<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:20px; color:gray;'>World Eyewear</p>", unsafe_allow_html=True)
 
+# ---------------- CLIENT MANAGEMENT ----------------
+
+if "clients" not in st.session_state:
+    st.session_state.clients = []
+
+
+st.sidebar.markdown("## 👥 Clients")
+
+
+new_client = st.sidebar.text_input(
+    "Add New Client"
+)
+
+
+if st.sidebar.button("➕ Add Client"):
+
+    if new_client.strip() != "":
+
+        if new_client not in st.session_state.clients:
+            st.session_state.clients.append(new_client)
+
+            st.sidebar.success(
+                "Client Added"
+            )
+
+        else:
+            st.sidebar.warning(
+                "Client already exists"
+            )
+
+
+selected_client = st.sidebar.selectbox(
+    "Select Client",
+    ["Select Client"] + st.session_state.clients
+)
+
 # ---------------- SIDEBAR ----------------
 company = st.sidebar.selectbox(
     "Select Account",
@@ -655,6 +691,22 @@ else:
     )
 
 
+    if selected_client != "Select Client":
+
+        st.success(
+            f"Active Client: {selected_client}"
+        )
+
+    else:
+
+        st.info(
+            "Please select a client"
+        )
+
+
+    col1, col2, col3, col4 = st.columns(4)
+
+
     col1, col2, col3, col4 = st.columns(4)
 
 
@@ -722,3 +774,5 @@ else:
         use_container_width=True,
         hide_index=True
     )
+
+
