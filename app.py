@@ -249,7 +249,7 @@ if uploaded_excel is not None or uploaded_pdf is not None:
     df.columns = df.columns.astype(str).str.strip()
 
 
-    # ONLY PDF COLUMN NORMALIZATION
+    # PDF column normalization
     if uploaded_pdf is not None:
 
         df.columns = (
@@ -267,6 +267,26 @@ if uploaded_excel is not None or uploaded_pdf is not None:
 
             if "Withdraw" in col or "Debit" in col:
                 df.rename(columns={col: "Debit"}, inplace=True)
+
+
+    # ---------------- CLEAN AMOUNTS ----------------
+
+    for col in ["Debit", "Credit"]:
+
+        if col in df.columns:
+
+            df[col] = (
+                df[col]
+                .astype(str)
+                .str.replace("$", "", regex=False)
+                .str.replace(",", "", regex=False)
+                .str.strip()
+            )
+
+            df[col] = pd.to_numeric(
+                df[col],
+                errors="coerce"
+            ).fillna(0)
 
 
     # ---------------- RULES ----------------
