@@ -69,6 +69,22 @@ if uploaded_excel is not None:
 
     df = pd.read_excel(uploaded_excel)
 
+    # all your existing Excel cleaning
+    # categorization
+    # reports
+    # exports
+
+
+elif uploaded_pdf is not None:
+
+    st.success("PDF file uploaded successfully")
+    st.write("File Name:", uploaded_pdf.name)
+
+
+else:
+
+    # opening screen
+
     # ---------------- CLEAN DATA ----------------
     df.columns = df.columns.astype(str).str.strip()
     df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
