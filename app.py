@@ -190,9 +190,16 @@ else:
 
     st.markdown("Your beautiful opening screen")
 
+if uploaded_excel is not None or uploaded_pdf is not None:
+
     # ---------------- Sr No ----------------
     df = df.reset_index(drop=True)
-    df.insert(0, "Sr. No", range(1, len(df) + 1))
+
+    df.insert(
+        0,
+        "Sr. No",
+        range(1, len(df) + 1)
+    )
 
     # ---------------- DISPLAY TABLE ----------------
     display_df = df.copy()
@@ -202,7 +209,12 @@ else:
             display_df[col] = display_df[col].apply(format_amount)
 
     st.subheader("📊 Categorized Transactions")
-    st.dataframe(display_df, use_container_width=True, hide_index=True)
+
+    st.dataframe(
+        display_df,
+        use_container_width=True,
+        hide_index=True
+    )
 
     # ---------------- CATEGORY STATUS COUNT ----------------
     total_entries = len(df)
