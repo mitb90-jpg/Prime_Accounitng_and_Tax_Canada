@@ -65,6 +65,7 @@ uploaded_pdf = st.sidebar.file_uploader(
 )
 
 # ================= MAIN =================
+
 if uploaded_excel is not None:
 
     df = pd.read_excel(uploaded_excel)
@@ -77,13 +78,28 @@ if uploaded_excel is not None:
 
 elif uploaded_pdf is not None:
 
-    st.success("PDF file uploaded successfully")
-    st.write("File Name:", uploaded_pdf.name)
+    import pdfplumber
+
+    st.success("PDF uploaded successfully")
+
+    with pdfplumber.open(uploaded_pdf) as pdf:
+
+        all_rows = []
+
+        for page in pdf.pages:
+            table = page.extract_table()
+
+            if table:
+                all_rows.extend(table)
+
+    df = pd.DataFrame(all_rows)
+
+    st.write("PDF Data Extracted")
 
 
 else:
 
-    # opening screen
+    st.markdown("Your beautiful welcome screen")
 
     # ---------------- CLEAN DATA ----------------
     df.columns = df.columns.astype(str).str.strip()
