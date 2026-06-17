@@ -87,10 +87,9 @@ elif uploaded_pdf is not None:
 
     df = pd.DataFrame(all_rows)
 
-
-# ---------------- CLEAN DATA ----------------
-
 if uploaded_excel is not None or uploaded_pdf is not None:
+
+    # CLEAN DATA
 
     df.columns = df.columns.astype(str).str.strip()
 
@@ -98,7 +97,20 @@ if uploaded_excel is not None or uploaded_pdf is not None:
 
     df = df.dropna(how="all")
 
+
+    # NORMALIZE COLUMNS  👈 here
+
+    if "Deposits/Credits" in df.columns:
+        df["Credit"] = df["Deposits/Credits"]
+
+    if "Withdrawals/Debits" in df.columns:
+        df["Debit"] = df["Withdrawals/Debits"]
+
+
     df["Category"] = ""
+
+
+    # RULES continue below
 
 
     # ---------------- RULES ----------------
