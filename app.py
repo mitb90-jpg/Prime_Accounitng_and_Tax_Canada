@@ -547,7 +547,7 @@ display_summary = pd.concat(
 st.subheader("📋 Category Summary")
 
 
-    st.dataframe(
+st.dataframe(
         display_summary,
         use_container_width=True,
         hide_index=True
