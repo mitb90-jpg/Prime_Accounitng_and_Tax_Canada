@@ -82,10 +82,11 @@ elif uploaded_pdf is not None:
 
     with pdfplumber.open(uploaded_pdf) as pdf:
 
-        for page in pdf.pages:
+        for page_num, page in enumerate(pdf.pages, start=1):
 
             words = page.extract_words()
 
+            # group words by visual row
             rows = {}
 
             for w in words:
@@ -98,68 +99,105 @@ elif uploaded_pdf is not None:
                 rows[y].append(w)
 
 
-            for y, line in rows.items():
+            current = None
 
-                text = " ".join(
-                    x["text"] for x in line
+
+            for y in sorted(rows):
+
+                line_words = sorted(
+                    rows[y],
+                    key=lambda x: float(x["x0"])
                 )
 
-                if any(char.isdigit() for char in text):
+                text = " ".join(
+                    w["text"] for w in line_words
+                )
 
-                    date = ""
-                    desc = ""
-                    debit = ""
-                    credit = ""
-                    balance = ""
 
-                    for w in line:
+                # Start reading after Account Details
+                if "Account Details" in text:
+                    current = "START"
+                    continue
+
+
+                if current != "START":
+                    continue
+
+
+                # Ignore header
+                if "Date Description" in text:
+                    continue
+
+
+                # New transaction starts with date
+                first_word = line_words[0]["text"]
+
+                if "/" in first_word and len(first_word) >= 8:
+
+
+                    # save previous transaction
+                    if current and isinstance(current, dict):
+                        transactions.append(current)
+
+
+                    current = {
+                        "Date": first_word,
+                        "Description": "",
+                        "Debit": "",
+                        "Credit": "",
+                        "Balance": ""
+                    }
+
+
+                    for w in line_words[1:]:
 
                         x = float(w["x0"])
                         value = w["text"]
 
 
-                        if x < 80:
-                            date += " " + value
-
-                        elif x < 280:
-                            desc += " " + value
+                        if x < 280:
+                            current["Description"] += " " + value
 
                         elif x < 400:
-                            debit += " " + value
+                            current["Debit"] += " " + value
 
                         elif x < 545:
-                            credit += " " + value
+                            current["Credit"] += " " + value
 
                         else:
-                            balance += " " + value
+                            current["Balance"] += " " + value
 
 
-                    transactions.append(
-                        [
-                            date.strip(),
-                            desc.strip(),
-                            debit.strip(),
-                            credit.strip(),
-                            balance.strip()
-                        ]
-                    )
+                else:
+
+                    # continuation description lines
+                    if isinstance(current, dict):
+
+                        for w in line_words:
+
+                            x = float(w["x0"])
+
+                            if x < 280:
+                                current["Description"] += " " + w["text"]
 
 
-    df = pd.DataFrame(
-        transactions,
-        columns=[
-            "Date",
-            "Description",
-            "Debit",
-            "Credit",
-            "Balance"
-        ]
+        if isinstance(current, dict):
+            transactions.append(current)
+
+
+
+    df = pd.DataFrame(transactions)
+
+
+    # clean spaces
+    df = df.apply(
+        lambda x: x.str.strip() if x.dtype == "object" else x
     )
 
 
-    st.write("PDF Converted")
+    st.write("PDF Converted Table")
 
-    st.dataframe(df.head(50))
+    st.dataframe(df, use_container_width=True)
 
     # ---------------- SPLIT PDF DATA ----------------
 
