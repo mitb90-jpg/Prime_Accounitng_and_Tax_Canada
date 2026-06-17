@@ -220,7 +220,7 @@ with col1:
 
 with col2:
     st.markdown("<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:20px; color:gray;'>World Eyewear</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:30px; color:gray;'>Turning Transactions Into Insights</p>", unsafe_allow_html=True)
 
 # ---------------- SIDEBAR ----------------
 
