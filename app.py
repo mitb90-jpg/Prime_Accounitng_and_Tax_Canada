@@ -54,10 +54,18 @@ company = st.sidebar.selectbox(
     ["Scotia Bank", "Triangle Master Card", "Visa - 6023", "Visa - 7866"]
 )
 
-uploaded_file = st.sidebar.file_uploader("Upload Excel File", type=["xlsx"])
+uploaded_excel = st.sidebar.file_uploader(
+    "Upload Excel File",
+    type=["xlsx"]
+)
+
+uploaded_pdf = st.sidebar.file_uploader(
+    "Upload PDF File",
+    type=["pdf"]
+)
 
 # ================= MAIN =================
-if uploaded_file is not None:
+if uploaded_excel is not None:
 
     df = pd.read_excel(uploaded_file)
 
