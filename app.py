@@ -247,8 +247,10 @@ if uploaded_excel is not None:
 
 if uploaded_excel is not None:
 
+    pass
+
 else:
-        pass
+        
 
     # YOUR OLD WORKING CODE MUST BE HERE
     # Excel
