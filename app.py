@@ -22,13 +22,34 @@ CREATE TABLE IF NOT EXISTS clients
 )
 """)
 
+
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS accounts
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER,
+    account_name TEXT,
+    account_type TEXT,
+    FOREIGN KEY(client_id) REFERENCES clients(id)
+)
+""")
+
+
 conn.commit()
+
+
+
+# ---------------- DATABASE FUNCTIONS ----------------
 
 
 def add_client(name):
 
     cursor.execute(
-        "INSERT OR IGNORE INTO clients(client_name) VALUES (?)",
+        """
+        INSERT INTO clients(client_name)
+        VALUES (?)
+        """,
         (name,)
     )
 
@@ -39,23 +60,121 @@ def add_client(name):
 def get_clients():
 
     cursor.execute(
-        "SELECT client_name FROM clients ORDER BY client_name"
+        """
+        SELECT client_name
+        FROM clients
+        ORDER BY client_name
+        """
     )
 
-    data = cursor.fetchall()
-
     return [
-        x[0] for x in data
+        row[0]
+        for row in cursor.fetchall()
     ]
+
+
 
 def delete_client(name):
 
     cursor.execute(
-        "DELETE FROM clients WHERE client_name = ?",
+        """
+        DELETE FROM clients
+        WHERE client_name = ?
+        """,
         (name,)
     )
 
     conn.commit()
+
+
+
+# ---------------- ACCOUNT FUNCTIONS ----------------
+
+
+def add_account(
+    client_name,
+    account_name,
+    account_type
+):
+
+    cursor.execute(
+        """
+        SELECT id
+        FROM clients
+        WHERE client_name = ?
+        """,
+        (client_name,)
+    )
+
+
+    client_id = cursor.fetchone()[0]
+
+
+    cursor.execute(
+        """
+        INSERT INTO accounts
+        (
+            client_id,
+            account_name,
+            account_type
+        )
+        VALUES (?, ?, ?)
+        """,
+        (
+            client_id,
+            account_name,
+            account_type
+        )
+    )
+
+
+    conn.commit()
+
+
+
+def get_accounts(client_name):
+
+    cursor.execute(
+        """
+        SELECT 
+            account_name,
+            account_type
+
+        FROM accounts
+
+        WHERE client_id =
+        (
+            SELECT id
+            FROM clients
+            WHERE client_name = ?
+        )
+        """,
+        (client_name,)
+    )
+
+
+    return cursor.fetchall()
+
+
+
+# ---------------- FORMAT FUNCTION ----------------
+
+
+def format_amount(x):
+
+    try:
+
+        if pd.isna(x):
+            return ""
+
+        if isinstance(x, (int, float)):
+            return f"{x:,.2f}"
+
+        return x
+
+    except:
+
+        return x
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -165,8 +284,6 @@ page = st.sidebar.radio(
         "📊 Reports"
     ]
 )
-
-
 
 # ================= CLIENT PAGE =================
 
