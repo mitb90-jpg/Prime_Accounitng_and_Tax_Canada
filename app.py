@@ -115,10 +115,10 @@ elif uploaded_pdf is not None:
                 )
 
 
-                # detect transaction table start
-
                 header_text = text.upper()
 
+
+                # start transaction table
                 if (
                     "DATE" in header_text
                     and "DESCRIPTION" in header_text
@@ -135,25 +135,20 @@ elif uploaded_pdf is not None:
                     continue
 
 
-                # ignore bottom summary rows
+                # ignore bottom summary
                 if (
-                    "DEBITS" in text.upper()
-                    or "CREDITS" in text.upper()
-                    or "TOTAL AMOUNT" in text.upper()
+                    "NO. OF DEBITS" in header_text
+                    or "NO. OF CREDITS" in header_text
+                    or "TOTAL AMOUNT" in header_text
+                    or "PAGE -" in header_text
                 ):
                     continue
 
 
-                # ignore headers and summary tables
-
-                ignore_text = text.upper()
-
+                # ignore repeated headers
                 if (
-                    ("DATE" in ignore_text and "DESCRIPTION" in ignore_text)
-                    or "NO. OF DEBITS" in ignore_text
-                    or "TOTAL AMOUNT" in ignore_text
-                    or "NO. OF CREDITS" in ignore_text
-                    or "PAGE -" in ignore_text
+                    "DATE" in header_text
+                    and "DESCRIPTION" in header_text
                 ):
                     continue
 
@@ -161,20 +156,16 @@ elif uploaded_pdf is not None:
                 first = line_words[0]["text"]
 
 
-                # transaction line
-
+                # transaction row
                 if (
-                    ("DATE" not in text.upper())
-                    and
-                    (
-                        "/" in first
-                        or "-" in first
-                        or "." in first
-                    )
+                    "/" in first
+                    or "-" in first
+                    or "." in first
                 ):
 
                     if current:
                         transactions.append(current)
+
 
                     current = {
                         "Date": first,
@@ -191,26 +182,24 @@ elif uploaded_pdf is not None:
                         value = w["text"]
 
 
-                        # description area
+                        # amount columns based on PDF layout
+
                         if x < 260:
                             current["Description"] += " " + value
 
-# amount columns based on PDF layout
 
-if x < 260:
-    current["Description"] += " " + value
-
-
-elif x >= 260 and x < 420:
-    current["Debit"] += " " + value
+                        elif x >= 260 and x < 420:
+                            current["Debit"] += " " + value
 
 
-elif x >= 420 and x < 560:
-    current["Credit"] += " " + value
+                        elif x >= 420 and x < 560:
+                            current["Credit"] += " " + value
 
 
-else:
-    current["Balance"] += " " + value
+                        else:
+                            current["Balance"] += " " + value
+
+
 
                 else:
 
@@ -242,6 +231,7 @@ else:
         df,
         use_container_width=True
     )
+
 
     st.write("Column check")
 
