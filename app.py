@@ -635,183 +635,90 @@ if uploaded_excel is not None:
 
 else:
 
-    st.markdown("""
-    <div style="
-        background: linear-gradient(135deg,#eaf3ff,#ffffff);
-        padding:60px 40px;
-        border-radius:30px;
-        border:1px solid #cbdced;
-        text-align:center;
-        box-shadow:0 12px 35px rgba(0,0,0,0.10);
-    ">
-
-    <div style="
-        display:inline-block;
-        background:#dff3e6;
-        color:#176b35;
-        padding:8px 18px;
-        border-radius:20px;
-        font-size:15px;
-        font-weight:bold;
-        margin-bottom:20px;
-    ">
-    🟢 System Ready
-    </div>
+    st.markdown(
+        """
+        <h1 style="color:#1f4e79;">
+        📊 Prime Accounting System
+        </h1>
+        """,
+        unsafe_allow_html=True
+    )
 
 
-    <h1 style="
-        color:#1f4e79;
-        font-size:50px;
-        margin-bottom:10px;
-    ">
-    📊 Prime Automated
-    <br>
-    Categorization System
-    </h1>
+    st.markdown(
+        """
+        <p style="font-size:22px;color:#555;">
+        Automated accounting workflow management
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
 
 
-    <h2 style="
-        color:#555;
-        font-weight:400;
-    ">
-    Prime Accounting and Tax
-    </h2>
-
-
-    <p style="
-        font-size:22px;
-        color:#333;
-        margin-top:25px;
-    ">
-    Smart transaction processing for modern accounting workflows
-    </p>
-
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
-
-    st.write("")
-
-
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
 
     with col1:
-
-        st.markdown("""
-        <div style="
-            padding:30px;
-            height:180px;
-            border-radius:22px;
-            background:white;
-            border:1px solid #d6e4f0;
-            box-shadow:0 6px 18px rgba(0,0,0,0.08);
-            text-align:center;
-        ">
-
-        <div style="font-size:45px;">
-        📂
-        </div>
-
-        <h2 style="color:#1f4e79;">
-        Upload
-        </h2>
-
-        <p>
-        Bank statements<br>
-        Excel or PDF
-        </p>
-
-        </div>
-        """, unsafe_allow_html=True)
-
-
+        st.metric("👥 Clients", "0")
 
     with col2:
-
-        st.markdown("""
-        <div style="
-            padding:30px;
-            height:180px;
-            border-radius:22px;
-            background:white;
-            border:1px solid #d6e4f0;
-            box-shadow:0 6px 18px rgba(0,0,0,0.08);
-            text-align:center;
-        ">
-
-        <div style="font-size:45px;">
-        🤖
-        </div>
-
-        <h2 style="color:#1f4e79;">
-        Automate
-        </h2>
-
-        <p>
-        Smart categorization<br>
-        Transaction analysis
-        </p>
-
-        </div>
-        """, unsafe_allow_html=True)
-
-
+        st.metric("📄 Statements", "0")
 
     with col3:
+        st.metric("💰 Revenue", "$0")
 
-        st.markdown("""
-        <div style="
-            padding:30px;
-            height:180px;
-            border-radius:22px;
-            background:white;
-            border:1px solid #d6e4f0;
-            box-shadow:0 6px 18px rgba(0,0,0,0.08);
-            text-align:center;
-        ">
-
-        <div style="font-size:45px;">
-        📈
-        </div>
-
-        <h2 style="color:#1f4e79;">
-        Reports
-        </h2>
-
-        <p>
-        Summary<br>
-        Profit & Loss
-        </p>
-
-        </div>
-        """, unsafe_allow_html=True)
+    with col4:
+        st.metric("💸 Expenses", "$0")
 
 
+    st.divider()
 
-    st.write("")
+
+    st.subheader("Quick Actions")
 
 
-    st.markdown("""
-    <div style="
-        background:linear-gradient(90deg,#1f4e79,#2e75b6);
-        color:white;
-        padding:25px;
-        border-radius:20px;
-        text-align:center;
-        box-shadow:0 8px 20px rgba(0,0,0,0.15);
-        margin-top:40px;
-    ">
+    c1, c2, c3 = st.columns(3)
 
-    <h2>
-    👈 Ready when you are
-    </h2>
 
-    <p style="font-size:18px;">
-    Upload your statement from the sidebar and let Prime handle the rest.
-    </p>
+    with c1:
+        st.button(
+            "➕ Add Client",
+            use_container_width=True
+        )
 
-    </div>
-    """, unsafe_allow_html=True)
+
+    with c2:
+        st.button(
+            "📂 Upload Statement",
+            use_container_width=True
+        )
+
+
+    with c3:
+        st.button(
+            "📊 Reports",
+            use_container_width=True
+        )
+
+
+    st.divider()
+
+
+    st.subheader("Recent Activity")
+
+
+    empty_df = pd.DataFrame(
+        columns=[
+            "Client",
+            "Statement",
+            "Date",
+            "Status"
+        ]
+    )
+
+
+    st.dataframe(
+        empty_df,
+        use_container_width=True,
+        hide_index=True
+    )
