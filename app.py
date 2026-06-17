@@ -120,36 +120,59 @@ uploaded_pdf = st.sidebar.file_uploader(
     type=["pdf"]
 )
 
+
+# ---------------- CLIENT MANAGEMENT ----------------
+
+st.sidebar.markdown("## 👥 Clients")
+
+
+new_client = st.sidebar.text_input(
+    "Add New Client"
+)
+
+
+if st.sidebar.button("➕ Add Client"):
+
+    if new_client.strip():
+
+        add_client(new_client)
+
+        st.sidebar.success(
+            "Client Added"
+        )
+
+
+clients = get_clients()
+
+
+selected_client = st.sidebar.selectbox(
+    "Select Client",
+    ["Select Client"] + clients
+)
+
+
+# ---------------- APP MENU ----------------
+
+st.sidebar.markdown("---")
+
+
+page = st.sidebar.radio(
+    "Navigation",
+    [
+        "🏠 Dashboard",
+        "👥 Clients",
+        "📂 Statements",
+        "📊 Reports"
+    ]
+)
+
+
+
 # ================= CLIENT PAGE =================
 
 if page == "👥 Clients":
 
     st.title("👥 Client Management")
-
-
-    st.subheader("Add New Client")
-
-
-    client_name = st.text_input(
-        "Client Name"
-    )
-
-
-    if st.button("➕ Add Client"):
-
-        if client_name.strip():
-
-            add_client(client_name)
-
-            st.success(
-                "Client Added Successfully"
-            )
-
-            st.rerun()
-
-
-
-    st.divider()
 
 
     st.subheader("Existing Clients")
@@ -164,6 +187,7 @@ if page == "👥 Clients":
             clients,
             columns=["Client Name"]
         )
+
 
         st.dataframe(
             client_df,
@@ -202,51 +226,6 @@ if page == "👥 Clients":
             )
 
             st.rerun()
-
-
-# ---------------- CLIENT MANAGEMENT ----------------
-
-st.sidebar.markdown("## 👥 Clients")
-
-
-new_client = st.sidebar.text_input(
-    "Add New Client"
-)
-
-
-if st.sidebar.button("➕ Add Client"):
-
-    if new_client.strip():
-
-        add_client(new_client)
-
-        st.sidebar.success(
-            "Client Added"
-        )
-
-
-clients = get_clients()
-
-
-selected_client = st.sidebar.selectbox(
-    "Select Client",
-    ["Select Client"] + clients
-)
-
-
-# ---------------- APP MENU ----------------
-
-st.sidebar.markdown("---")
-
-page = st.sidebar.radio(
-    "Navigation",
-    [
-        "🏠 Dashboard",
-        "👥 Clients",
-        "📂 Statements",
-        "📊 Reports"
-    ]
-)
 
 # ================= MAIN =================
 
