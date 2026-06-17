@@ -129,24 +129,39 @@ elif uploaded_pdf is not None:
                     continue
 
 
-                first = line_words[0]["text"]
+first = line_words[0]["text"]
+
+# combine split dates
+if len(line_words) > 1:
+    possible_date = first + line_words[1]["text"]
+
+    if (
+        "/" in possible_date
+        or "-" in possible_date
+        or "." in possible_date
+    ):
+        first = possible_date
 
 
-                # new transaction
-                if "/" in first and len(first) >= 8:
+# new transaction
+if (
+    "/" in first
+    or "-" in first
+    or "." in first
+) and len(first) >= 6:
 
 
-                    if current:
-                        transactions.append(current)
+    if current:
+        transactions.append(current)
 
 
-                    current = {
-                        "Date": first,
-                        "Description": "",
-                        "Debit": "",
-                        "Credit": "",
-                        "Balance": ""
-                    }
+    current = {
+        "Date": first,
+        "Description": "",
+        "Debit": "",
+        "Credit": "",
+        "Balance": ""
+    }
 
 
                     for w in line_words[1:]:
