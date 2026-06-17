@@ -70,9 +70,6 @@ if uploaded_excel is not None:
 
     df = pd.read_excel(uploaded_excel)
 
-    # existing Excel cleaning
-    df.columns = df.columns.astype(str).str.strip()
-
 
 elif uploaded_pdf is not None:
 
@@ -90,20 +87,23 @@ elif uploaded_pdf is not None:
 
     df = pd.DataFrame(all_rows)
 
-    # same cleaning for PDF
+
+# ---------------- CLEAN DATA ----------------
+
+if uploaded_excel is not None or uploaded_pdf is not None:
+
     df.columns = df.columns.astype(str).str.strip()
+
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
+
+    df = df.dropna(how="all")
+
+    df["Category"] = ""
 
 
 else:
 
     st.markdown("Your beautiful opening screen")
-
-    # ---------------- CLEAN DATA ----------------
-    df.columns = df.columns.astype(str).str.strip()
-    df = df.loc[:, ~df.columns.str.contains("^Unnamed", na=False)]
-    df = df.dropna(how="all")
-
-    df["Category"] = ""
 
     # ---------------- RULES ----------------
     df.loc[
