@@ -85,16 +85,30 @@ elif uploaded_pdf is not None:
 
         for page_num, page in enumerate(pdf.pages, start=1):
 
+            st.write("Reading Page:", page_num)
+
             table = page.extract_table()
 
+            st.write(
+                "Table Found:",
+                table is not None
+            )
+
             if table:
+
+                st.write(
+                    "Rows on page:",
+                    len(table)
+                )
+
                 all_rows.extend(table)
+
 
     df = pd.DataFrame(all_rows)
 
-    st.write("PDF Rows Extracted:", len(df))
+    st.write("Total Extracted Rows:", len(df))
 
-    st.dataframe(df.head(20))
+    st.dataframe(df.head(30))
 
 
 # ---------------- CLEAN DATA ----------------
