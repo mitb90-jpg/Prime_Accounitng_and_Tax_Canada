@@ -75,17 +75,26 @@ elif uploaded_pdf is not None:
 
     import pdfplumber
 
+    st.success("PDF uploaded successfully")
+
+    all_rows = []
+
     with pdfplumber.open(uploaded_pdf) as pdf:
 
-        all_rows = []
+        st.write("Total PDF Pages:", len(pdf.pages))
 
-        for page in pdf.pages:
+        for page_num, page in enumerate(pdf.pages, start=1):
+
             table = page.extract_table()
 
             if table:
                 all_rows.extend(table)
 
     df = pd.DataFrame(all_rows)
+
+    st.write("PDF Rows Extracted:", len(df))
+
+    st.dataframe(df.head(20))
 
 if uploaded_excel is not None or uploaded_pdf is not None:
 
