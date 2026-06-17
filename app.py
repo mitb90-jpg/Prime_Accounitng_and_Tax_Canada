@@ -230,27 +230,41 @@ if page == "👥 Clients":
 
     st.subheader("Delete Client")
 
+
     if clients:
 
         delete_client_name = st.selectbox(
             "Select Client",
-            clients
+            ["Select Client"] + clients
         )
 
 
         # DELETE CONFIRMATION
 
         if "confirm_delete" not in st.session_state:
+
             st.session_state.confirm_delete = False
+
 
 
         if st.button("🗑️ Delete Client"):
 
-            st.session_state.confirm_delete = True
+
+            if delete_client_name != "Select Client":
+
+                st.session_state.confirm_delete = True
+
+
+            else:
+
+                st.warning(
+                    "Please select a client first"
+                )
 
 
 
         if st.session_state.confirm_delete:
+
 
             st.warning(
                 f"⚠️ Are you sure you want to delete '{delete_client_name}'?"
@@ -264,22 +278,39 @@ if page == "👥 Clients":
 
                 if st.button("✅ Yes, Delete"):
 
+
                     delete_client(delete_client_name)
+
 
                     st.session_state.confirm_delete = False
 
-                    st.success("Client Deleted")
+
+                    st.success(
+                        "Client Deleted"
+                    )
+
 
                     st.rerun()
+
 
 
             with c2:
 
                 if st.button("❌ Cancel"):
 
+
                     st.session_state.confirm_delete = False
 
+
                     st.rerun()
+
+
+
+    else:
+
+        st.info(
+            "No clients available to delete"
+        )
 
 # ================= MAIN =================
 
