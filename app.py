@@ -515,16 +515,36 @@ if uploaded_excel is not None or uploaded_pdf is not None:
     )
 
 
-    display_summary = summary.copy()
+display_summary = summary.copy()
 
 
-    display_summary["Amount"] = (
-        display_summary["Amount"]
-        .apply(format_amount)
-    )
+display_summary["Amount"] = (
+    display_summary["Amount"]
+    .apply(format_amount)
+)
 
 
-    st.subheader("📋 Category Summary")
+# ---------------- TOTAL ROW ----------------
+
+summary_total = summary["Amount"].sum()
+
+
+total_summary_row = pd.DataFrame([{
+    "Category": "TOTAL",
+    "Amount": format_amount(summary_total)
+}])
+
+
+display_summary = pd.concat(
+    [
+        display_summary,
+        total_summary_row
+    ],
+    ignore_index=True
+)
+
+
+st.subheader("📋 Category Summary")
 
 
     st.dataframe(
