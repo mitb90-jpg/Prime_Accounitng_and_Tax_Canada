@@ -453,21 +453,55 @@ if uploaded_excel is not None or uploaded_pdf is not None:
     )
 
     # ---------------- CATEGORY SUMMARY ----------------
-    summary = df.groupby("Category")[["Credit", "Debit"]].sum().fillna(0).reset_index()
+
+    df["Amount"] = (
+        df["Credit"].fillna(0) +
+        df["Debit"].fillna(0)
+    )
+
+
+    summary = (
+        df.groupby("Category")["Amount"]
+        .sum()
+        .reset_index()
+    )
+
 
     display_summary = summary.copy()
-    for col in ["Credit", "Debit"]:
-        display_summary[col] = display_summary[col].apply(format_amount)
+
+
+    display_summary["Amount"] = (
+        display_summary["Amount"]
+        .apply(format_amount)
+    )
+
 
     st.subheader("📋 Category Summary")
-    st.dataframe(display_summary, use_container_width=True, hide_index=True)
+
+
+    st.dataframe(
+        display_summary,
+        use_container_width=True,
+        hide_index=True
+    )
+
 
     # ---------------- SUMMARY DOWNLOAD ----------------
+
     summary_output = io.BytesIO()
+
+
     with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
-        summary.to_excel(writer, index=False, sheet_name="Category Summary")
+
+        summary.to_excel(
+            writer,
+            index=False,
+            sheet_name="Category Summary"
+        )
+
 
     summary_output.seek(0)
+
 
     st.download_button(
         "⬇️ Export Summary Data",
