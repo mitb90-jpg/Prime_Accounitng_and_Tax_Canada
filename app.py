@@ -67,7 +67,7 @@ uploaded_pdf = st.sidebar.file_uploader(
 # ================= MAIN =================
 if uploaded_excel is not None:
 
-    df = pd.read_excel(uploaded_file)
+    df = pd.read_excel(uploaded_excel)
 
     # ---------------- CLEAN DATA ----------------
     df.columns = df.columns.astype(str).str.strip()
