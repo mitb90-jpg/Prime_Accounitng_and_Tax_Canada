@@ -366,7 +366,7 @@ else:
 
     <p style="font-size:18px;color:#555;">
     Upload a bank statement or credit card statement
-    to start automated categorization and reporting.
+    to start automated categorization and reporting
     </p>
 
     </div>
