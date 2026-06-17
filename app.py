@@ -159,16 +159,19 @@ elif uploaded_pdf is not None:
 
 
                 # transaction line
-                if (
-                    "/" in first
-                    or "-" in first
-                    or "." in first
-                ):
 
+                if (
+                    ("DATE" not in text.upper())
+                    and
+                    (
+                        "/" in first
+                        or "-" in first
+                        or "." in first
+                    )
+                ):
 
                     if current:
                         transactions.append(current)
-
 
                     current = {
                         "Date": first,
