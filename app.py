@@ -112,8 +112,23 @@ elif uploaded_pdf is not None:
                 )
 
 
-                if "Account Details" in text:
+                # detect transaction table start
+
+                header_text = text.upper()
+
+                if (
+                    "DATE" in header_text
+                    and "DESCRIPTION" in header_text
+                    and (
+                        "DEBIT" in header_text
+                        or "WITHDRAW" in header_text
+                    )
+                ):
                     started = True
+                    continue
+
+
+                if not started:
                     continue
 
 
