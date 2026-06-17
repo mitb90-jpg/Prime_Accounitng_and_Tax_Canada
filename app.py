@@ -71,6 +71,9 @@ if uploaded_excel is not None:
 
     df = pd.read_excel(uploaded_excel)
 
+    # remove blank Excel columns
+    df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed")]
+
 
 elif uploaded_pdf is not None:
 
