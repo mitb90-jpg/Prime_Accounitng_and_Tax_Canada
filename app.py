@@ -330,7 +330,7 @@ page = st.sidebar.radio(
         "🏠 Dashboard",
         "👥 Clients",
         "🏦 Accounts",
-        "📂 Statements",
+        "🧾 Sales",
         "📊 Reports"
     ]
 )
@@ -596,6 +596,107 @@ if page == "🏦 Accounts":
                 st.info(
                     "No accounts added for this client"
                 )
+
+# ================= SALES PAGE =================
+
+if page == "🧾 Sales":
+
+    st.title("🧾 Sales & Invoice Management")
+
+    st.success("Create and manage customer invoices")
+
+    st.divider()
+
+
+    st.subheader("Invoice Details")
+
+
+    col1, col2 = st.columns(2)
+
+
+    with col1:
+
+        customer_name = st.text_input(
+            "Customer Name"
+        )
+
+        invoice_date = st.date_input(
+            "Invoice Date"
+        )
+
+
+    with col2:
+
+        invoice_number = st.text_input(
+            "Invoice Number"
+        )
+
+        due_date = st.date_input(
+            "Due Date"
+        )
+
+
+    st.divider()
+
+
+    st.subheader("Invoice Items")
+
+
+    item_description = st.text_input(
+        "Item Description"
+    )
+
+
+    col3, col4 = st.columns(2)
+
+
+    with col3:
+
+        quantity = st.number_input(
+            "Quantity",
+            min_value=1,
+            value=1
+        )
+
+
+    with col4:
+
+        rate = st.number_input(
+            "Rate",
+            min_value=0.0
+        )
+
+
+    amount = quantity * rate
+
+
+    st.info(
+        f"Item Amount: ${amount:,.2f}"
+    )
+
+
+    st.divider()
+
+
+    tax = st.number_input(
+        "Tax",
+        min_value=0.0
+    )
+
+
+    total = amount + tax
+
+
+    st.success(
+        f"Invoice Total: ${total:,.2f}"
+    )
+
+
+    if st.button("🧾 Generate Invoice"):
+
+        st.success(
+            "Invoice generated successfully"
+        )
 
 # ================= MAIN =================
 
