@@ -4,6 +4,7 @@ import io
 import re
 import sqlite3
 import json
+import os
 
 # ---------------- DATABASE ----------------
 
