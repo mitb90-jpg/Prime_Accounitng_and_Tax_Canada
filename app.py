@@ -33,6 +33,28 @@ st.write(
     os.path.exists(DB_PATH)
 )
 
+# ---------------- DATABASE CHECK ----------------
+
+import os
+
+st.write("DB LOCATION:")
+st.write(DB_PATH)
+
+cursor.execute(
+    "SELECT name FROM sqlite_master WHERE type='table'"
+)
+
+st.write("Tables:")
+st.write(cursor.fetchall())
+
+
+cursor.execute(
+    "SELECT * FROM clients"
+)
+
+st.write("Clients table data:")
+st.write(cursor.fetchall())
+
 
 # ---------------- CLIENTS TABLE ----------------
 
