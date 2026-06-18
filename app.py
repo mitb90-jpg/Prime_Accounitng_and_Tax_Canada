@@ -762,7 +762,6 @@ elif selected_client != "Select Client" and uploaded_pdf is not None:
         if x.dtype == "object"
         else x
     )
-
 # ---------------- CLEAN DATA ----------------
 
 if uploaded_excel is not None or uploaded_pdf is not None:
