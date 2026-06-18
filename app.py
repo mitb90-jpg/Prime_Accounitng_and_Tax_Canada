@@ -613,7 +613,7 @@ if page == "🏦 Accounts":
 
 # ================= MAIN =================
 
-if selected_client != "Select Client" and uploaded_excel is not None:
+if uploaded_excel is not None:
 
     df = pd.read_excel(uploaded_excel)
 
@@ -621,7 +621,7 @@ if selected_client != "Select Client" and uploaded_excel is not None:
     df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed")]
 
 
-elif selected_client != "Select Client" and uploaded_pdf is not None:
+elif uploaded_pdf is not None:
 
     import pdfplumber
 
