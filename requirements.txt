@@ -1,9 +1,9 @@
+streamlit
 openpyxl
+pandas
 numpy
 matplotlib
 pdfplumber
-import streamlit as st
-import pandas as pd
-import io
-import sqlite3
-import os
+io
+os
+sqlite3
