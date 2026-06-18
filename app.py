@@ -271,9 +271,9 @@ selected_client = st.sidebar.selectbox(
 
 # ================= WORK AREA =================
 
-if page == "📂 Work Area":
+    if page == "📂 Work Area":
 
-    st.title("📂 Work Area")
+        st.title("📂 Work Area")
 
 
     clients = get_clients()
