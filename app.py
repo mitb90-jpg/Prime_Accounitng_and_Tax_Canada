@@ -708,48 +708,149 @@ if page == "🧾 Sales":
 
         buffer = io.BytesIO()
 
-
         doc = SimpleDocTemplate(
-            buffer
+            buffer,
+            title="Invoice"
         )
 
-
         styles = getSampleStyleSheet()
-
 
         content = []
 
 
+        # -------- HEADER --------
+
         content.append(
             Paragraph(
-                "Prime Accounting Invoice",
+                "WORLD EYEWEAR",
                 styles["Title"]
             )
         )
 
+        content.append(
+            Paragraph(
+                "Sales Invoice",
+                styles["Heading2"]
+            )
+        )
 
         content.append(
-            Spacer(1, 12)
+            Spacer(1, 20)
+        )
+
+
+        # -------- INVOICE DETAILS --------
+
+        invoice_info = [
+            ["Invoice Number", invoice_number],
+            ["Invoice Date", str(invoice_date)],
+            ["Due Date", str(due_date)],
+            ["Customer", customer_name]
+        ]
+
+
+        invoice_table = Table(
+            invoice_info,
+            colWidths=[120, 300]
+        )
+
+
+        invoice_table.setStyle(
+            TableStyle([
+                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+                ("BACKGROUND", (0,0), (0,-1), colors.lightgrey),
+            ])
+        )
+
+
+        content.append(invoice_table)
+
+
+        content.append(
+            Spacer(1,20)
+        )
+
+
+        # -------- ITEMS --------
+
+        item_data = [
+            [
+                "Description",
+                "Quantity",
+                "Rate",
+                "Amount"
+            ],
+            [
+                item_description,
+                str(quantity),
+                f"${rate:,.2f}",
+                f"${amount:,.2f}"
+            ]
+        ]
+
+
+        item_table = Table(
+            item_data,
+            colWidths=[180,80,80,80]
+        )
+
+
+        item_table.setStyle(
+            TableStyle([
+                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+                ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+            ])
+        )
+
+
+        content.append(item_table)
+
+
+        content.append(
+            Spacer(1,20)
+        )
+
+
+        # -------- TOTAL --------
+
+        total_data = [
+            [
+                "Tax",
+                f"${tax:,.2f}"
+            ],
+            [
+                "TOTAL",
+                f"${total:,.2f}"
+            ]
+        ]
+
+
+        total_table = Table(
+            total_data,
+            colWidths=[300,100]
+        )
+
+
+        total_table.setStyle(
+            TableStyle([
+                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+                ("BACKGROUND", (0,1), (-1,1), colors.lightgrey),
+            ])
+        )
+
+
+        content.append(total_table)
+
+
+        content.append(
+            Spacer(1,30)
         )
 
 
         content.append(
             Paragraph(
-                f"""
-                Customer: {customer_name}<br/>
-                Invoice Number: {invoice_number}<br/>
-                Invoice Date: {invoice_date}<br/>
-                Due Date: {due_date}<br/><br/>
-
-                Item: {item_description}<br/>
-                Quantity: {quantity}<br/>
-                Rate: ${rate:,.2f}<br/>
-                Amount: ${amount:,.2f}<br/><br/>
-
-                Tax: ${tax:,.2f}<br/>
-                <b>Total: ${total:,.2f}</b>
-                """,
-                styles["BodyText"]
+                "Thank you for your business.",
+                styles["Normal"]
             )
         )
 
@@ -768,7 +869,7 @@ if page == "🧾 Sales":
         st.download_button(
             label="⬇️ Download Invoice PDF",
             data=buffer,
-            file_name=f"Invoice_{invoice_number}.pdf",
+            file_name=f"World_Eyewear_{invoice_number}.pdf",
             mime="application/pdf"
         )
 
