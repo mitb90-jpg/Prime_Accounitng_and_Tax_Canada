@@ -626,7 +626,8 @@ elif uploaded_pdf is not None:
 
     import pdfplumber
 
-    st.success("PDF uploaded successfully")
+if uploaded_pdf:
+    st.success(f"{len(uploaded_pdf)} PDF file(s) uploaded successfully")
 
     transactions = []
 
