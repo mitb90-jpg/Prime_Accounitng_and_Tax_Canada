@@ -6,57 +6,13 @@ import sqlite3
 
 # ---------------- DATABASE ----------------
 
-import os
-import sqlite3
-
-
-DB_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "prime_accounting.db"
-)
-
-
 conn = sqlite3.connect(
-    DB_PATH,
+    "prime_accounting.db",
     check_same_thread=False
 )
 
 cursor = conn.cursor()
 
-import os
-
-st.write("DATABASE PATH:")
-st.write(DB_PATH)
-
-st.write(
-    "Database exists:",
-    os.path.exists(DB_PATH)
-)
-
-# ---------------- DATABASE CHECK ----------------
-
-import os
-
-st.write("DB LOCATION:")
-st.write(DB_PATH)
-
-cursor.execute(
-    "SELECT name FROM sqlite_master WHERE type='table'"
-)
-
-st.write("Tables:")
-st.write(cursor.fetchall())
-
-
-cursor.execute(
-    "SELECT * FROM clients"
-)
-
-st.write("Clients table data:")
-st.write(cursor.fetchall())
-
-
-# ---------------- CLIENTS TABLE ----------------
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS clients
@@ -67,7 +23,6 @@ CREATE TABLE IF NOT EXISTS clients
 """)
 
 
-# ---------------- ACCOUNTS TABLE ----------------
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS accounts
@@ -324,7 +279,7 @@ page = st.sidebar.radio(
     [
         "🏠 Dashboard",
         "👥 Clients",
-        "📂 Work Area",
+        "🏦 Accounts",
         "📂 Statements",
         "📊 Reports"
     ]
@@ -475,76 +430,6 @@ if page == "👥 Clients":
         st.info(
             "No clients available to delete"
         )
-
-# ================= WORK AREA =================
-
-if page == "📂 Work Area":
-
-    st.title("📂 Work Area")
-
-
-    clients = get_clients()
-
-
-    if not clients:
-
-        st.warning(
-            "Please add a client first"
-        )
-
-    else:
-
-        selected_work_client = st.selectbox(
-            "Select Client",
-            ["Select Client"] + clients,
-            key="work_client"
-        )
-
-
-        if selected_work_client != "Select Client":
-
-            st.success(
-                f"Active Client: {selected_work_client}"
-            )
-
-
-            st.divider()
-
-
-            st.subheader(
-                "Upload Statement"
-            )
-
-
-            uploaded_file = st.file_uploader(
-                "Choose PDF or Excel File",
-                type=["pdf", "xlsx"]
-            )
-
-
-            st.divider()
-
-
-            st.subheader(
-                "Generate"
-            )
-
-
-            report_type = st.radio(
-                "Select Report Type",
-                [
-                    "Categorized Transactions Only",
-                    "Category Summary Only",
-                    "Profit & Loss Only",
-                    "Complete Package"
-                ]
-            )
-
-
-            st.button(
-                "🚀 Generate Report",
-                use_container_width=True
-            )
 
 # ================= ACCOUNT PAGE =================
 
@@ -1335,5 +1220,3 @@ else:
         use_container_width=True,
         hide_index=True
     )
-
-
