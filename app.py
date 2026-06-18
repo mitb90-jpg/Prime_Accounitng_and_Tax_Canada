@@ -185,33 +185,6 @@ st.set_page_config(
     layout="wide"
 )
 
-CLIENT_FILE = "clients.json"
-
-if os.path.exists(CLIENT_FILE):
-    with open(CLIENT_FILE, "r") as f:
-        clients = json.load(f)
-else:
-    clients = []
-
-
-new_client = st.sidebar.text_input("Add Client")
-
-if st.sidebar.button("Save Client"):
-
-    if new_client and new_client not in clients:
-
-        clients.append(new_client)
-
-        with open(CLIENT_FILE, "w") as f:
-            json.dump(clients, f)
-
-        st.sidebar.success("Client Saved")
-
-
-selected_client = st.sidebar.selectbox(
-    "Select Company",
-    clients
-)
 
 # ---------------- FORMAT FUNCTION ----------------
 def format_amount(x):
