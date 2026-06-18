@@ -7,6 +7,8 @@ import sqlite3
 # ---------------- DATABASE ----------------
 
 import os
+import sqlite3
+
 
 DB_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -22,15 +24,7 @@ conn = sqlite3.connect(
 cursor = conn.cursor()
 
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS clients
-(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_name TEXT UNIQUE
-)
-""")
-
-
+# ---------------- CLIENTS TABLE ----------------
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS clients
@@ -39,11 +33,23 @@ CREATE TABLE IF NOT EXISTS clients
     client_name TEXT UNIQUE
 )
 """)
+
+
+# ---------------- ACCOUNTS TABLE ----------------
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS accounts
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER,
+    account_name TEXT,
+    account_type TEXT,
+    FOREIGN KEY(client_id) REFERENCES clients(id)
+)
+""")
+
 
 conn.commit()
-
-
-st.write(get_clients())
 
 
 
