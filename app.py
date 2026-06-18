@@ -2,11 +2,17 @@ import streamlit as st
 import pandas as pd
 import io
 import sqlite3
+import os
 
 # ---------------- DATABASE ----------------
 
+DB_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "prime_accounting.db"
+)
+
 conn = sqlite3.connect(
-    "prime_accounting.db",
+    DB_PATH,
     check_same_thread=False
 )
 
