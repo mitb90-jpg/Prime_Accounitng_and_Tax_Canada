@@ -33,18 +33,16 @@ CREATE TABLE IF NOT EXISTS clients
 
 
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS accounts
+CREATE TABLE IF NOT EXISTS clients
 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_id INTEGER,
-    account_name TEXT,
-    account_type TEXT,
-    FOREIGN KEY(client_id) REFERENCES clients(id)
+    client_name TEXT UNIQUE
 )
 """)
 
-
 conn.commit()
+
+
 st.write(get_clients())
 
 
