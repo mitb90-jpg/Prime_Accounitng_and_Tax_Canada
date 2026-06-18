@@ -2,15 +2,13 @@ import streamlit as st
 import pandas as pd
 import io
 import re
-import sqlite3
 import json
 import os
 
-
-# ---------------- DATABASE ----------------
-
 from supabase import create_client, Client
 
+
+# ---------------- DATABASE ----------------
 
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
@@ -55,8 +53,56 @@ def delete_client(name):
 
     supabase.table("clients") \
         .delete() \
-        .eq("client_name", name) \
+        .eq(
+            "client_name",
+            name
+        ) \
         .execute()
+
+
+
+# ---------------- ACCOUNT FUNCTIONS ----------------
+
+
+def add_account(
+    client_name,
+    account_name,
+    account_type
+):
+
+    supabase.table("accounts").insert(
+        {
+            "client_name": client_name,
+            "account_name": account_name,
+            "account_type": account_type
+        }
+    ).execute()
+
+
+
+def get_accounts(client_name):
+
+    response = (
+        supabase
+        .table("accounts")
+        .select(
+            "account_name, account_type"
+        )
+        .eq(
+            "client_name",
+            client_name
+        )
+        .execute()
+    )
+
+
+    return [
+        (
+            row["account_name"],
+            row["account_type"]
+        )
+        for row in response.data
+    ]
 
 
 
