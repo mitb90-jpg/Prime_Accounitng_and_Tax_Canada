@@ -1,101 +1,107 @@
 import streamlit as st
 import pandas as pd
 import io
+import re
 import sqlite3
+import json
 import os
+
 
 # ---------------- DATABASE ----------------
 
-DB_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "prime_accounting.db"
+from supabase import create_client, Client
+
+
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
+
+supabase: Client = create_client(
+    SUPABASE_URL,
+    SUPABASE_KEY
 )
-
-conn = sqlite3.connect(
-    DB_PATH,
-    check_same_thread=False
-)
-
-cursor = conn.cursor()
-
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS clients
-(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_name TEXT UNIQUE
-)
-""")
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS accounts
-(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_id INTEGER,
-    account_name TEXT,
-    account_type TEXT,
-    FOREIGN KEY(client_id) REFERENCES clients(id)
-)
-""")
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS statements
-(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_id INTEGER,
-    file_name TEXT,
-    upload_date TEXT,
-    FOREIGN KEY(client_id) REFERENCES clients(id)
-)
-""")
-
-conn.commit()
 
 # ---------------- DATABASE FUNCTIONS ----------------
 
 
 def add_client(name):
 
-    cursor.execute(
-        """
-        INSERT INTO clients(client_name)
-        VALUES (?)
-        """,
-        (name,)
-    )
-
-    conn.commit()
+    supabase.table("clients").insert(
+        {
+            "client_name": name
+        }
+    ).execute()
 
 
 
 def get_clients():
 
-    cursor.execute(
-        """
-        SELECT client_name
-        FROM clients
-        ORDER BY client_name
-        """
+    response = (
+        supabase
+        .table("clients")
+        .select("client_name")
+        .order("client_name")
+        .execute()
     )
 
     return [
-        row[0]
-        for row in cursor.fetchall()
+        row["client_name"]
+        for row in response.data
     ]
 
 
 
 def delete_client(name):
 
-    cursor.execute(
-        """
-        DELETE FROM clients
-        WHERE client_name = ?
-        """,
-        (name,)
+    supabase.table("clients") \
+        .delete() \
+        .eq("client_name", name) \
+        .execute()
+
+
+
+# ---------------- ACCOUNT FUNCTIONS ----------------
+
+
+def add_account(
+    client_name,
+    account_name,
+    account_type
+):
+
+    supabase.table("accounts").insert(
+        {
+            "client_name": client_name,
+            "account_name": account_name,
+            "account_type": account_type
+        }
+    ).execute()
+
+
+
+def get_accounts(client_name):
+
+    response = (
+        supabase
+        .table("accounts")
+        .select(
+            "account_name, account_type"
+        )
+        .eq(
+            "client_name",
+            client_name
+        )
+        .execute()
     )
 
-    conn.commit()
+
+    return [
+        (
+            row["account_name"],
+            row["account_type"]
+        )
+        for row in response.data
+    ]
 
 
 
