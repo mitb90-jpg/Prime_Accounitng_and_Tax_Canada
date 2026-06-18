@@ -8,6 +8,16 @@ import os
 from supabase import create_client, Client
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
 
 
 # ---------------- DATABASE ----------------
