@@ -767,7 +767,7 @@ for pdf_file in uploaded_pdf:
     )
 # ---------------- CLEAN DATA ----------------
 
-if uploaded_excel is not None or uploaded_pdf is not None:
+if uploaded_excel is not None or uploaded_pdf:
 
     if "df" not in locals():
         st.warning("PDF could not be read. No transactions found.")
