@@ -279,7 +279,7 @@ page = st.sidebar.radio(
     [
         "🏠 Dashboard",
         "👥 Clients",
-        "🏦 Accounts",
+        "📂 Work Area",
         "📂 Statements",
         "📊 Reports"
     ]
