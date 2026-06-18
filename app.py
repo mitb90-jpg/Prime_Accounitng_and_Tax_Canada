@@ -23,6 +23,16 @@ conn = sqlite3.connect(
 
 cursor = conn.cursor()
 
+import os
+
+st.write("DATABASE PATH:")
+st.write(DB_PATH)
+
+st.write(
+    "Database exists:",
+    os.path.exists(DB_PATH)
+)
+
 
 # ---------------- CLIENTS TABLE ----------------
 
