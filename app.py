@@ -6,8 +6,16 @@ import sqlite3
 
 # ---------------- DATABASE ----------------
 
+import os
+
+DB_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "prime_accounting.db"
+)
+
+
 conn = sqlite3.connect(
-    "prime_accounting.db",
+    DB_PATH,
     check_same_thread=False
 )
 
