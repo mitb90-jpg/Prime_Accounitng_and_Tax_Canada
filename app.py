@@ -899,7 +899,7 @@ else:
     ">
 
     <h2 style="color:#1f4e79;">
-    👋 Welcome to Prime Accounting Dashboard
+    👋 Welcome to Prime Accounting
     </h2>
 
     <p style="font-size:18px;color:#555;">
@@ -1216,7 +1216,7 @@ else:
     st.markdown(
         """
         <div class="main-title">
-        📊 Prime Accounting
+        📊 Prime Accounting Dashboard
         </div>
 
         <div class="sub-title">
