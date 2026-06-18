@@ -622,7 +622,7 @@ if uploaded_excel is not None:
     df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed")]
 
 
-elif uploaded_pdf is not None
+elif uploaded_pdf is not None:
 
     import pdfplumber
 
