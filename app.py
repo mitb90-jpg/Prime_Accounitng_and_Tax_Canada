@@ -1216,7 +1216,7 @@ else:
     st.markdown(
         """
         <div class="main-title">
-        📊 Prime Accounting Dashboard
+        📊 Prime Accounting
         </div>
 
         <div class="sub-title">
