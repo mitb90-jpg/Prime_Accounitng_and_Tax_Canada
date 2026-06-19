@@ -59,6 +59,75 @@ def get_clients():
         for row in response.data
     ]
 
+# ---------------- INVOICE FUNCTIONS ----------------
+
+
+def add_invoice(
+    invoice_number,
+    client_name,
+    invoice_date,
+    due_date,
+    description,
+    quantity,
+    rate,
+    amount,
+    tax,
+    total,
+    payment_status,
+    received_date
+):
+
+    supabase.table("invoices").insert(
+        {
+
+            "invoice_number": invoice_number,
+
+            "client_name": client_name,
+
+            "invoice_date": str(invoice_date),
+
+            "due_date": str(due_date),
+
+            "description": description,
+
+            "quantity": quantity,
+
+            "rate": rate,
+
+            "amount": amount,
+
+            "tax": tax,
+
+            "total": total,
+
+            "payment_status": payment_status,
+
+            "received_date": 
+                str(received_date)
+                if received_date
+                else None
+
+        }
+    ).execute()
+
+
+
+def get_invoices():
+
+    response = (
+        supabase
+        .table("invoices")
+        .select("*")
+        .order(
+            "created_at",
+            desc=True
+        )
+        .execute()
+    )
+
+
+    return response.data
+
 
 
 def delete_client(name):
@@ -343,6 +412,7 @@ page = st.sidebar.radio(
         "👥 Clients",
         "🏦 Accounts",
         "🧾 Sales",
+        "📄 Invoice History",
         "📊 Reports"
     ]
 )
@@ -1021,6 +1091,34 @@ if page == "🧾 Sales":
             content
         )
 
+                add_invoice(
+
+            invoice_number,
+
+            customer_name,
+
+            invoice_date,
+
+            due_date,
+
+            item_description,
+
+            quantity,
+
+            rate,
+
+            amount,
+
+            tax,
+
+            total,
+
+            payment_status,
+
+            received_date
+
+        )
+
 
         buffer.seek(0)
 
@@ -1035,6 +1133,41 @@ if page == "🧾 Sales":
             data=buffer,
             file_name=f"Prime_Accounting_Invoice_{invoice_number}.pdf",
             mime="application/pdf"
+        )
+
+# ================= INVOICE HISTORY =================
+
+
+if page == "📄 Invoice History":
+
+
+    st.title(
+        "📄 Invoice History"
+    )
+
+
+    invoices = get_invoices()
+
+
+    if invoices:
+
+
+        invoice_df = pd.DataFrame(
+            invoices
+        )
+
+
+        st.dataframe(
+            invoice_df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+    else:
+
+        st.info(
+            "No invoices created yet"
         )
 
 # ================= MAIN =================
