@@ -762,74 +762,7 @@ if page == "🧾 Sales":
     st.divider()
 
 
-# -------- MULTIPLE INVOICE ITEMS --------
-
-if "invoice_items" not in st.session_state:
-
-    st.session_state.invoice_items = []
-
-
-st.subheader("Invoice Items")
-
-
-with st.form(
-    "invoice_items_sales_form",
-    clear_on_submit=True
-):
-
-    col1, col2, col3 = st.columns(3)
-
-
-    with col1:
-
-        item_description = st.text_input(
-            "Description"
-        )
-
-
-    with col2:
-
-        quantity = st.number_input(
-            "Quantity",
-            min_value=1,
-            value=1
-        )
-
-
-    with col3:
-
-        rate = st.number_input(
-            "Rate",
-            min_value=0.0
-        )
-
-
-    item_total = quantity * rate
-
-
-    st.info(
-        f"Item Total: ${item_total:,.2f}"
-    )
-
-
-    add_item = st.form_submit_button(
-        "➕ Add Item"
-    )
-
-
-if add_item:
-
-    st.session_state.invoice_items.append(
-        {
-            "Description": item_description,
-            "Quantity": quantity,
-            "Rate": rate,
-            "Amount": quantity * rate
-        }
-    )
-
-    st.rerun()
-            
+           
     # -------- DISPLAY / EDIT ITEMS --------
 
     if st.session_state.invoice_items:
