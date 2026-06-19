@@ -1381,7 +1381,7 @@ if page == "📄 Invoice History":
 
 
         st.subheader(
-            "Delete Invoice"
+            "Delete & Download Invoice"
         )
 
 
