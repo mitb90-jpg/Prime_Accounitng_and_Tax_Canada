@@ -793,9 +793,7 @@ if page == "🧾 Sales":
         )
 
 
-        # st.session_state.invoice_items = (
-         #   edited_items.to_dict("records")
-        #)
+pass
 
 
         amount = (
