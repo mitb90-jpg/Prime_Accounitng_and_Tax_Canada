@@ -840,6 +840,25 @@ if page == "🧾 Sales":
 
     total = amount + tax
 
+        # -------- TOTAL AMOUNT DUE --------
+
+    st.info(
+        f"Service Amount: ${amount:,.2f}"
+    )
+
+
+    st.warning(
+        f"HST: ${tax:,.2f}"
+    )
+
+
+    st.success(
+        f"Total Amount Due: ${total:,.2f}"
+    )
+
+
+    st.divider()
+
 
 
     # -------- PAYMENT STATUS --------
