@@ -680,38 +680,92 @@ if page == "🧾 Sales":
     )
 
 
+# -------- MULTIPLE INVOICE ITEMS --------
+
+if "invoice_items" not in st.session_state:
+    st.session_state.invoice_items = []
+
+
+st.subheader("Invoice Items")
+
+
+col1, col2, col3 = st.columns(3)
+
+
+with col1:
+
     item_description = st.text_input(
-        "Service Description"
+        "Description",
+        key="item_desc"
+    )
+
+
+with col2:
+
+    quantity = st.number_input(
+        "Quantity",
+        min_value=1,
+        value=1,
+        key="item_qty"
+    )
+
+
+with col3:
+
+    rate = st.number_input(
+        "Rate",
+        min_value=0.0,
+        key="item_rate"
     )
 
 
 
-    col3, col4 = st.columns(2)
+if st.button("➕ Add Item"):
+
+    st.session_state.invoice_items.append(
+        {
+            "Description": item_description,
+            "Quantity": quantity,
+            "Rate": rate,
+            "Amount": quantity * rate
+        }
+    )
+
+    st.rerun()
 
 
 
-    with col3:
+# -------- DISPLAY ITEMS --------
+
+if st.session_state.invoice_items:
+
+    item_df = pd.DataFrame(
+        st.session_state.invoice_items
+    )
 
 
-        quantity = st.number_input(
-            "Quantity",
-            min_value=1,
-            value=1
-        )
+    st.dataframe(
+        item_df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+
+    amount = (
+        item_df["Amount"]
+        .sum()
+    )
+
+
+else:
+
+    amount = 0
 
 
 
-    with col4:
-
-
-        rate = st.number_input(
-            "Rate",
-            min_value=0.0
-        )
-
-
-
-    amount = quantity * rate
+st.info(
+    f"Service Amount: ${amount:,.2f}"
+)
 
 
 
