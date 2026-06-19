@@ -771,199 +771,172 @@ if page == "🧾 Sales":
         content = []
 
 
-# ================= INVOICE HEADER =================
+        # ================= INVOICE HEADER =================
 
 
-# Logo
+        # Logo
 
-logo_path = "Logo.jpeg"
+        logo_path = "Logo.jpeg"
 
-logo = Image(
-    logo_path,
-    width=80,
-    height=80
-)
-
-
-
-# -------- MAIN DARK BLUE HEADER --------
-
-
-header_data = [
-
-    [
-        Paragraph(
-            "<b><font size=20 color='white'>Prime Accounting & Tax</font></b>"
-            "<br/>"
-            "<font size=11 color='white'>Toronto, Ontario</font>",
-            styles["Normal"]
-        ),
-
-        logo
-    ]
-
-]
-
-
-header_table = Table(
-    header_data,
-    colWidths=[350, 100]
-)
-
-
-header_table.setStyle(
-    TableStyle([
-
-        (
-            "BACKGROUND",
-            (0, 0),
-            (-1, -1),
-            colors.HexColor("#1f4e79")
-        ),
-
-        (
-            "VALIGN",
-            (0, 0),
-            (-1, -1),
-            "MIDDLE"
-        ),
-
-        (
-            "ALIGN",
-            (1, 0),
-            (1, 0),
-            "RIGHT"
-        ),
-
-        (
-            "LEFTPADDING",
-            (0, 0),
-            (-1, -1),
-            15
-        ),
-
-        (
-            "RIGHTPADDING",
-            (0, 0),
-            (-1, -1),
-            15
-        ),
-
-        (
-            "TOPPADDING",
-            (0, 0),
-            (-1, -1),
-            15
-        ),
-
-        (
-            "BOTTOMPADDING",
-            (0, 0),
-            (-1, -1),
-            15
+        logo = Image(
+            logo_path,
+            width=80,
+            height=80
         )
 
-    ])
-)
+
+        # -------- MAIN DARK BLUE HEADER --------
 
 
-content.append(
-    header_table
-)
-
-
-content.append(
-    Spacer(1, 5)
-)
-
-
-
-# -------- LIGHT BLUE CONTACT HEADER --------
-
-
-contact_table = Table(
-
-    [
-        [
-            "",
-            Paragraph(
-                """
-                <font size=10>
-                Email: info@primetaxes.ca<br/>
-                Website: Primetaxes.ca<br/>
-                Instagram: primetaxto
-                </font>
-                """,
-                styles["Normal"]
-            )
+        header_data = [
+            [
+                Paragraph(
+                    "<b><font size=20 color='white'>Prime Accounting & Tax</font></b>"
+                    "<br/>"
+                    "<font size=11 color='white'>Toronto, Ontario</font>",
+                    styles["Normal"]
+                ),
+                logo
+            ]
         ]
-    ],
-
-    colWidths=[300, 150]
-
-)
 
 
-
-contact_table.setStyle(
-    TableStyle([
-
-        (
-            "BACKGROUND",
-            (0, 0),
-            (-1, -1),
-            colors.HexColor("#b7d7f0")
-        ),
-
-        (
-            "ALIGN",
-            (1, 0),
-            (1, 0),
-            "RIGHT"
-        ),
-
-        (
-            "VALIGN",
-            (0, 0),
-            (-1, -1),
-            "MIDDLE"
-        ),
-
-        (
-            "TOPPADDING",
-            (0, 0),
-            (-1, -1),
-            8
-        ),
-
-        (
-            "BOTTOMPADDING",
-            (0, 0),
-            (-1, -1),
-            8
+        header_table = Table(
+            header_data,
+            colWidths=[350, 100]
         )
 
-    ])
-)
+
+        header_table.setStyle(
+            TableStyle([
+
+                (
+                    "BACKGROUND",
+                    (0, 0),
+                    (-1, -1),
+                    colors.HexColor("#1f4e79")
+                ),
+
+                (
+                    "VALIGN",
+                    (0, 0),
+                    (-1, -1),
+                    "MIDDLE"
+                ),
+
+                (
+                    "ALIGN",
+                    (1, 0),
+                    (1, 0),
+                    "RIGHT"
+                ),
+
+                (
+                    "LEFTPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    15
+                ),
+
+                (
+                    "RIGHTPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    15
+                ),
+
+                (
+                    "TOPPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    15
+                ),
+
+                (
+                    "BOTTOMPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    15
+                )
+
+            ])
+        )
 
 
-
-content.append(
-    contact_table
-)
-
-
-content.append(
-    Spacer(1, 20)
-)
+        content.append(header_table)
 
 
         content.append(
-            Paragraph(
-                "Professional Invoice",
-                styles["Heading2"]
-            )
+            Spacer(1, 5)
         )
+
+
+        # -------- LIGHT BLUE CONTACT HEADER --------
+
+
+        contact_table = Table(
+            [
+                [
+                    "",
+                    Paragraph(
+                        """
+                        <font size=10>
+                        Email: info@primetaxes.ca<br/>
+                        Website: Primetaxes.ca<br/>
+                        Instagram: primetaxto
+                        </font>
+                        """,
+                        styles["Normal"]
+                    )
+                ]
+            ],
+            colWidths=[300,150]
+        )
+
+
+        contact_table.setStyle(
+            TableStyle([
+
+                (
+                    "BACKGROUND",
+                    (0,0),
+                    (-1,-1),
+                    colors.HexColor("#b7d7f0")
+                ),
+
+                (
+                    "ALIGN",
+                    (1,0),
+                    (1,0),
+                    "RIGHT"
+                ),
+
+                (
+                    "VALIGN",
+                    (0,0),
+                    (-1,-1),
+                    "MIDDLE"
+                ),
+
+                (
+                    "TOPPADDING",
+                    (0,0),
+                    (-1,-1),
+                    8
+                ),
+
+                (
+                    "BOTTOMPADDING",
+                    (0,0),
+                    (-1,-1),
+                    8
+                )
+
+            ])
+        )
+
+
+        content.append(contact_table)
 
 
         content.append(
