@@ -799,9 +799,6 @@ if st.button("🧾 Generate Invoice"):
         title="Prime Accounting Invoice"
     )
 
-    # keep your existing PDF generation code here
-
-
     # ================= INVOICE HISTORY =================
 
 
