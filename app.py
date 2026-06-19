@@ -643,7 +643,7 @@ if page == "🧾 Sales":
 
         st.rerun()
 
-# -------- MULTIPLE INVOICE ITEMS --------
+    # -------- MULTIPLE INVOICE ITEMS --------
 
 if "invoice_items" not in st.session_state:
 
