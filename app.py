@@ -90,7 +90,6 @@ def generate_invoice_number():
     return f"{prefix}-{count:04d}"
 
 
-
 def add_invoice(
     invoice_number,
     client_name,
@@ -117,44 +116,43 @@ def add_invoice(
         .execute()
     )
 
-
     if existing.data:
         return
 
-
     supabase.table("invoices").insert(
         {
-
             "invoice_number": invoice_number,
-
             "client_name": client_name,
-
             "invoice_date": str(invoice_date),
-
             "due_date": str(due_date),
-
             "description": description,
-
             "quantity": quantity,
-
             "rate": rate,
-
             "amount": amount,
-
             "tax": tax,
-
             "total": total,
-
             "payment_status": payment_status,
-
             "received_date":
                 str(received_date)
                 if received_date
                 else None
-
         }
     ).execute()
 
+
+def add_invoice_items(invoice_number, items):
+
+    for item in items:
+
+        supabase.table("invoice_items").insert(
+            {
+                "invoice_number": invoice_number,
+                "description": item["Description"],
+                "quantity": item["Quantity"],
+                "rate": item["Rate"],
+                "amount": item["Amount"]
+            }
+        ).execute()
 
 
 def get_invoices():
@@ -167,12 +165,10 @@ def get_invoices():
             "created_at",
             desc=True
         )
-        
         .execute()
     )
 
     return response.data
-
 
 
 def delete_client(name):
@@ -184,7 +180,6 @@ def delete_client(name):
             name
         ) \
         .execute()
-
 
 
 def delete_invoice(invoice_number):
@@ -917,54 +912,6 @@ if page == "🧾 Sales":
 
         content = []
 
-        # continue PDF code here...
-
-    # -------- UNPAID INVOICES --------
-
-    st.divider()
-
-    st.subheader("📌 Unpaid Invoices")
-
-
-    invoices = get_invoices()
-
-
-    unpaid_invoices = [
-        inv
-        for inv in invoices
-        if inv["payment_status"] == "Unpaid"
-    ]
-
-
-    if unpaid_invoices:
-
-        unpaid_df = pd.DataFrame(
-            unpaid_invoices
-        )
-
-
-        st.dataframe(
-            unpaid_df[
-                [
-                    "invoice_number",
-                    "client_name",
-                    "invoice_date",
-                    "due_date",
-                    "total",
-                    "payment_status"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
-
-
-    else:
-
-        st.info(
-            "No unpaid invoices"
-        )
-
         # ================= INVOICE HEADER =================
 
         logo_path = "Logo.jpeg"
@@ -1219,7 +1166,12 @@ if page == "🧾 Sales":
         )
 
 
-        # -------- SAVE DATABASE --------
+# -------- SAVE DATABASE --------
+
+        total_quantity = sum(
+            item["Quantity"]
+            for item in st.session_state.invoice_items
+        )
 
         add_invoice(
             invoice_number,
@@ -1227,13 +1179,18 @@ if page == "🧾 Sales":
             invoice_date,
             due_date,
             str(st.session_state.invoice_items),
-            len(st.session_state.invoice_items),
+            total_quantity,
             0,
             amount,
             tax,
             total,
             payment_status,
             received_date
+        )
+
+        add_invoice_items(
+            invoice_number,
+            st.session_state.invoice_items
         )
 
 
@@ -1261,6 +1218,51 @@ if page == "🧾 Sales":
 
         st.rerun()
 
+    # -------- UNPAID INVOICES --------
+
+    st.divider()
+
+    st.subheader("📌 Unpaid Invoices")
+
+
+    invoices = get_invoices()
+
+
+    unpaid_invoices = [
+        inv
+        for inv in invoices
+        if inv["payment_status"] == "Unpaid"
+    ]
+
+
+    if unpaid_invoices:
+
+        unpaid_df = pd.DataFrame(
+            unpaid_invoices
+        )
+
+
+        st.dataframe(
+            unpaid_df[
+                [
+                    "invoice_number",
+                    "client_name",
+                    "invoice_date",
+                    "due_date",
+                    "total",
+                    "payment_status"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+    else:
+
+        st.info(
+            "No unpaid invoices"
+        )
 
 
 
