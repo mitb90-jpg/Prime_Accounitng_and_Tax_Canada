@@ -765,17 +765,28 @@ if page == "🧾 Sales":
 
 
 
-    # -------- TAX --------
+    # -------- HST --------
 
-    tax = st.number_input(
-        "Tax",
-        min_value=0.0
+    hst_rate = st.number_input(
+        "HST Rate (%)",
+        min_value=0.0,
+        value=13.0,
+        step=0.5
     )
 
 
+    calculated_hst = amount * (hst_rate / 100)
 
-    total = amount + tax
 
+    hst = st.number_input(
+        "HST Amount",
+        min_value=0.0,
+        value=float(calculated_hst),
+        step=0.01
+    )
+
+
+    total = amount + hst
 
 
     st.success(
