@@ -688,22 +688,22 @@ st.info(
 )
 
 
-if st.button("➕ Add Item"):
+if st.button("➕ Add Item", key="add_invoice_item"):
 
-    if item_description.strip():
+    new_item = {
+        "Description": item_description,
+        "Quantity": quantity,
+        "Rate": rate,
+        "Amount": quantity * rate
+    }
 
-        st.session_state.invoice_items.append(
-            {
-                "Description": item_description,
-                "Quantity": quantity,
-                "Rate": rate,
-                "Amount": item_total
-            }
-        )
 
-        st.success("Item Added")
+    st.session_state.invoice_items.append(
+        new_item
+    )
 
-        st.rerun()
+
+    st.rerun()
 
     else:
 
