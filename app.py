@@ -629,7 +629,21 @@ if page == "🧾 Sales":
     st.title("🧾 Sales & Invoice Management")
 
 
-    # -------- MULTIPLE INVOICE ITEMS --------
+
+
+
+    # -------- NEW / RESET INVOICE --------
+
+    if st.button("🔄 New Invoice / Refresh"):
+
+        st.session_state.invoice_items = []
+
+        if "invoice_number" in st.session_state:
+            del st.session_state.invoice_number
+
+        st.rerun()
+
+        # -------- MULTIPLE INVOICE ITEMS --------
 
     if "invoice_items" not in st.session_state:
 
@@ -694,18 +708,6 @@ if page == "🧾 Sales":
                 "Amount": quantity * rate
             }
         )
-
-        st.rerun()
-
-
-    # -------- NEW / RESET INVOICE --------
-
-    if st.button("🔄 New Invoice / Refresh"):
-
-        st.session_state.invoice_items = []
-
-        if "invoice_number" in st.session_state:
-            del st.session_state.invoice_number
 
         st.rerun()
 
