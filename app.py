@@ -684,7 +684,7 @@ if page == "🧾 Sales":
 
 
     with st.form(
-        "invoice_item_form",
+        "invoice_items_sales_form",
         clear_on_submit=True
     ):
 
