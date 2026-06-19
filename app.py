@@ -851,7 +851,7 @@ if page == "🧾 Sales":
 
     total = amount + tax
 
-        # -------- TOTAL AMOUNT DUE --------
+    # -------- TOTAL AMOUNT DUE --------
 
     st.info(
         f"Service Amount: ${amount:,.2f}"
@@ -896,6 +896,52 @@ if page == "🧾 Sales":
 
 
     st.divider()
+
+        # -------- UNPAID INVOICES --------
+
+    st.divider()
+
+    st.subheader("📌 Unpaid Invoices")
+
+
+    invoices = get_invoices()
+
+
+    unpaid_invoices = [
+        inv
+        for inv in invoices
+        if inv["payment_status"] == "Unpaid"
+    ]
+
+
+    if unpaid_invoices:
+
+        unpaid_df = pd.DataFrame(
+            unpaid_invoices
+        )
+
+
+        st.dataframe(
+            unpaid_df[
+                [
+                    "invoice_number",
+                    "client_name",
+                    "invoice_date",
+                    "due_date",
+                    "total",
+                    "payment_status"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+    else:
+
+        st.info(
+            "No unpaid invoices"
+        )
 
 
 
