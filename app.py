@@ -1087,40 +1087,39 @@ if page == "🧾 Sales":
         )
 
 
-        doc.build(
-            content
-        )
-
-                add_invoice(
-
-            invoice_number,
-
-            customer_name,
-
-            invoice_date,
-
-            due_date,
-
-            item_description,
-
-            quantity,
-
-            rate,
-
-            amount,
-
-            tax,
-
-            total,
-
-            payment_status,
-
-            received_date
-
-        )
+doc.build(content)
 
 
-        buffer.seek(0)
+add_invoice(
+
+    invoice_number,
+
+    customer_name,
+
+    invoice_date,
+
+    due_date,
+
+    item_description,
+
+    quantity,
+
+    rate,
+
+    amount,
+
+    tax,
+
+    total,
+
+    payment_status,
+
+    received_date
+
+)
+
+
+buffer.seek(0)
 
 
         st.success(
