@@ -671,7 +671,7 @@ if page == "🧾 Sales":
 
         due_date = st.date_input(
             "Due Date",
-            format="DD-MMYYYY"
+            format="DD-MM-YYYY"
         )
 
 
