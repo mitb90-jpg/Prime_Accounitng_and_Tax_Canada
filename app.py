@@ -167,6 +167,7 @@ def get_invoices():
             "created_at",
             desc=True
         )
+        
         .execute()
     )
 
@@ -654,11 +655,14 @@ if page == "🧾 Sales":
 
     with col3:
 
-        invoice_number = generate_invoice_number()
+        if "invoice_number" not in st.session_state:
+
+            st.session_state.invoice_number = generate_invoice_number()
+
 
         st.text_input(
             "Invoice Number",
-            value=invoice_number,
+            value=st.session_state.invoice_number,
             disabled=True
         )
 
@@ -667,7 +671,7 @@ if page == "🧾 Sales":
 
         due_date = st.date_input(
             "Due Date",
-            format="DD-MM-YYYY"
+            format="DD-MMYYYY"
         )
 
 
