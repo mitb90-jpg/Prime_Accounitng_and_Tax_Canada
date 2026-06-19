@@ -4,22 +4,23 @@ import io
 import re
 import json
 import os
+import datetime
 
 from supabase import create_client, Client
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+
+
+# ReportLab PDF
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
     Spacer,
     Table,
-    TableStyle
+    TableStyle,
+    Image
 )
 
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
-from reportlab.platypus import Image
-from reportlab.lib.utils import ImageReader
 
 
 # ---------------- DATABASE ----------------
@@ -627,34 +628,18 @@ if page == "🧾 Sales":
     st.title("🧾 Sales & Invoice Management")
 
 
-    st.success(
-        "Create and manage customer invoices"
+    customer_name = st.selectbox(
+        "Customer",
+        ["Select Client"] + get_clients()
     )
 
 
-    st.divider()
-
-
-    st.subheader(
-        "Invoice Details"
+    invoice_date = st.date_input(
+        "Invoice Date"
     )
 
 
     col1, col2 = st.columns(2)
-
-
-    with col1:
-
-
-        customer_name = st.text_input(
-            "Customer Name"
-        )
-
-
-        invoice_date = st.date_input(
-            "Invoice Date"
-        )
-
 
 
     with col2:
@@ -672,483 +657,436 @@ if page == "🧾 Sales":
         )
 
 
-        st.divider()
+    st.divider()
 
 
-# -------- MULTIPLE INVOICE ITEMS --------
+    # -------- MULTIPLE INVOICE ITEMS --------
 
-if "invoice_items" not in st.session_state:
-    st.session_state.invoice_items = []
+    if "invoice_items" not in st.session_state:
+        st.session_state.invoice_items = []
 
 
-st.subheader("Invoice Items")
+    st.subheader("Invoice Items")
 
 
-col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
 
 
-with col1:
+    with col1:
 
-    item_description = st.text_input(
-        "Description",
-        key="item_desc"
-    )
-
-
-with col2:
-
-    quantity = st.number_input(
-        "Quantity",
-        min_value=1,
-        value=1,
-        key="item_qty"
-    )
-
-
-with col3:
-
-    rate = st.number_input(
-        "Rate",
-        min_value=0.0,
-        key="item_rate"
-    )
-
-
-
-if st.button("➕ Add Item"):
-
-    if item_description.strip():
-
-        st.session_state.invoice_items.append(
-            {
-                "Description": item_description,
-                "Quantity": quantity,
-                "Rate": rate,
-                "Amount": quantity * rate
-            }
-        )
-
-        st.rerun()
-
-
-
-# -------- DISPLAY ITEMS --------
-
-if st.session_state.invoice_items:
-
-    item_df = pd.DataFrame(
-        st.session_state.invoice_items
-    )
-
-
-    st.dataframe(
-        item_df,
-        use_container_width=True,
-        hide_index=True
-    )
-
-
-    amount = (
-        item_df["Amount"]
-        .sum()
-    )
-
-
-else:
-
-    amount = 0
-
-
-
-st.info(
-    f"Service Amount: ${amount:,.2f}"
-)
-
-
-
-# -------- TAX --------
-
-tax = st.number_input(
-    "Tax",
-    min_value=0.0
-)
-
-
-
-total = amount + tax
-
-
-
-st.success(
-    f"Invoice Total: ${total:,.2f}"
-)
-
-
-st.divider()
-
-
-# -------- PAYMENT STATUS --------
-
-payment_status = st.selectbox(
-    "Status",
-    [
-        "Unpaid",
-        "Paid"
-    ]
-)
-
-
-if payment_status == "Paid":
-
-    received_date = st.date_input(
-        "Payment Received Date"
-    )
-
-else:
-
-    received_date = None
-
-
-
-st.divider()
-
-
-
-# -------- GENERATE INVOICE --------
-
-if st.button("🧾 Generate Invoice"):
-
-    buffer = io.BytesIO()
-
-    doc = SimpleDocTemplate(
-        buffer,
-        title="Prime Accounting Invoice"
-    )
-
-
-    styles = getSampleStyleSheet()
-
-    content = []
-
-
-    # ================= INVOICE HEADER =================
-
-
-    logo_path = "Logo.jpeg"
-
-
-    logo = Image(
-        logo_path,
-        width=80,
-        height=80
-    )
-
-
-    header_data = [
-        [
-            Paragraph(
-                "<b><font size=20 color='white'>Prime Accounting & Tax</font></b>"
-                "<br/>"
-                "<font size=11 color='white'>Toronto, Ontario</font>",
-                styles["Normal"]
-            ),
-            logo
-        ]
-    ]
-
-
-    header_table = Table(
-        header_data,
-        colWidths=[350,100]
-    )
-
-
-    header_table.setStyle(
-        TableStyle([
-
-            (
-                "BACKGROUND",
-                (0,0),
-                (-1,-1),
-                colors.HexColor("#1f4e79")
-            ),
-
-            (
-                "VALIGN",
-                (0,0),
-                (-1,-1),
-                "MIDDLE"
-            ),
-
-        ])
-    )
-
-
-    content.append(header_table)
-
-
-    content.append(
-        Spacer(1,20)
-    )
-
-
-
-    # ================= INVOICE DETAILS =================
-
-
-    invoice_info = [
-
-        [
-            "Invoice Sent To",
-            customer_name
-        ],
-
-        [
-            "Invoice Number",
-            invoice_number
-        ],
-
-        [
-            "Invoice Date",
-            str(invoice_date)
-        ],
-
-        [
-            "Due Date",
-            str(due_date)
-        ],
-
-        [
-            "Payment Status",
-            payment_status
-        ]
-
-    ]
-
-
-    invoice_table = Table(
-        invoice_info,
-        colWidths=[150,280]
-    )
-
-
-    invoice_table.setStyle(
-        TableStyle([
-
-            (
-                "GRID",
-                (0,0),
-                (-1,-1),
-                0.5,
-                colors.grey
-            )
-
-        ])
-    )
-
-
-    content.append(invoice_table)
-
-
-    content.append(
-        Spacer(1,20)
-    )
-
-
-
-    # ================= MULTIPLE ITEMS =================
-
-
-    item_data = [
-
-        [
+        item_description = st.text_input(
             "Description",
-            "Qty",
+            key="item_desc"
+        )
+
+
+    with col2:
+
+        quantity = st.number_input(
+            "Quantity",
+            min_value=1,
+            value=1,
+            key="item_qty"
+        )
+
+
+    with col3:
+
+        rate = st.number_input(
             "Rate",
-            "Amount"
-        ]
-
-    ]
-
-
-    for item in st.session_state.invoice_items:
-
-        item_data.append(
-
-            [
-                item["Description"],
-                str(item["Quantity"]),
-                f"${item['Rate']:,.2f}",
-                f"${item['Amount']:,.2f}"
-            ]
-
+            min_value=0.0,
+            key="item_rate"
         )
 
 
 
-    item_table = Table(
-        item_data,
-        colWidths=[220,60,80,80]
-    )
+    if st.button("➕ Add Item"):
 
+        if item_description.strip():
 
-    item_table.setStyle(
-        TableStyle([
-
-            (
-                "GRID",
-                (0,0),
-                (-1,-1),
-                0.5,
-                colors.grey
-            ),
-
-            (
-                "BACKGROUND",
-                (0,0),
-                (-1,0),
-                colors.HexColor("#1f7189")
-            ),
-
-            (
-                "TEXTCOLOR",
-                (0,0),
-                (-1,0),
-                colors.white
+            st.session_state.invoice_items.append(
+                {
+                    "Description": item_description,
+                    "Quantity": quantity,
+                    "Rate": rate,
+                    "Amount": quantity * rate
+                }
             )
 
-        ])
+            st.rerun()
+
+
+
+    # -------- DISPLAY ITEMS --------
+
+    if st.session_state.invoice_items:
+
+        item_df = pd.DataFrame(
+            st.session_state.invoice_items
+        )
+
+
+        st.dataframe(
+            item_df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+        amount = (
+            item_df["Amount"]
+            .sum()
+        )
+
+
+    else:
+
+        amount = 0
+
+
+
+    st.info(
+        f"Service Amount: ${amount:,.2f}"
     )
 
 
-    content.append(item_table)
 
+    # -------- TAX --------
 
-    content.append(
-        Spacer(1,20)
+    tax = st.number_input(
+        "Tax",
+        min_value=0.0
     )
 
-
-
-    # ================= TOTAL =================
-
-
-    amount = sum(
-        item["Amount"]
-        for item in st.session_state.invoice_items
-    )
 
 
     total = amount + tax
 
 
 
-    total_table = Table(
+    st.success(
+        f"Invoice Total: ${total:,.2f}"
+    )
 
+
+    st.divider()
+
+
+
+    # -------- PAYMENT STATUS --------
+
+    payment_status = st.selectbox(
+        "Status",
         [
-
-            [
-                "Tax",
-                f"${tax:,.2f}"
-            ],
-
-            [
-                "TOTAL",
-                f"${total:,.2f}"
-            ]
-
-        ],
-
-        colWidths=[300,120]
-
+            "Unpaid",
+            "Paid"
+        ]
     )
 
 
+    if payment_status == "Paid":
 
-    total_table.setStyle(
-        TableStyle([
-
-            (
-                "GRID",
-                (0,0),
-                (-1,-1),
-                0.5,
-                colors.grey
-            )
-
-        ])
-
-    )
-
-
-    content.append(total_table)
-
-
-
-    content.append(
-        Spacer(1,30)
-    )
-
-
-    content.append(
-
-        Paragraph(
-            "Thank you for your business.",
-            styles["Normal"]
+        received_date = st.date_input(
+            "Payment Received Date"
         )
 
-    )
+    else:
+
+        received_date = None
 
 
 
-    # ================= BUILD PDF =================
-
-
-    doc.build(
-        content
-    )
-
-
-    buffer.seek(0)
+    st.divider()
 
 
 
-    st.success(
-        "Invoice generated successfully"
-    )
+    # -------- GENERATE INVOICE --------
+
+    if st.button("🧾 Generate Invoice"):
+
+        buffer = io.BytesIO()
+
+        doc = SimpleDocTemplate(
+            buffer,
+            title="Prime Accounting Invoice"
+        )
+
+
+        styles = getSampleStyleSheet()
+
+        content = []
+
+
+        # ================= INVOICE HEADER =================
+
+        logo_path = "Logo.jpeg"
+
+
+        logo = Image(
+            logo_path,
+            width=80,
+            height=80
+        )
+
+
+        header_data = [
+            [
+                Paragraph(
+                    "<b><font size=20 color='white'>Prime Accounting & Tax</font></b>"
+                    "<br/>"
+                    "<font size=11 color='white'>Toronto, Ontario</font>",
+                    styles["Normal"]
+                ),
+                logo
+            ]
+        ]
+
+
+        header_table = Table(
+            header_data,
+            colWidths=[350,100]
+        )
+
+
+        header_table.setStyle(
+            TableStyle([
+                (
+                    "BACKGROUND",
+                    (0,0),
+                    (-1,-1),
+                    colors.HexColor("#1f4e79")
+                ),
+                (
+                    "VALIGN",
+                    (0,0),
+                    (-1,-1),
+                    "MIDDLE"
+                ),
+            ])
+        )
+
+
+        content.append(header_table)
+
+        content.append(
+            Spacer(1,20)
+        )
 
 
 
-    # SAVE DATABASE
-
-    add_invoice(
-        invoice_number,
-        customer_name,
-        invoice_date,
-        due_date,
-        str(st.session_state.invoice_items),
-        len(st.session_state.invoice_items),
-        0,
-        amount,
-        tax,
-        total,
-        payment_status,
-        received_date
-    )
+        # ================= INVOICE DETAILS =================
 
 
+        invoice_info = [
 
-    st.download_button(
+            ["Invoice Sent To", customer_name],
 
-        label="⬇️ Download Invoice PDF",
+            ["Invoice Number", invoice_number],
 
-        data=buffer,
+            ["Invoice Date", str(invoice_date)],
 
-        file_name=f"Invoice_{invoice_number}.pdf",
+            ["Due Date", str(due_date)],
 
-        mime="application/pdf"
+            ["Payment Status", payment_status]
 
-    )
+        ]
+
+
+        invoice_table = Table(
+            invoice_info,
+            colWidths=[150,280]
+        )
+
+
+        invoice_table.setStyle(
+            TableStyle([
+                (
+                    "GRID",
+                    (0,0),
+                    (-1,-1),
+                    0.5,
+                    colors.grey
+                )
+            ])
+        )
+
+
+        content.append(invoice_table)
+
+        content.append(
+            Spacer(1,20)
+        )
+
+
+
+        # ================= MULTIPLE ITEMS =================
+
+
+        item_data = [
+            [
+                "Description",
+                "Qty",
+                "Rate",
+                "Amount"
+            ]
+        ]
+
+
+        for item in st.session_state.invoice_items:
+
+            item_data.append(
+                [
+                    item["Description"],
+                    str(item["Quantity"]),
+                    f"${item['Rate']:,.2f}",
+                    f"${item['Amount']:,.2f}"
+                ]
+            )
+
+
+        item_table = Table(
+            item_data,
+            colWidths=[220,60,80,80]
+        )
+
+
+        item_table.setStyle(
+            TableStyle([
+                (
+                    "GRID",
+                    (0,0),
+                    (-1,-1),
+                    0.5,
+                    colors.grey
+                ),
+
+                (
+                    "BACKGROUND",
+                    (0,0),
+                    (-1,0),
+                    colors.HexColor("#1f7189")
+                ),
+
+                (
+                    "TEXTCOLOR",
+                    (0,0),
+                    (-1,0),
+                    colors.white
+                )
+            ])
+        )
+
+
+        content.append(item_table)
+
+
+        content.append(
+            Spacer(1,20)
+        )
+
+
+
+        # ================= TOTAL =================
+
+
+        amount = sum(
+            item["Amount"]
+            for item in st.session_state.invoice_items
+        )
+
+
+        total = amount + tax
+
+
+
+        total_table = Table(
+            [
+                [
+                    "Tax",
+                    f"${tax:,.2f}"
+                ],
+
+                [
+                    "TOTAL",
+                    f"${total:,.2f}"
+                ]
+            ],
+            colWidths=[300,120]
+        )
+
+
+        total_table.setStyle(
+            TableStyle([
+                (
+                    "GRID",
+                    (0,0),
+                    (-1,-1),
+                    0.5,
+                    colors.grey
+                )
+            ])
+        )
+
+
+        content.append(total_table)
+
+
+        content.append(
+            Spacer(1,30)
+        )
+
+
+        content.append(
+            Paragraph(
+                "Thank you for your business.",
+                styles["Normal"]
+            )
+        )
+
+
+
+        # ================= BUILD PDF =================
+
+
+        doc.build(
+            content
+        )
+
+
+        buffer.seek(0)
+
+
+
+        st.success(
+            "Invoice generated successfully"
+        )
+
+
+
+        # SAVE DATABASE
+
+        add_invoice(
+            invoice_number,
+            customer_name,
+            invoice_date,
+            due_date,
+            str(st.session_state.invoice_items),
+            len(st.session_state.invoice_items),
+            0,
+            amount,
+            tax,
+            total,
+            payment_status,
+            received_date
+        )
+
+
+        st.download_button(
+            label="⬇️ Download Invoice PDF",
+            data=buffer,
+            file_name=f"Invoice_{invoice_number}.pdf",
+            mime="application/pdf"
+        )
 
     # ================= INVOICE HISTORY =================
 
@@ -1279,487 +1217,6 @@ if page == "📄 Invoice History":
             "No invoices created yet"
         )
 
-
-
-    # -------- PAYMENT STATUS --------
-
-    st.subheader("Payment Status")
-
-
-    payment_status = st.selectbox(
-        "Status",
-        [
-            "Unpaid",
-            "Paid"
-        ]
-    )
-
-
-    if payment_status == "Paid":
-
-        received_date = st.date_input(
-            "Payment Received Date"
-        )
-
-    else:
-
-        received_date = None
-
-
-
-    st.divider()
-
-
-
-    # -------- GENERATE INVOICE --------
-
-
-    if st.button("🧾 Generate Invoice"):
-
-
-        buffer = io.BytesIO()
-
-
-        doc = SimpleDocTemplate(
-            buffer,
-            title="Prime Accounting Invoice"
-        )
-
-
-        styles = getSampleStyleSheet()
-
-
-        content = []
-
-
-        # ================= INVOICE HEADER =================
-
-
-        # Logo
-
-        logo_path = "Logo.jpeg"
-
-        logo = Image(
-            logo_path,
-            width=80,
-            height=80
-        )
-
-
-        # -------- MAIN DARK BLUE HEADER --------
-
-
-        header_data = [
-            [
-                Paragraph(
-                    "<b><font size=20 color='white'>Prime Accounting & Tax</font></b>"
-                    "<br/>"
-                    "<font size=11 color='white'>Toronto, Ontario</font>",
-                    styles["Normal"]
-                ),
-                logo
-            ]
-        ]
-
-
-        header_table = Table(
-            header_data,
-            colWidths=[350, 100]
-        )
-
-
-        header_table.setStyle(
-            TableStyle([
-
-                (
-                    "BACKGROUND",
-                    (0, 0),
-                    (-1, -1),
-                    colors.HexColor("#1f4e79")
-                ),
-
-                (
-                    "VALIGN",
-                    (0, 0),
-                    (-1, -1),
-                    "MIDDLE"
-                ),
-
-                (
-                    "ALIGN",
-                    (1, 0),
-                    (1, 0),
-                    "RIGHT"
-                ),
-
-                (
-                    "LEFTPADDING",
-                    (0, 0),
-                    (-1, -1),
-                    15
-                ),
-
-                (
-                    "RIGHTPADDING",
-                    (0, 0),
-                    (-1, -1),
-                    15
-                ),
-
-                (
-                    "TOPPADDING",
-                    (0, 0),
-                    (-1, -1),
-                    15
-                ),
-
-                (
-                    "BOTTOMPADDING",
-                    (0, 0),
-                    (-1, -1),
-                    15
-                )
-
-            ])
-        )
-
-
-        content.append(header_table)
-
-
-        content.append(
-            Spacer(1, 5)
-        )
-
-
-        # -------- LIGHT BLUE CONTACT HEADER --------
-
-
-        contact_table = Table(
-            [
-                [
-                    "",
-                    Paragraph(
-                        """
-                        <font size=10>
-                        Email: info@primetaxes.ca<br/>
-                        Website: Primetaxes.ca<br/>
-                        Instagram: primetaxto
-                        </font>
-                        """,
-                        styles["Normal"]
-                    )
-                ]
-            ],
-            colWidths=[300,150]
-        )
-
-
-        contact_table.setStyle(
-            TableStyle([
-
-                (
-                    "BACKGROUND",
-                    (0,0),
-                    (-1,-1),
-                    colors.HexColor("#b7d7f0")
-                ),
-
-                (
-                    "ALIGN",
-                    (1,0),
-                    (1,0),
-                    "RIGHT"
-                ),
-
-                (
-                    "VALIGN",
-                    (0,0),
-                    (-1,-1),
-                    "MIDDLE"
-                ),
-
-                (
-                    "TOPPADDING",
-                    (0,0),
-                    (-1,-1),
-                    8
-                ),
-
-                (
-                    "BOTTOMPADDING",
-                    (0,0),
-                    (-1,-1),
-                    8
-                )
-
-            ])
-        )
-
-
-        content.append(contact_table)
-
-
-        content.append(
-            Spacer(1,20)
-        )
-
-
-        # DETAILS
-
-
-        invoice_info = [
-
-            [
-                "Invoice Issued By",
-                "Prime Accounting & Tax"
-            ],
-
-            [
-                "Invoice Sent To",
-                customer_name
-            ],
-
-            [
-                "Invoice Number",
-                invoice_number
-            ],
-
-            [
-                "Invoice Date",
-                str(invoice_date)
-            ],
-
-            [
-                "Due Date",
-                str(due_date)
-            ],
-
-            [
-                "Payment Status",
-                payment_status
-            ]
-
-        ]
-
-
-        invoice_table = Table(
-            invoice_info,
-            colWidths=[150,280]
-        )
-
-
-        invoice_table.setStyle(
-            TableStyle([
-
-                (
-                "GRID",
-                (0,0),
-                (-1,-1),
-                0.5,
-                colors.grey
-                ),
-
-                (
-                "BACKGROUND",
-                (0,0),
-                (0,-1),
-                colors.lightgrey
-                )
-
-            ])
-        )
-
-
-        content.append(
-            invoice_table
-        )
-
-
-        content.append(
-            Spacer(1,20)
-        )
-
-
-
-        # SERVICE TABLE
-
-
-        item_data = [
-
-            [
-                "Description",
-                "Qty",
-                "Rate",
-                "Amount"
-            ],
-
-            [
-                item_description,
-                str(quantity),
-                f"${rate:,.2f}",
-                f"${amount:,.2f}"
-            ]
-
-        ]
-
-
-        item_table = Table(
-            item_data,
-            colWidths=[200,60,80,80]
-        )
-
-
-        item_table.setStyle(
-            TableStyle([
-
-                (
-                "GRID",
-                (0,0),
-                (-1,-1),
-                0.5,
-                colors.grey
-                ),
-
-                (
-                "BACKGROUND",
-                (0,0),
-                (-1,0),
-                colors.HexColor("#1f7189")
-                ),
-
-                (
-                "TEXTCOLOR",
-                (0,0),
-                (-1,0),
-                colors.white
-                )
-
-            ])
-        )
-
-
-        content.append(
-            item_table
-        )
-
-
-        content.append(
-            Spacer(1,20)
-        )
-
-
-
-        # TOTAL
-
-
-        total_table = Table(
-            [
-                [
-                    "Tax",
-                    f"${tax:,.2f}"
-                ],
-
-                [
-                    "TOTAL",
-                    f"${total:,.2f}"
-                ]
-
-            ],
-            colWidths=[300,120]
-        )
-
-
-        total_table.setStyle(
-            TableStyle([
-
-                (
-                "GRID",
-                (0,0),
-                (-1,-1),
-                0.5,
-                colors.grey
-                ),
-
-                (
-                "BACKGROUND",
-                (0,1),
-                (-1,1),
-                colors.HexColor("#1f7189")
-                ),
-
-                (
-                "TEXTCOLOR",
-                (0,1),
-                (-1,1),
-                colors.white
-                )
-
-            ])
-        )
-
-
-        content.append(
-            total_table
-        )
-
-
-        content.append(
-            Spacer(1,30)
-        )
-
-
-        content.append(
-            Paragraph(
-                "Thank you for your business.",
-                styles["Normal"]
-            )
-        )
-
-
-
-        doc.build(
-            content
-        )
-
-
-        buffer.seek(0)
-
-
-        st.success(
-            "Invoice generated successfully"
-        )
-
-
-        # -------- SAVE INVOICE TO SUPABASE --------
-
-        add_invoice(
-            invoice_number,
-            customer_name,
-            invoice_date,
-            due_date,
-            item_description,
-            quantity,
-            rate,
-            amount,
-            tax,
-            total,
-            payment_status,
-            received_date
-        )
-
-
-        st.success(
-            "Invoice saved to database ✅"
-        )
-
-
-        st.download_button(
-            label="⬇️ Download Invoice PDF",
-            data=buffer,
-            file_name=f"Invoice_{invoice_number}.pdf",
-            mime="application/pdf"
-        )
 
 
 # ================= MAIN =================
@@ -2336,7 +1793,7 @@ if uploaded_excel is not None:
 
     pass
 
-else:
+elif page == "🏠 Dashboard":
 
     st.markdown("""
     <style>
