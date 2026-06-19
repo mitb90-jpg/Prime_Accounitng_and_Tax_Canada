@@ -753,10 +753,24 @@ if page == "🧾 Sales":
         )
 
 
+        # recalculate amount
+        item_df["Amount"] = (
+            item_df["Quantity"]
+            *
+            item_df["Rate"]
+        )
+
+
         st.dataframe(
             item_df,
             use_container_width=True,
             hide_index=True
+        )
+
+
+        # update session with calculated amount
+        st.session_state.invoice_items = item_df.to_dict(
+            "records"
         )
 
 
