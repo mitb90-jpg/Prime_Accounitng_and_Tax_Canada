@@ -63,6 +63,31 @@ def get_clients():
 
 # ---------------- INVOICE FUNCTIONS ----------------
 
+import datetime
+
+
+def generate_invoice_number():
+
+    today = datetime.date.today()
+
+    prefix = f"INV-{today.strftime('%Y%m%d')}"
+
+    response = (
+        supabase
+        .table("invoices")
+        .select("invoice_number")
+        .like(
+            "invoice_number",
+            f"{prefix}%"
+        )
+        .execute()
+    )
+
+
+    count = len(response.data) + 1
+
+
+    return f"{prefix}-{count:04d}"
 
 def add_invoice(
     invoice_number,
@@ -78,6 +103,28 @@ def add_invoice(
     payment_status,
     received_date
 ):
+
+    # -------- DUPLICATE CHECK --------
+
+    existing = (
+        supabase
+        .table("invoices")
+        .select("invoice_number")
+        .eq(
+            "invoice_number",
+            invoice_number
+        )
+        .execute()
+    )
+
+
+    if existing.data:
+
+        return
+
+
+
+    # -------- SAVE INVOICE --------
 
     supabase.table("invoices").insert(
         {
@@ -151,136 +198,6 @@ def delete_invoice(invoice_number):
             invoice_number
         ) \
         .execute()
-
-# ================= INVOICE HISTORY =================
-
-
-if page == "📄 Invoice History":
-
-
-    st.title(
-        "📄 Invoice History"
-    )
-
-
-    invoices = get_invoices()
-
-
-    if invoices:
-
-
-        invoice_df = pd.DataFrame(
-            invoices
-        )
-
-
-        st.dataframe(
-            invoice_df,
-            use_container_width=True,
-            hide_index=True
-        )
-
-
-        st.divider()
-
-
-        st.subheader(
-            "Delete Invoice"
-        )
-
-
-        invoice_numbers = [
-            row["invoice_number"]
-            for row in invoices
-        ]
-
-
-        selected_invoice = st.selectbox(
-            "Select Invoice",
-            ["Select Invoice"] + invoice_numbers
-        )
-
-
-        if "confirm_invoice_delete" not in st.session_state:
-
-            st.session_state.confirm_invoice_delete = False
-
-
-
-        if st.button(
-            "🗑️ Delete Invoice"
-        ):
-
-
-            if selected_invoice != "Select Invoice":
-
-                st.session_state.confirm_invoice_delete = True
-
-
-            else:
-
-                st.warning(
-                    "Please select an invoice"
-                )
-
-
-
-        if st.session_state.confirm_invoice_delete:
-
-
-            st.warning(
-                f"⚠️ Are you sure you want to delete invoice {selected_invoice}?"
-            )
-
-
-            c1, c2 = st.columns(2)
-
-
-            with c1:
-
-                if st.button(
-                    "✅ Yes, Delete"
-                ):
-
-
-                    delete_invoice(
-                        selected_invoice
-                    )
-
-
-                    st.session_state.confirm_invoice_delete = False
-
-
-                    st.success(
-                        "Invoice deleted successfully"
-                    )
-
-
-                    st.rerun()
-
-
-
-            with c2:
-
-                if st.button(
-                    "❌ Cancel"
-                ):
-
-
-                    st.session_state.confirm_invoice_delete = False
-
-
-                    st.rerun()
-
-
-
-    else:
-
-
-        st.info(
-            "No invoices created yet"
-        )
-
 
 
 # ---------------- ACCOUNT FUNCTIONS ----------------
@@ -799,22 +716,19 @@ if page == "🧾 Sales":
 
 
 
-    with col2:
+with col2:
 
+    invoice_number = generate_invoice_number()
 
-        invoice_number = generate_invoice_number()
+    st.text_input(
+        "Invoice Number",
+        value=invoice_number,
+        disabled=True
+    )
 
-
-        st.text_input(
-            "Invoice Number",
-            value=invoice_number,
-            disabled=True
-        )
-
-
-        due_date = st.date_input(
-            "Due Date"
-        )
+    due_date = st.date_input(
+        "Due Date"
+    )
 
 
 
