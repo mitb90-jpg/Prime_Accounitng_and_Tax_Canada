@@ -33,8 +33,8 @@ supabase: Client = create_client(
     SUPABASE_KEY
 )
 
-# ---------------- DATABASE FUNCTIONS ----------------
 
+# ---------------- DATABASE FUNCTIONS ----------------
 
 def add_client(name):
 
@@ -61,6 +61,7 @@ def get_clients():
         for row in response.data
     ]
 
+
 # ---------------- INVOICE FUNCTIONS ----------------
 
 import datetime
@@ -83,11 +84,11 @@ def generate_invoice_number():
         .execute()
     )
 
-
     count = len(response.data) + 1
 
-
     return f"{prefix}-{count:04d}"
+
+
 
 def add_invoice(
     invoice_number,
@@ -104,8 +105,6 @@ def add_invoice(
     received_date
 ):
 
-    # -------- DUPLICATE CHECK --------
-
     existing = (
         supabase
         .table("invoices")
@@ -119,12 +118,8 @@ def add_invoice(
 
 
     if existing.data:
-
         return
 
-
-
-    # -------- SAVE INVOICE --------
 
     supabase.table("invoices").insert(
         {
@@ -151,7 +146,7 @@ def add_invoice(
 
             "payment_status": payment_status,
 
-            "received_date": 
+            "received_date":
                 str(received_date)
                 if received_date
                 else None
@@ -174,7 +169,6 @@ def get_invoices():
         .execute()
     )
 
-
     return response.data
 
 
@@ -189,6 +183,8 @@ def delete_client(name):
         ) \
         .execute()
 
+
+
 def delete_invoice(invoice_number):
 
     supabase.table("invoices") \
@@ -198,33 +194,6 @@ def delete_invoice(invoice_number):
             invoice_number
         ) \
         .execute()
-
-
-# ---------------- ACCOUNT FUNCTIONS ----------------
-
-def get_accounts(client_name):
-
-    response = (
-        supabase
-        .table("accounts")
-        .select(
-            "account_name, account_type"
-        )
-        .eq(
-            "client_name",
-            client_name
-        )
-        .execute()
-    )
-
-
-    return [
-        (
-            row["account_name"],
-            row["account_type"]
-        )
-        for row in response.data
-    ]
 
 
 
@@ -270,34 +239,6 @@ def get_accounts(client_name):
         )
         for row in response.data
     ]
-
-
-
-# ---------------- ACCOUNT FUNCTIONS ----------------
-
-
-def get_accounts(client_name):
-
-    cursor.execute(
-        """
-        SELECT 
-            account_name,
-            account_type
-
-        FROM accounts
-
-        WHERE client_id =
-        (
-            SELECT id
-            FROM clients
-            WHERE client_name = ?
-        )
-        """,
-        (client_name,)
-    )
-
-
-    return cursor.fetchall()
 
 
 
@@ -716,23 +657,22 @@ if page == "🧾 Sales":
 
 
 
-with col2:
+    with col2:
 
-    invoice_number = generate_invoice_number()
+        invoice_number = generate_invoice_number()
 
-    st.text_input(
-        "Invoice Number",
-        value=invoice_number,
-        disabled=True
-    )
+        st.text_input(
+            "Invoice Number",
+            value=invoice_number,
+            disabled=True
+        )
 
-    due_date = st.date_input(
-        "Due Date"
-    )
+        due_date = st.date_input(
+            "Due Date"
+        )
 
 
-
-    st.divider()
+        st.divider()
 
 
     st.subheader(
