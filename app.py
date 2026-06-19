@@ -723,6 +723,14 @@ if page == "🧾 Sales":
             )
 
 
+            item_total = quantity * rate
+
+
+            st.info(
+                f"Item Total: ${item_total:,.2f}"
+            )
+
+
         add_item = st.form_submit_button(
             "➕ Add Item"
         )
