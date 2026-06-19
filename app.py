@@ -743,57 +743,15 @@ if page == "🧾 Sales":
         )
 
 
-        edited_items = st.data_editor(
+        st.dataframe(
             item_df,
             use_container_width=True,
-            hide_index=True,
-            num_rows="dynamic",
-            column_config={
-
-                "Description": st.column_config.TextColumn(
-                    "Description"
-                ),
-
-                "Quantity": st.column_config.NumberColumn(
-                    "Quantity",
-                    min_value=1,
-                    step=1
-                ),
-
-                "Rate": st.column_config.NumberColumn(
-                    "Rate",
-                    min_value=0.0,
-                    step=0.01
-                ),
-
-                "Amount": st.column_config.NumberColumn(
-                    "Amount",
-                    disabled=True
-                )
-            }
+            hide_index=True
         )
 
-
-        edited_items["Quantity"] = pd.to_numeric(
-            edited_items["Quantity"],
-            errors="coerce"
-        ).fillna(0)
-
-
-        edited_items["Rate"] = pd.to_numeric(
-            edited_items["Rate"],
-            errors="coerce"
-        ).fillna(0)
-
-
-        edited_items["Amount"] = (
-            edited_items["Quantity"]
-            *
-            edited_items["Rate"]
-        )
 
         amount = (
-            edited_items["Amount"]
+            item_df["Amount"]
             .sum()
         )
 
@@ -807,7 +765,6 @@ if page == "🧾 Sales":
     st.info(
         f"Service Amount: ${amount:,.2f}"
     )
-
 
 
     # -------- HST --------
