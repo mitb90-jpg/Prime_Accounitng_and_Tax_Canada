@@ -628,21 +628,31 @@ if page == "🧾 Sales":
     st.title("🧾 Sales & Invoice Management")
 
 
-    customer_name = st.selectbox(
-        "Customer",
-        ["Select Client"] + get_clients()
-    )
-
-
-    invoice_date = st.date_input(
-        "Invoice Date"
-    )
-
+# ---------- INVOICE BASIC DETAILS ----------
 
     col1, col2 = st.columns(2)
 
 
+    with col1:
+
+        customer_name = st.selectbox(
+            "Customer",
+            ["Select Client"] + get_clients()
+        )
+
+
     with col2:
+
+        invoice_date = st.date_input(
+            "Invoice Date"
+        )
+
+
+
+    col3, col4 = st.columns(2)
+
+
+    with col3:
 
         invoice_number = generate_invoice_number()
 
@@ -651,6 +661,9 @@ if page == "🧾 Sales":
             value=invoice_number,
             disabled=True
         )
+
+
+    with col4:
 
         due_date = st.date_input(
             "Due Date"
