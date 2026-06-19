@@ -1151,7 +1151,7 @@ if page == "🧾 Sales":
 
 
 
-        # SAVE DATABASE
+        # -------- SAVE INVOICE TO DATABASE --------
 
         add_invoice(
             invoice_number,
@@ -1169,19 +1169,19 @@ if page == "🧾 Sales":
         )
 
 
-        st.download_button(
-            label="⬇️ Download Invoice PDF",
-            data=buffer,
-            file_name=f"Invoice_{invoice_number}.pdf",
-            mime="application/pdf"
+        st.success(
+            "Invoice saved successfully ✅"
         )
 
 
-        # Prepare for next invoice
+        # clear for next invoice
 
         st.session_state.invoice_items = []
 
         st.rerun()
+
+
+
 
     # ================= INVOICE HISTORY =================
 
