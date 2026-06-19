@@ -717,19 +717,18 @@ if page == "🧾 Sales":
 
         content = []
 
-
         # -------- HEADER --------
 
         content.append(
             Paragraph(
-                "WORLD EYEWEAR",
+                "<font size=22 color='#1f7189'><b>Prime Accounting and Tax</b></font>",
                 styles["Title"]
             )
         )
 
         content.append(
             Paragraph(
-                "Sales Invoice",
+                "<font size=14 color='#666666'>Professional Invoice</font>",
                 styles["Heading2"]
             )
         )
@@ -737,7 +736,6 @@ if page == "🧾 Sales":
         content.append(
             Spacer(1, 20)
         )
-
 
         # -------- INVOICE DETAILS --------
 
@@ -748,28 +746,36 @@ if page == "🧾 Sales":
             ["Customer", customer_name]
         ]
 
-
         invoice_table = Table(
             invoice_info,
             colWidths=[120, 300]
         )
 
-
         invoice_table.setStyle(
             TableStyle([
-                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
-                ("BACKGROUND", (0,0), (0,-1), colors.lightgrey),
+                ("BACKGROUND", (0, 0), (0, -1),
+                 colors.HexColor("#8fd0e0")),
+
+                ("TEXTCOLOR", (0, 0), (0, -1),
+                 colors.white),
+
+                ("GRID", (0, 0), (-1, -1),
+                 1, colors.white),
+
+                ("FONTNAME", (0, 0), (0, -1),
+                 "Helvetica-Bold"),
+
+                ("ROWBACKGROUNDS",
+                 (1, 0), (-1, -1),
+                 [colors.whitesmoke, colors.lightgrey])
             ])
         )
 
-
         content.append(invoice_table)
 
-
         content.append(
-            Spacer(1,20)
+            Spacer(1, 20)
         )
-
 
         # -------- ITEMS --------
 
@@ -788,28 +794,43 @@ if page == "🧾 Sales":
             ]
         ]
 
-
         item_table = Table(
             item_data,
-            colWidths=[180,80,80,80]
+            colWidths=[180, 80, 80, 80]
         )
-
 
         item_table.setStyle(
             TableStyle([
-                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
-                ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+                ("BACKGROUND",
+                 (0, 0), (-1, 0),
+                 colors.HexColor("#1f7189")),
+
+                ("TEXTCOLOR",
+                 (0, 0), (-1, 0),
+                 colors.white),
+
+                ("FONTNAME",
+                 (0, 0), (-1, 0),
+                 "Helvetica-Bold"),
+
+                ("GRID",
+                 (0, 0), (-1, -1),
+                 1, colors.white),
+
+                ("ROWBACKGROUNDS",
+                 (0, 1), (-1, -1),
+                 [
+                     colors.HexColor("#d8eef5"),
+                     colors.white
+                 ])
             ])
         )
 
-
         content.append(item_table)
 
-
         content.append(
-            Spacer(1,20)
+            Spacer(1, 20)
         )
-
 
         # -------- TOTAL --------
 
@@ -824,28 +845,36 @@ if page == "🧾 Sales":
             ]
         ]
 
-
         total_table = Table(
             total_data,
-            colWidths=[300,100]
+            colWidths=[300, 100]
         )
-
 
         total_table.setStyle(
             TableStyle([
-                ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
-                ("BACKGROUND", (0,1), (-1,1), colors.lightgrey),
+                ("GRID",
+                 (0, 0), (-1, -1),
+                 1, colors.white),
+
+                ("BACKGROUND",
+                 (0, 1), (-1, 1),
+                 colors.HexColor("#1f7189")),
+
+                ("TEXTCOLOR",
+                 (0, 1), (-1, 1),
+                 colors.white),
+
+                ("FONTNAME",
+                 (0, 1), (-1, 1),
+                 "Helvetica-Bold")
             ])
         )
 
-
         content.append(total_table)
 
-
         content.append(
-            Spacer(1,30)
+            Spacer(1, 30)
         )
-
 
         content.append(
             Paragraph(
@@ -853,7 +882,6 @@ if page == "🧾 Sales":
                 styles["Normal"]
             )
         )
-
 
         doc.build(content)
 
