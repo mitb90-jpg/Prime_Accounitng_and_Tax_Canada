@@ -675,18 +675,13 @@ if page == "🧾 Sales":
         st.divider()
 
 
-    st.subheader(
-        "Invoice Items"
-    )
-
-
 # -------- MULTIPLE INVOICE ITEMS --------
 
 if "invoice_items" not in st.session_state:
     st.session_state.invoice_items = []
 
 
-
+st.subheader("Invoice Items")
 
 
 col1, col2, col3 = st.columns(3)
@@ -722,16 +717,18 @@ with col3:
 
 if st.button("➕ Add Item"):
 
-    st.session_state.invoice_items.append(
-        {
-            "Description": item_description,
-            "Quantity": quantity,
-            "Rate": rate,
-            "Amount": quantity * rate
-        }
-    )
+    if item_description.strip():
 
-    st.rerun()
+        st.session_state.invoice_items.append(
+            {
+                "Description": item_description,
+                "Quantity": quantity,
+                "Rate": rate,
+                "Amount": quantity * rate
+            }
+        )
+
+        st.rerun()
 
 
 
@@ -769,7 +766,7 @@ st.info(
 
 
 
-# -------- TAX & TOTAL --------
+# -------- TAX --------
 
 tax = st.number_input(
     "Tax",
@@ -777,7 +774,9 @@ tax = st.number_input(
 )
 
 
+
 total = amount + tax
+
 
 
 st.success(
@@ -788,13 +787,38 @@ st.success(
 st.divider()
 
 
+# -------- PAYMENT STATUS --------
+
+payment_status = st.selectbox(
+    "Status",
+    [
+        "Unpaid",
+        "Paid"
+    ]
+)
+
+
+if payment_status == "Paid":
+
+    received_date = st.date_input(
+        "Payment Received Date"
+    )
+
+else:
+
+    received_date = None
+
+
+
+st.divider()
+
+
+
 # -------- GENERATE INVOICE --------
 
 if st.button("🧾 Generate Invoice"):
 
-
     buffer = io.BytesIO()
-
 
     doc = SimpleDocTemplate(
         buffer,
@@ -803,7 +827,6 @@ if st.button("🧾 Generate Invoice"):
 
 
     styles = getSampleStyleSheet()
-
 
     content = []
 
