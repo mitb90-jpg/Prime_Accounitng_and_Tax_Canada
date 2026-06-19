@@ -792,10 +792,6 @@ if page == "🧾 Sales":
             edited_items["Rate"]
         )
 
-
-pass
-
-
         amount = (
             edited_items["Amount"]
             .sum()
