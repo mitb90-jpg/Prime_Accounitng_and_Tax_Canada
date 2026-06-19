@@ -787,6 +787,21 @@ st.success(
 
 st.divider()
 
+
+# -------- GENERATE INVOICE --------
+
+if st.button("🧾 Generate Invoice"):
+
+    buffer = io.BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        title="Prime Accounting Invoice"
+    )
+
+    # keep your existing PDF generation code here
+
+
     # ================= INVOICE HISTORY =================
 
 
