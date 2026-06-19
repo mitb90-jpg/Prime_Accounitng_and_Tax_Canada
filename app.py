@@ -1144,6 +1144,13 @@ if page == "🧾 Sales":
         buffer.seek(0)
 
 
+        st.download_button(
+            label="⬇️ Download Invoice PDF",
+            data=buffer,
+            file_name=f"Invoice_{invoice_number}.pdf",
+            mime="application/pdf"
+        )
+
 
         st.success(
             "Invoice generated successfully"
