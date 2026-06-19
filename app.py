@@ -644,7 +644,8 @@ if page == "🧾 Sales":
     with col1:
 
         item_description = st.text_input(
-            "Description"
+            "Description",
+            key="item_description"
         )
 
 
@@ -1238,14 +1239,17 @@ if page == "🧾 Sales":
         )
 
 
-        # clear for next invoice
+        # -------- CLEAR FOR NEW INVOICE --------
 
         st.session_state.invoice_items = []
 
+        for key in [
+            "item_description",
+            "current_invoice_number"
+        ]:
 
-        if "current_invoice_number" in st.session_state:
-
-            del st.session_state.current_invoice_number
+            if key in st.session_state:
+                del st.session_state[key]
 
 
         st.rerun()
