@@ -688,26 +688,34 @@ st.info(
 )
 
 
-if st.button("➕ Add Item", key="add_invoice_item"):
+if st.button(
+    "➕ Add Item",
+    key="add_invoice_item"
+):
 
-    new_item = {
-        "Description": item_description,
-        "Quantity": quantity,
-        "Rate": rate,
-        "Amount": quantity * rate
-    }
+    if item_description.strip():
+
+        new_item = {
+            "Description": item_description,
+            "Quantity": quantity,
+            "Rate": rate,
+            "Amount": quantity * rate
+        }
 
 
-    st.session_state.invoice_items.append(
-        new_item
-    )
+        st.session_state.invoice_items.append(
+            new_item
+        )
 
 
-    st.rerun()
+        st.rerun()
+
 
     else:
 
-        st.warning("Please enter description")
+        st.warning(
+            "Please enter description"
+        )
 
 
     # ---------- INVOICE BASIC DETAILS ----------
