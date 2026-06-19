@@ -628,6 +628,7 @@ if page == "🧾 Sales":
 
     st.title("🧾 Sales & Invoice Management")
 
+
     # -------- MULTIPLE INVOICE ITEMS --------
 
     if "invoice_items" not in st.session_state:
@@ -654,7 +655,8 @@ if page == "🧾 Sales":
         quantity = st.number_input(
             "Quantity",
             min_value=1,
-            value=1
+            value=1,
+            key="invoice_quantity"
         )
 
 
@@ -662,7 +664,8 @@ if page == "🧾 Sales":
 
         rate = st.number_input(
             "Rate",
-            min_value=0.0
+            min_value=0.0,
+            key="invoice_rate"
         )
 
 
@@ -1239,16 +1242,20 @@ if page == "🧾 Sales":
         )
 
 
-        # -------- CLEAR FOR NEW INVOICE --------
+        # CLEAR ALL INVOICE INPUTS
 
         st.session_state.invoice_items = []
 
+
         for key in [
             "item_description",
+            "invoice_quantity",
+            "invoice_rate",
             "current_invoice_number"
         ]:
 
             if key in st.session_state:
+
                 del st.session_state[key]
 
 
