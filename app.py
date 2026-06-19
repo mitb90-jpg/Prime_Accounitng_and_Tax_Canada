@@ -1144,6 +1144,13 @@ if page == "🧾 Sales":
         buffer.seek(0)
 
 
+        st.success(
+            "Invoice generated successfully"
+        )
+
+
+        # -------- DOWNLOAD INVOICE --------
+
         st.download_button(
             label="⬇️ Download Invoice PDF",
             data=buffer,
@@ -1152,13 +1159,7 @@ if page == "🧾 Sales":
         )
 
 
-        st.success(
-            "Invoice generated successfully"
-        )
-
-
-
-        # -------- SAVE INVOICE TO DATABASE --------
+        # -------- SAVE DATABASE --------
 
         add_invoice(
             invoice_number,
@@ -1179,13 +1180,6 @@ if page == "🧾 Sales":
         st.success(
             "Invoice saved successfully ✅"
         )
-
-
-        # clear for next invoice
-
-        st.session_state.invoice_items = []
-
-        st.rerun()
 
 
 
