@@ -753,29 +753,55 @@ if page == "🧾 Sales":
         )
 
 
-        # recalculate amount
-        item_df["Amount"] = (
-            item_df["Quantity"]
-            *
-            item_df["Rate"]
-        )
-
-
-        st.dataframe(
+        edited_items = st.data_editor(
             item_df,
             use_container_width=True,
-            hide_index=True
+            hide_index=True,
+            num_rows="dynamic",
+            column_config={
+
+                "Description": st.column_config.TextColumn(
+                    "Description"
+                ),
+
+                "Quantity": st.column_config.NumberColumn(
+                    "Quantity",
+                    min_value=1,
+                    step=1
+                ),
+
+                "Rate": st.column_config.NumberColumn(
+                    "Rate",
+                    min_value=0.0,
+                    step=0.01
+                ),
+
+                "Amount": st.column_config.NumberColumn(
+                    "Amount",
+                    disabled=True
+                )
+            }
         )
 
 
-        # update session with calculated amount
-        st.session_state.invoice_items = item_df.to_dict(
+        # recalculate amount after editing
+
+        edited_items["Amount"] = (
+            edited_items["Quantity"]
+            *
+            edited_items["Rate"]
+        )
+
+
+        # save edited values back
+
+        st.session_state.invoice_items = edited_items.to_dict(
             "records"
         )
 
 
         amount = (
-            item_df["Amount"]
+            edited_items["Amount"]
             .sum()
         )
 
