@@ -644,7 +644,8 @@ if page == "🧾 Sales":
     with col2:
 
         invoice_date = st.date_input(
-            "Invoice Date"
+            "Invoice Date",
+            format="DD-MMMM-YYYY"
         )
 
 
@@ -666,7 +667,8 @@ if page == "🧾 Sales":
     with col4:
 
         due_date = st.date_input(
-            "Due Date"
+            "Due Date",
+            format="DD-MMMM-YYYY"
         )
 
 
