@@ -144,23 +144,6 @@ def delete_client(name):
 
 # ---------------- ACCOUNT FUNCTIONS ----------------
 
-
-def add_account(
-    client_name,
-    account_name,
-    account_type
-):
-
-    supabase.table("accounts").insert(
-        {
-            "client_name": client_name,
-            "account_name": account_name,
-            "account_type": account_type
-        }
-    ).execute()
-
-
-
 def get_accounts(client_name):
 
     response = (
@@ -233,47 +216,6 @@ def get_accounts(client_name):
 
 
 # ---------------- ACCOUNT FUNCTIONS ----------------
-
-
-def add_account(
-    client_name,
-    account_name,
-    account_type
-):
-
-    cursor.execute(
-        """
-        SELECT id
-        FROM clients
-        WHERE client_name = ?
-        """,
-        (client_name,)
-    )
-
-
-    client_id = cursor.fetchone()[0]
-
-
-    cursor.execute(
-        """
-        INSERT INTO accounts
-        (
-            client_id,
-            account_name,
-            account_type
-        )
-        VALUES (?, ?, ?)
-        """,
-        (
-            client_id,
-            account_name,
-            account_type
-        )
-    )
-
-
-    conn.commit()
-
 
 
 def get_accounts(client_name):
@@ -1073,6 +1015,29 @@ if page == "🧾 Sales":
 
         st.success(
             "Invoice generated successfully"
+        )
+
+
+        # -------- SAVE INVOICE TO SUPABASE --------
+
+        add_invoice(
+            invoice_number,
+            customer_name,
+            invoice_date,
+            due_date,
+            item_description,
+            quantity,
+            rate,
+            amount,
+            tax,
+            total,
+            payment_status,
+            received_date
+        )
+
+
+        st.success(
+            "Invoice saved to database ✅"
         )
 
 
