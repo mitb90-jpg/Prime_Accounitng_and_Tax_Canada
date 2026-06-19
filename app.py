@@ -684,6 +684,7 @@ if page == "🧾 Sales":
     # -------- MULTIPLE INVOICE ITEMS --------
 
     if "invoice_items" not in st.session_state:
+
         st.session_state.invoice_items = []
 
 
@@ -697,11 +698,13 @@ if page == "🧾 Sales":
 
         col1, col2, col3 = st.columns(3)
 
+
         with col1:
 
             item_description = st.text_input(
                 "Description"
             )
+
 
         with col2:
 
@@ -711,12 +714,14 @@ if page == "🧾 Sales":
                 value=1
             )
 
+
         with col3:
 
             rate = st.number_input(
                 "Rate",
                 min_value=0.0
             )
+
 
         add_item = st.form_submit_button(
             "➕ Add Item"
@@ -736,8 +741,8 @@ if page == "🧾 Sales":
                 }
             )
 
-            
-            st.return()
+
+        st.rerun()
             
     # -------- DISPLAY / EDIT ITEMS --------
 
