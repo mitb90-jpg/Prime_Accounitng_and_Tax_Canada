@@ -726,6 +726,7 @@ else:
     received_date = None
 
 
+
 if st.button("🧾 Generate Invoice"):
 
     buffer = io.BytesIO()
@@ -752,17 +753,18 @@ if st.button("🧾 Generate Invoice"):
         )
     )
 
-        content.append(
-            Paragraph(
-                "<font size=14 color='#666666'>Professional Invoice</font>",
-                styles["Heading2"]
-            )
-        )
 
-        content.append(
-            Spacer(1, 20)
+    content.append(
+        Paragraph(
+            "<font size=14 color='#666666'>Professional Invoice</font>",
+            styles["Heading2"]
         )
+    )
 
+
+    content.append(
+        Spacer(1, 20)
+    )
         # -------- INVOICE DETAILS --------
 
         invoice_info = [
