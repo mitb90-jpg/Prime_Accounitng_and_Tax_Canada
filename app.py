@@ -655,13 +655,18 @@ if page == "🧾 Sales":
 
     with col3:
 
-        invoice_number = generate_invoice_number()
+    if "current_invoice_number" not in st.session_state:
+        st.session_state.current_invoice_number = generate_invoice_number()
 
-        st.text_input(
-            "Invoice Number",
-            value=invoice_number,
-            disabled=True
-        )
+
+    invoice_number = st.session_state.current_invoice_number
+
+
+    st.text_input(
+        "Invoice Number",
+        value=invoice_number,
+        disabled=True
+    )
 
 
     with col4:
@@ -731,7 +736,7 @@ if page == "🧾 Sales":
             )
     with st.form("invoice_item_form", clear_on_submit=True):
         
-            st.rerun()
+            
 
 
 
