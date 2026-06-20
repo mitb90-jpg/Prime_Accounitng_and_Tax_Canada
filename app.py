@@ -2320,20 +2320,26 @@ elif page == "🏠 Dashboard":
 
     with c3:
 
+        dashboard_unpaid_total = sum(
+            inv["total"]
+            for inv in dashboard_invoices
+            if inv["payment_status"] == "Unpaid"
+        )
+
         st.markdown(
             """
             <div class="card">
 
             <div class="card-title">
-            💰 Revenue
+            💰 Outstanding Total
             </div>
 
             <div class="card-number">
-            $0
+            ${:,.2f}
             </div>
 
             </div>
-            """,
+            """.format(dashboard_unpaid_total),
             unsafe_allow_html=True
         )
 
