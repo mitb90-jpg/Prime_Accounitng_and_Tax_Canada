@@ -2344,7 +2344,7 @@ elif page == "🏠 Dashboard":
             <div class="card">
 
             <div class="card-title">
-            ⚠️ 30+ Days Overdue Account
+            ⚠️ 30+ Days Overdue 
             </div>
 
             <div class="card-number">
