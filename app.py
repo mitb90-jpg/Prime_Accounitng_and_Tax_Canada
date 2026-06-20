@@ -2319,9 +2319,9 @@ elif page == "🏠 Dashboard":
             st.rerun()
 
 
-    with b:
-        if st.button("📄 Create Invoice", use_container_width=True):
-            st.session_state.page = "📄 Create Invoice"
+    with c:
+        if st.button("🧾 Create Invoice", use_container_width=True):
+            st.session_state.page = "🧾 Sales"
             st.rerun()
 
 
