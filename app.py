@@ -639,6 +639,13 @@ with col2:
     st.markdown("<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:25px; color:gray;'>Turning Transactions Into Insights</p>", unsafe_allow_html=True)
 
+    today_display = datetime.date.today().strftime("%A, %B %d, %Y")
+
+    st.markdown(
+        f"<p style='font-size:16px; color:#1f4e79; margin-top:-10px;'>👋 Welcome back — today is {today_display}</p>",
+        unsafe_allow_html=True
+    )
+
 
 st.sidebar.image("Logo.jpeg", width=70)
 
