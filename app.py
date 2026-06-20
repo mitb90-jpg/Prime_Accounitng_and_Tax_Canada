@@ -2139,19 +2139,6 @@ elif page == "🏠 Dashboard":
     st.write("")
 
 
-    if selected_client != "Select Client":
-
-        st.success(
-            f"Active Client: {selected_client}"
-        )
-
-    else:
-
-        st.info(
-            "Select a client to begin"
-        )
-
-
     st.write("")
 
 
