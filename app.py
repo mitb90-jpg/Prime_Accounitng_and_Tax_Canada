@@ -2346,20 +2346,27 @@ elif page == "🏠 Dashboard":
 
     with c4:
 
+        overdue_30_count = len([
+            inv for inv in dashboard_invoices
+            if inv["payment_status"] == "Unpaid"
+            and inv.get("invoice_date")
+            and (today - datetime.date.fromisoformat(inv["invoice_date"])).days > 30
+        ])
+
         st.markdown(
             """
             <div class="card">
 
             <div class="card-title">
-            💸 Free Card
+            ⚠️ 30+ Days Unpaid
             </div>
 
             <div class="card-number">
-            $0
+            {}
             </div>
 
             </div>
-            """,
+            """.format(overdue_30_count),
             unsafe_allow_html=True
         )
 
