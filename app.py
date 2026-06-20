@@ -631,7 +631,7 @@ if page == "👥 Clients":
             "No clients available to delete"
         )
 
-st.divider()
+    st.divider()
 
     st.subheader("📋 Client Profile")
 
