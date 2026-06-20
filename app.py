@@ -602,7 +602,7 @@ div.stButton > button:hover {
     background-color: #163a5c;
 }
 section[data-testid="stSidebar"] {
-    background-color: #ffffff;
+    background-color: #CAE9F5;
     border-right: 1px solid #e5e7eb;
 }
 section[data-testid="stSidebar"] * {
