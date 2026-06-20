@@ -51,7 +51,7 @@ def add_client(name, address, contact_number):
 
 
 
-def update_client(client_id, new_name, address, contact_number):
+def update_client(old_name, new_name, address, contact_number):
 
     supabase.table("clients") \
         .update(
@@ -61,7 +61,7 @@ def update_client(client_id, new_name, address, contact_number):
                 "contact_number": contact_number
             }
         ) \
-        .eq("id", client_id) \
+        .eq("client_name", old_name) \
         .execute()
 
 
@@ -71,12 +71,15 @@ def get_clients():
     response = (
         supabase
         .table("clients")
-        .select("id, client_name")
+        .select("client_name")
         .order("client_name")
         .execute()
     )
 
-    return response.data
+    return [
+        row["client_name"]
+        for row in response.data
+    ]
 
 
 def get_client_details(client_name):
@@ -86,18 +89,6 @@ def get_client_details(client_name):
         .table("clients")
         .select("*")
         .eq("client_name", client_name)
-        .execute()
-    )
-
-    return response.data[0] if response.data else None
-
-def get_client_details_by_id(client_id):
-
-    response = (
-        supabase
-        .table("clients")
-        .select("*")
-        .eq("id", client_id)
         .execute()
     )
 
@@ -286,13 +277,12 @@ def generate_invoice_pdf(invoice_number):
         ),
         Paragraph(
             "<font size=10 color='white'>Email: info@primetaxes.ca</font>"
-            "<br/><font size=10 color='white'>Website: Primetaxes.ca</font>"
-            "<br/><font size=10 color='white'>Instagram: Primetaxto</font>",
+            "<br/><font size=10 color='white'>Website: Primetaxes.ca</font>",
             styles["Normal"]
         ),
     ]]
 
-    contact_table = Table(contact_data, colWidths=[360, 150])
+    contact_table = Table(contact_data, colWidths=[330, 180])
     contact_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), TEAL),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -325,7 +315,7 @@ def generate_invoice_pdf(invoice_number):
         Paragraph(info_text, styles["Normal"]),
     ]]
 
-    bill_info_table = Table(bill_info_data, colWidths=[350, 160])
+    bill_info_table = Table(bill_info_data, colWidths=[260, 250])
     bill_info_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (0, 0), 0),
@@ -336,7 +326,7 @@ def generate_invoice_pdf(invoice_number):
 
     content.append(
         Paragraph(
-            f"<font size=10>&nbsp;&nbsp;<b>Invoice For:</b> {invoice.get('description', '')}</font>",
+            f"<font size=10><b>Invoice For:</b> {invoice.get('description', '')}</font>",
             styles["Normal"]
         )
     )
@@ -466,13 +456,13 @@ def get_invoices():
     return response.data
 
 
-def delete_client(client_id):
+def delete_client(name):
 
     supabase.table("clients") \
         .delete() \
         .eq(
-            "id",
-            client_id
+            "client_name",
+            name
         ) \
         .execute()
 
@@ -577,6 +567,9 @@ def format_amount(x):
 # ---------------- CSS ----------------
 st.markdown("""
 <style>
+.stApp {
+    background-color: #CAE9F5;
+}
 div.stDownloadButton > button {
     width: 100%;
     background-color: #1f4e79;
@@ -717,14 +710,6 @@ if page == "👥 Clients":
 
     clients = get_clients()
 
-    client_labels = [
-        f"{c['client_name']} (ID: {c['id']})"
-        for c in clients
-    ]
-
-    def get_client_id_from_label(label):
-        return int(label.split("ID: ")[1].rstrip(")"))
-
     if st.session_state.clients_active_tab == "Add Client":
 
         st.subheader("Add New Client")
@@ -743,9 +728,6 @@ if page == "👥 Clients":
 
         st.markdown("**Account Details (optional)**")
 
-        if "new_client_accounts" not in st.session_state:
-            st.session_state.new_client_accounts = []
-
         new_account_name = st.text_input(
             "Account Name",
             placeholder="Example: Scotia Bank",
@@ -758,27 +740,6 @@ if page == "👥 Clients":
             key="new_client_account_type"
         )
 
-        if st.button("➕ Add Account", key="add_pending_account"):
-
-            if new_account_name.strip():
-
-                st.session_state.new_client_accounts.append(
-                    {
-                        "Account Name": new_account_name,
-                        "Account Type": new_account_type
-                    }
-                )
-
-                st.rerun()
-
-        if st.session_state.new_client_accounts:
-
-            st.dataframe(
-                pd.DataFrame(st.session_state.new_client_accounts),
-                use_container_width=True,
-                hide_index=True
-            )
-
 
         if st.button("➕ Add Client"):
 
@@ -786,16 +747,9 @@ if page == "👥 Clients":
 
                 new_client_id = add_client(client_name, client_address, client_contact)
 
-                for acc in st.session_state.new_client_accounts:
+                if new_account_name.strip():
 
-                    add_account(
-                        new_client_id,
-                        client_name,
-                        acc["Account Name"],
-                        acc["Account Type"]
-                    )
-
-                st.session_state.new_client_accounts = []
+                    add_account(new_client_id, client_name, new_account_name, new_account_type)
 
                 st.success(
                     "Client Added Successfully"
@@ -822,24 +776,14 @@ if page == "👥 Clients":
 
             client_df = pd.DataFrame(all_clients_data)
 
-            client_df = client_df.rename(columns={
-                "id": "Client ID",
-                "client_name": "Client Name",
-                "address": "Address",
-                "contact_number": "Contact Number"
-            })
+            client_df = client_df.drop(columns=["id"])
 
             client_df.insert(0, "Sr. No", range(1, len(client_df) + 1))
 
             st.dataframe(
                 client_df,
-                hide_index=True,
-                column_config={
-                    "Sr. No": st.column_config.NumberColumn(
-                        "Sr. No",
-                        width="small"
-                    )
-                }
+                use_container_width=True,
+                hide_index=True
             )
 
             client_excel = io.BytesIO()
@@ -868,9 +812,9 @@ if page == "👥 Clients":
 
         if clients:
 
-            delete_client_label = st.selectbox(
+            delete_client_name = st.selectbox(
                 "Select Client",
-                options=["Select Client"] + client_labels,
+                options=["Select Client"] + clients,
                 index=0,
                 key="delete_client_dropdown"
             )
@@ -880,7 +824,7 @@ if page == "👥 Clients":
 
             if st.button("🗑️ Delete Client"):
 
-                if delete_client_label != "Select Client":
+                if delete_client_name != "Select Client":
                     st.session_state.confirm_delete = True
                 else:
                     st.warning("Please select a client first")
@@ -888,15 +832,14 @@ if page == "👥 Clients":
             if st.session_state.confirm_delete:
 
                 st.warning(
-                    f"⚠️ Are you sure you want to delete '{delete_client_label}'?"
+                    f"⚠️ Are you sure you want to delete '{delete_client_name}'?"
                 )
 
                 c1, c2 = st.columns(2)
 
                 with c1:
                     if st.button("✅ Yes, Delete"):
-                        delete_id = get_client_id_from_label(delete_client_label)
-                        delete_client(delete_id)
+                        delete_client(delete_client_name)
                         st.session_state.confirm_delete = False
                         st.success("Client Deleted")
                         st.rerun()
@@ -918,17 +861,15 @@ if page == "👥 Clients":
 
         if clients:
 
-            profile_client_label = st.selectbox(
+            profile_client = st.selectbox(
                 "Select Client to View Profile",
-                ["Select Client"] + client_labels,
+                ["Select Client"] + clients,
                 key="profile_client_select"
             )
 
-            if profile_client_label != "Select Client":
+            if profile_client != "Select Client":
 
-                profile_client_id = get_client_id_from_label(profile_client_label)
-
-                details = get_client_details_by_id(profile_client_id)
+                details = get_client_details(profile_client)
 
                 st.write(f"**Name:** {details['client_name']}")
                 st.write(f"**Address:** {details.get('address', '')}")
@@ -957,7 +898,7 @@ if page == "👥 Clients":
                     if st.button("💾 Save Changes", key="save_client_edit"):
 
                         update_client(
-                            profile_client_id,
+                            profile_client,
                             edit_name,
                             edit_address,
                             edit_contact
@@ -986,7 +927,7 @@ if page == "👥 Clients":
                 if st.button("➕ Add Account", key="profile_add_account"):
 
                     if account_name.strip():
-                        add_account(details["id"], details['client_name'], account_name, account_type)
+                        add_account(details["id"], profile_client, account_name, account_type)
                         st.success("Account Added Successfully")
                         st.rerun()
 
@@ -1023,22 +964,9 @@ if page == "🧾 Sales":
 
     with col1:
 
-        sales_clients = get_clients()
-
-        sales_client_labels = [
-            f"{c['client_name']} (ID: {c['id']})"
-            for c in sales_clients
-        ]
-
-        customer_label = st.selectbox(
+        customer_name = st.selectbox(
             "Customer",
-            ["Select Client"] + sales_client_labels
-        )
-
-        customer_name = (
-            customer_label.split(" (ID:")[0]
-            if customer_label != "Select Client"
-            else "Select Client"
+            ["Select Client"] + get_clients()
         )
 
     with col2:
@@ -2225,17 +2153,13 @@ elif page == "🏠 Dashboard":
         margin-top:0px;
     }
 
-   .card {
+    .card {
         background:white;
         padding:25px;
         border-radius:18px;
         border:1px solid #e5e7eb;
         box-shadow:0 4px 15px rgba(0,0,0,0.08);
         text-align:center;
-        height:140px;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
     }
 
     .card-title {
@@ -2273,8 +2197,6 @@ elif page == "🏠 Dashboard":
     st.write("")
 
 
-    today = datetime.date.today()
-
     c1, c2, c3, c4 = st.columns(4)
 
 
@@ -2299,86 +2221,60 @@ elif page == "🏠 Dashboard":
 
     with c2:
 
-        dashboard_invoices = get_invoices()
-
-        dashboard_unpaid_count = len([
-            inv for inv in dashboard_invoices
-            if inv["payment_status"] == "Unpaid"
-        ])
-
         st.markdown(
             """
             <div class="card">
 
             <div class="card-title">
-            📌 Unpaid Invoices
+            📄 Statements
             </div>
 
             <div class="card-number">
-            {}
+            0
             </div>
 
             </div>
-            """.format(dashboard_unpaid_count),
+            """,
             unsafe_allow_html=True
         )
 
 
     with c3:
 
-        overdue_30_invoices = [
-            inv for inv in dashboard_invoices
-            if inv["payment_status"] == "Unpaid"
-            and inv.get("invoice_date")
-            and (today - datetime.date.fromisoformat(inv["invoice_date"])).days > 30
-        ]
-
-        overdue_30_count = len(overdue_30_invoices)
-
-        overdue_30_total = sum(
-            inv["total"] for inv in overdue_30_invoices
-        )
-
         st.markdown(
             """
             <div class="card">
 
             <div class="card-title">
-            ⚠️ 30+ Days Overdue 
+            💰 Revenue
             </div>
 
             <div class="card-number">
-            ${:,.2f}
+            $0
             </div>
 
             </div>
-            """.format(overdue_30_total),
+            """,
             unsafe_allow_html=True
         )
 
 
     with c4:
 
-        dashboard_unpaid_total = sum(
-            inv["total"]
-            for inv in dashboard_invoices
-            if inv["payment_status"] == "Unpaid"
-        )
-
         st.markdown(
             """
             <div class="card">
 
             <div class="card-title">
-            💰 Unpaid Total
+            💸 Expenses
             </div>
 
             <div class="card-number">
-            ${:,.2f}
+            $0
             </div>
 
             </div>
-            """.format(dashboard_unpaid_total),
+            """,
             unsafe_allow_html=True
         )
 
@@ -2416,42 +2312,21 @@ elif page == "🏠 Dashboard":
     st.divider()
 
 
-    st.subheader("⏰ Upcoming Due Dates (Next 7 Days)")
+    st.subheader("📌 Recent Activity")
 
 
-    today = datetime.date.today()
-    week_later = today + datetime.timedelta(days=7)
-
-    upcoming_invoices = [
-        inv for inv in dashboard_invoices
-        if inv["payment_status"] == "Unpaid"
-        and inv.get("due_date")
-        and today <= datetime.date.fromisoformat(inv["due_date"]) <= week_later
-    ]
-
-    if upcoming_invoices:
-
-        upcoming_df = pd.DataFrame(upcoming_invoices)
-
-        upcoming_df = upcoming_df[
-            ["invoice_number", "client_name", "due_date", "total"]
+    empty_df = pd.DataFrame(
+        columns=[
+            "Client",
+            "Activity",
+            "Date",
+            "Status"
         ]
+    )
 
-        upcoming_df = upcoming_df.rename(columns={
-            "invoice_number": "Invoice Number",
-            "client_name": "Client Name",
-            "due_date": "Due Date",
-            "total": "Total"
-        })
 
-        upcoming_df["Total"] = upcoming_df["Total"].apply(format_amount)
-
-        st.dataframe(
-            upcoming_df,
-            use_container_width=True,
-            hide_index=True
-        )
-
-    else:
-
-        st.info("No invoices due in the next 7 days")
+    st.dataframe(
+        empty_df,
+        use_container_width=True,
+        hide_index=True
+    )
