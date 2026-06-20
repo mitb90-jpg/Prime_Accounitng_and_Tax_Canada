@@ -1482,7 +1482,7 @@ if page == "📄 Invoice History":
 
         invoice_df.insert(0, "Sr. No", range(1, len(invoice_df) + 1))
 
-        invoice_df = invoice_df.drop(columns=["quantity", "rate"])
+        invoice_df = invoice_df.drop(columns=["quantity", "rate","client_id"])
 
         invoice_df = invoice_df.rename(columns={
             "invoice_number": "Invoice Number",
@@ -1498,11 +1498,17 @@ if page == "📄 Invoice History":
             "created_at": "Created At"
         })
 
+        display_invoice_df = invoice_df.copy()
+
+        for col in ["Amount", "Tax", "Total"]:
+            display_invoice_df[col] = display_invoice_df[col].apply(format_amount)
+
         st.dataframe(
-            invoice_df,
+            display_invoice_df,
             use_container_width=True,
             hide_index=True
         )
+
         invoice_excel = io.BytesIO()
 
         with pd.ExcelWriter(invoice_excel, engine="openpyxl") as writer:
