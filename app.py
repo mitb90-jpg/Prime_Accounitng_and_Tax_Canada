@@ -335,13 +335,14 @@ def generate_invoice_pdf(invoice_number):
 
     # ================= ITEMS TABLE =================
 
-    item_data = [["Description", "Rate", "Discount", "Price"]]
+    item_data = [["Description", "Qty", "Rate", "Discount", "Price"]]
 
     for item in items:
         discount_val = item.get("discount", 0) or 0
 
         item_data.append([
             item["description"],
+            str(item["quantity"]),
             f"${item['rate']:,.2f}",
             f"${discount_val:,.2f}" if discount_val else "",
             f"${item['amount']:,.2f}"
@@ -350,9 +351,9 @@ def generate_invoice_pdf(invoice_number):
     # pad empty rows so the table always has a consistent height
     min_rows = 8
     while len(item_data) - 1 < min_rows:
-        item_data.append(["", "", "", "$0.00"])
+        item_data.append(["", "", "", "", "$0.00"])
 
-    item_table = Table(item_data, colWidths=[260, 80, 80, 90])
+    item_table = Table(item_data, colWidths=[210, 50, 80, 80, 90])
 
     item_style = [
         ("BACKGROUND", (0, 0), (-1, 0), LIGHT_BLUE),
@@ -367,8 +368,7 @@ def generate_invoice_pdf(invoice_number):
 
     for row_idx in range(1, len(item_data)):
         bg = LIGHT_BLUE_2 if row_idx % 2 == 1 else LIGHT_BLUE
-        item_style.append(("BACKGROUND", (0, row_idx), (0, row_idx), colors.white))
-        item_style.append(("BACKGROUND", (1, row_idx), (-1, row_idx), bg))
+        item_style.append(("BACKGROUND", (0, row_idx), (-1, row_idx), bg))
 
     item_table.setStyle(TableStyle(item_style))
 
