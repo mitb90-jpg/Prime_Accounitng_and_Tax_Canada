@@ -1482,6 +1482,22 @@ if page == "📄 Invoice History":
 
         invoice_df.insert(0, "Sr. No", range(1, len(invoice_df) + 1))
 
+        invoice_df = invoice_df.rename(columns={
+            "invoice_number": "Invoice Number",
+            "client_name": "Client Name",
+            "invoice_date": "Invoice Date",
+            "due_date": "Due Date",
+            "description": "Description",
+            "quantity": "Quantity",
+            "rate": "Rate",
+            "amount": "Amount",
+            "tax": "Tax",
+            "total": "Total",
+            "payment_status": "Payment Status",
+            "received_date": "Received Date",
+            "created_at": "Created At"
+        })
+
         st.dataframe(
             invoice_df,
             use_container_width=True,
