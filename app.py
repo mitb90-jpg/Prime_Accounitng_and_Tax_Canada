@@ -2293,20 +2293,27 @@ elif page == "🏠 Dashboard":
 
     with c2:
 
+        dashboard_invoices = get_invoices()
+
+        dashboard_unpaid_count = len([
+            inv for inv in dashboard_invoices
+            if inv["payment_status"] == "Unpaid"
+        ])
+
         st.markdown(
             """
             <div class="card">
 
             <div class="card-title">
-            📄 Statements
+            📌 Unpaid Invoices
             </div>
 
             <div class="card-number">
-            0
+            {}
             </div>
 
             </div>
-            """,
+            """.format(dashboard_unpaid_count),
             unsafe_allow_html=True
         )
 
