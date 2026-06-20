@@ -1503,6 +1503,19 @@ if page == "📄 Invoice History":
             use_container_width=True,
             hide_index=True
         )
+        invoice_excel = io.BytesIO()
+
+        with pd.ExcelWriter(invoice_excel, engine="openpyxl") as writer:
+            invoice_df.to_excel(writer, index=False, sheet_name="Invoices")
+
+        invoice_excel.seek(0)
+
+        st.download_button(
+            "⬇️ Export Invoice History",
+            data=invoice_excel,
+            file_name="Invoice_History.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 
         st.divider()
