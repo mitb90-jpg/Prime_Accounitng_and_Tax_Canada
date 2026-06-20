@@ -455,6 +455,10 @@ section[data-testid="stSidebar"] .stRadio label[data-checked="true"] p {
     color: #1f4e79 !important;
     font-weight: bold;
 }
+section[data-testid="stSidebar"] div.stButton > button {
+    color: white !important;
+    font-weight: bold;
+}
 </style>
 """, unsafe_allow_html=True)
 
