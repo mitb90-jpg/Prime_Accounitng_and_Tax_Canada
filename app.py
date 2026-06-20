@@ -447,27 +447,6 @@ with col2:
     st.markdown("<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:25px; color:gray;'>Turning Transactions Into Insights</p>", unsafe_allow_html=True)
 
-# ---------------- SIDEBAR ----------------
-
-company = st.sidebar.selectbox(
-    "Select Account",
-    ["Scotia Bank", "Triangle Master Card", "Visa - 6023", "Visa - 7866"]
-)
-
-
-# ---------------- CLIENT MANAGEMENT ----------------
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 👥 Client Management")
-
-
-clients = get_clients()
-
-
-selected_client = st.sidebar.selectbox(
-    "Select Client",
-    ["Select Client"] + clients
-)
 
 # ---------------- APP MENU ----------------
 
