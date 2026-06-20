@@ -476,7 +476,7 @@ with col2:
 st.sidebar.image("Logo.jpeg", width=70)
 
 st.sidebar.markdown(
-    "<h2 style='color:white; margin-top:0px;'>Prime Accounting</h2>",
+    "<h2 style='color:1f4e79; margin-top:0px;'>Prime Accounting</h2>",
     unsafe_allow_html=True
 )
 
