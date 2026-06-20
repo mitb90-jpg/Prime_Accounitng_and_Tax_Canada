@@ -434,6 +434,16 @@ div.stButton > button {
 div.stButton > button:hover {
     background-color: #163a5c;
 }
+section[data-testid="stSidebar"] {
+    background-color: #1f4e79;
+}
+section[data-testid="stSidebar"] * {
+    color: white;
+}
+section[data-testid="stSidebar"] .stRadio label {
+    font-size: 16px;
+    padding: 8px;
+}
 </style>
 """, unsafe_allow_html=True)
 
