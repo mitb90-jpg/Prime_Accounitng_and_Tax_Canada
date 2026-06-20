@@ -577,6 +577,10 @@ if page == "👥 Clients":
 
             client_df = pd.DataFrame(all_clients_data)
 
+            client_df = client_df.drop(columns=["id"])
+
+            client_df.insert(0, "Sr. No", range(1, len(client_df) + 1))
+
             st.dataframe(
                 client_df,
                 use_container_width=True,
