@@ -2269,6 +2269,8 @@ elif page == "🏠 Dashboard":
     st.write("")
 
 
+    today = datetime.date.today()
+
     c1, c2, c3, c4 = st.columns(4)
 
 
