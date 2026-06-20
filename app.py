@@ -2225,13 +2225,17 @@ elif page == "🏠 Dashboard":
         margin-top:0px;
     }
 
-    .card {
+   .card {
         background:white;
         padding:25px;
         border-radius:18px;
         border:1px solid #e5e7eb;
         box-shadow:0 4px 15px rgba(0,0,0,0.08);
         text-align:center;
+        height:140px;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
     }
 
     .card-title {
