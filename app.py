@@ -462,6 +462,18 @@ section[data-testid="stSidebar"] .stRadio label[data-checked="true"] p {
 </style>
 """, unsafe_allow_html=True)
 
+section[data-testid="stSidebar"] .stRadio input[type="radio"] {
+    display: none;
+}
+
+section[data-testid="stSidebar"] .stRadio > div {
+    gap: 4px;
+}
+
+section[data-testid="stSidebar"] .stRadio label {
+    cursor: pointer;
+}
+
 # ---------------- HEADER ----------------
 col1, col2 = st.columns([1, 6])
 
