@@ -2347,11 +2347,11 @@ elif page == "🏠 Dashboard":
             ⚠️ 30+ Days Overdue Account
             </div>
 
-            <div class="card-number">
+            <div style="font-size:35px; font-weight:normal; color:#1f4e79;">
             {}
             </div>
 
-            <div style="font-size:14px; color:#888; margin-top:5px;">
+            <div style="font-size:16px; font-weight:bold; color:#888; margin-top:5px;">
             ${:,.2f}
             </div>
 
