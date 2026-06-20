@@ -1469,6 +1469,10 @@ if page == "📄 Invoice History":
             invoices
         )
 
+        if "id" in invoice_df.columns:
+            invoice_df = invoice_df.drop(columns=["id"])
+
+        invoice_df.insert(0, "Sr. No", range(1, len(invoice_df) + 1))
 
         st.dataframe(
             invoice_df,
