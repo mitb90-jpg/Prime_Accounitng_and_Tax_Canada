@@ -2351,12 +2351,8 @@ elif page == "🏠 Dashboard":
             ${:,.2f}
             </div>
 
-            <div style="font-size:14px; color:#888; margin-top:5px;">
-            {} invoices
             </div>
-
-            </div>
-            """.format(overdue_30_total, overdue_30_count),
+            """.format(overdue_30_total),
             unsafe_allow_html=True
         )
 
