@@ -2397,21 +2397,42 @@ elif page == "🏠 Dashboard":
     st.divider()
 
 
-    st.subheader("📌 Recent Activity")
+    st.subheader("⏰ Upcoming Due Dates (Next 7 Days)")
 
 
-    empty_df = pd.DataFrame(
-        columns=[
-            "Client",
-            "Activity",
-            "Date",
-            "Status"
+    today = datetime.date.today()
+    week_later = today + datetime.timedelta(days=7)
+
+    upcoming_invoices = [
+        inv for inv in dashboard_invoices
+        if inv["payment_status"] == "Unpaid"
+        and inv.get("due_date")
+        and today <= datetime.date.fromisoformat(inv["due_date"]) <= week_later
+    ]
+
+    if upcoming_invoices:
+
+        upcoming_df = pd.DataFrame(upcoming_invoices)
+
+        upcoming_df = upcoming_df[
+            ["invoice_number", "client_name", "due_date", "total"]
         ]
-    )
 
+        upcoming_df = upcoming_df.rename(columns={
+            "invoice_number": "Invoice Number",
+            "client_name": "Client Name",
+            "due_date": "Due Date",
+            "total": "Total"
+        })
 
-    st.dataframe(
-        empty_df,
-        use_container_width=True,
-        hide_index=True
-    )
+        upcoming_df["Total"] = upcoming_df["Total"].apply(format_amount)
+
+        st.dataframe(
+            upcoming_df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    else:
+
+        st.info("No invoices due in the next 7 days")
