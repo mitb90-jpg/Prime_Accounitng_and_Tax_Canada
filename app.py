@@ -315,7 +315,7 @@ def generate_invoice_pdf(invoice_number):
         Paragraph(info_text, styles["Normal"]),
     ]]
 
-    bill_info_table = Table(bill_info_data, colWidths=[260, 250])
+    bill_info_table = Table(bill_info_data, colWidths=[330, 180])
     bill_info_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (0, 0), 0),
