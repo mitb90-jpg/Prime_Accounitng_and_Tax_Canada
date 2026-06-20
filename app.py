@@ -2326,32 +2326,6 @@ elif page == "🏠 Dashboard":
 
     with c3:
 
-        dashboard_unpaid_total = sum(
-            inv["total"]
-            for inv in dashboard_invoices
-            if inv["payment_status"] == "Unpaid"
-        )
-
-        st.markdown(
-            """
-            <div class="card">
-
-            <div class="card-title">
-            💰 Outstanding Total
-            </div>
-
-            <div class="card-number">
-            ${:,.2f}
-            </div>
-
-            </div>
-            """.format(dashboard_unpaid_total),
-            unsafe_allow_html=True
-        )
-
-
-    with c4:
-
         overdue_30_invoices = [
             inv for inv in dashboard_invoices
             if inv["payment_status"] == "Unpaid"
@@ -2370,7 +2344,7 @@ elif page == "🏠 Dashboard":
             <div class="card">
 
             <div class="card-title">
-            ⚠️ 30+ Days & Overdue Balance 
+            ⚠️ 30+ Days Unpaid
             </div>
 
             <div class="card-number">
@@ -2383,6 +2357,32 @@ elif page == "🏠 Dashboard":
 
             </div>
             """.format(overdue_30_count, overdue_30_total),
+            unsafe_allow_html=True
+        )
+
+
+    with c4:
+
+        dashboard_unpaid_total = sum(
+            inv["total"]
+            for inv in dashboard_invoices
+            if inv["payment_status"] == "Unpaid"
+        )
+
+        st.markdown(
+            """
+            <div class="card">
+
+            <div class="card-title">
+            💰 Unpaid Total
+            </div>
+
+            <div class="card-number">
+            ${:,.2f}
+            </div>
+
+            </div>
+            """.format(dashboard_unpaid_total),
             unsafe_allow_html=True
         )
 
