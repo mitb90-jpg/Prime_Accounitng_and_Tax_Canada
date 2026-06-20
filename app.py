@@ -277,7 +277,8 @@ def generate_invoice_pdf(invoice_number):
         ),
         Paragraph(
             "<font size=10 color='white'>Email: info@primetaxes.ca</font>"
-            "<br/><font size=10 color='white'>Website: Primetaxes.ca</font>",
+            "<br/><font size=10 color='white'>Website: Primetaxes.ca</font>"
+            "<br/><font size=10 color='white'>Instagram: Primetaxto</font>",
             styles["Normal"]
         ),
     ]]
