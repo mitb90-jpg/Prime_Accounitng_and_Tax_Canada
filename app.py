@@ -548,6 +548,8 @@ if page == "👥 Clients":
 
     st.divider()
 
+    clients = get_clients()
+
     if st.session_state.clients_active_tab == "Add Client":
 
         st.subheader("Add New Client")
@@ -601,7 +603,6 @@ if page == "👥 Clients":
 
         st.subheader("Existing Clients")
 
-        clients = get_clients()
 
         if clients:
 
