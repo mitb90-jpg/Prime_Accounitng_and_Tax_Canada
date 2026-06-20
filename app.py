@@ -2348,27 +2348,37 @@ elif page == "🏠 Dashboard":
 
     with c4:
 
-        overdue_30_count = len([
+        overdue_30_invoices = [
             inv for inv in dashboard_invoices
             if inv["payment_status"] == "Unpaid"
             and inv.get("invoice_date")
             and (today - datetime.date.fromisoformat(inv["invoice_date"])).days > 30
-        ])
+        ]
+
+        overdue_30_count = len(overdue_30_invoices)
+
+        overdue_30_total = sum(
+            inv["total"] for inv in overdue_30_invoices
+        )
 
         st.markdown(
             """
             <div class="card">
 
             <div class="card-title">
-            ⚠️ 30+ Days Unpaid
+            ⚠️ 30+ Days & Overdue Balance 
             </div>
 
             <div class="card-number">
             {}
             </div>
 
+            <div style="font-size:14px; color:#888; margin-top:5px;">
+            ${:,.2f}
             </div>
-            """.format(overdue_30_count),
+
+            </div>
+            """.format(overdue_30_count, overdue_30_total),
             unsafe_allow_html=True
         )
 
