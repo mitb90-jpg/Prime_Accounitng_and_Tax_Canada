@@ -1329,12 +1329,17 @@ if page == "🧾 Sales":
             for item in st.session_state.invoice_items
         )
 
+        item_descriptions = ", ".join(
+            item["Description"]
+            for item in st.session_state.invoice_items
+        )
+
         add_invoice(
             invoice_number,
             customer_name,
             invoice_date,
             due_date,
-            str(st.session_state.invoice_items),
+            item_descriptions,
             total_quantity,
             0,
             amount,
