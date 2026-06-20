@@ -2344,19 +2344,19 @@ elif page == "🏠 Dashboard":
             <div class="card">
 
             <div class="card-title">
-            ⚠️ 30+ Days Overdue Account
+            ⚠️ 30+ Days Unpaid
             </div>
 
-            <div style="font-size:35px; font-weight:normal; color:#1f4e79;">
-            {}
-            </div>
-
-            <div style="font-size:16px; font-weight:bold; color:#888; margin-top:5px;">
+            <div class="card-number">
             ${:,.2f}
             </div>
 
+            <div style="font-size:14px; color:#888; margin-top:5px;">
+            {} invoices
             </div>
-            """.format(overdue_30_count, overdue_30_total),
+
+            </div>
+            """.format(overdue_30_total, overdue_30_count),
             unsafe_allow_html=True
         )
 
