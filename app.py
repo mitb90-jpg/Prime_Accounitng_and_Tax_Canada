@@ -529,12 +529,26 @@ if page == "👥 Clients":
 
     st.title("👥 Client Management")
 
-    tab1, tab2, tab3 = st.tabs(
-        ["📋 All Clients", "➕ Add Client", "👤 Client Profile"]
-    )
+    if "clients_active_tab" not in st.session_state:
+        st.session_state.clients_active_tab = "All Clients"
 
+    tab_col1, tab_col2, tab_col3 = st.columns(3)
 
-    with tab2:
+    with tab_col1:
+        if st.button("📋 All Clients", use_container_width=True):
+            st.session_state.clients_active_tab = "All Clients"
+
+    with tab_col2:
+        if st.button("➕ Add Client", use_container_width=True):
+            st.session_state.clients_active_tab = "Add Client"
+
+    with tab_col3:
+        if st.button("👤 Client Profile", use_container_width=True):
+            st.session_state.clients_active_tab = "Client Profile"
+
+    st.divider()
+
+    if st.session_state.clients_active_tab == "Add Client":
 
         st.subheader("Add New Client")
 
@@ -583,10 +597,7 @@ if page == "👥 Clients":
 
 
 
-    st.divider()
-
-
-    with tab1:
+    if st.session_state.clients_active_tab == "All Clients":
 
         st.subheader("Existing Clients")
 
@@ -683,7 +694,7 @@ if page == "👥 Clients":
                 "No clients available to delete"
             )
 
-    with tab3:
+    if st.session_state.clients_active_tab == "Client Profile":
 
         st.subheader("👤 Client Profile")
 
@@ -2295,22 +2306,21 @@ elif page == "🏠 Dashboard":
 
 
     with a:
-        st.button(
-            "👥 Manage Clients",
-            use_container_width=True
-        )
+        if st.button("➕ Add Client", use_container_width=True):
+            st.session_state.page = "👥 Clients"
+            st.session_state.clients_active_tab = "Add Client"
+            st.rerun()
 
 
     with b:
-        st.button(
-            "📂 Upload Statement",
-            use_container_width=True
-        )
+        if st.button("📂 Upload Statement", use_container_width=True):
+            st.session_state.page = "📊 Reports"
+            st.rerun()
 
 
     with c:
         st.button(
-            "📊 View Reports",
+            "📄 Unpaid Invoices",
             use_container_width=True
         )
 
