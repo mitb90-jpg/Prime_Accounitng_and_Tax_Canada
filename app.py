@@ -2351,7 +2351,7 @@ elif page == "🏠 Dashboard":
             <div class="card">
 
             <div class="card-title">
-            💸 Expenses
+            💸 Free Card
             </div>
 
             <div class="card-number">
