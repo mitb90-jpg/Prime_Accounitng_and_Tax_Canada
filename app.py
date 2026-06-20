@@ -327,7 +327,7 @@ def generate_invoice_pdf(invoice_number):
 
     content.append(
         Paragraph(
-            f"<font size=10><b>Invoice For:</b> {invoice.get('description', '')}</font>",
+            f"<font size=10>&nbsp;&nbsp;<b>Invoice For:</b> {invoice.get('description', '')}</font>",
             styles["Normal"]
         )
     )
