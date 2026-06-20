@@ -726,6 +726,9 @@ if page == "👥 Clients":
 
         st.markdown("**Account Details (optional)**")
 
+        if "new_client_accounts" not in st.session_state:
+            st.session_state.new_client_accounts = []
+
         new_account_name = st.text_input(
             "Account Name",
             placeholder="Example: Scotia Bank",
@@ -738,6 +741,27 @@ if page == "👥 Clients":
             key="new_client_account_type"
         )
 
+        if st.button("➕ Add Account", key="add_pending_account"):
+
+            if new_account_name.strip():
+
+                st.session_state.new_client_accounts.append(
+                    {
+                        "Account Name": new_account_name,
+                        "Account Type": new_account_type
+                    }
+                )
+
+                st.rerun()
+
+        if st.session_state.new_client_accounts:
+
+            st.dataframe(
+                pd.DataFrame(st.session_state.new_client_accounts),
+                use_container_width=True,
+                hide_index=True
+            )
+
 
         if st.button("➕ Add Client"):
 
@@ -745,9 +769,16 @@ if page == "👥 Clients":
 
                 new_client_id = add_client(client_name, client_address, client_contact)
 
-                if new_account_name.strip():
+                for acc in st.session_state.new_client_accounts:
 
-                    add_account(new_client_id, client_name, new_account_name, new_account_type)
+                    add_account(
+                        new_client_id,
+                        client_name,
+                        acc["Account Name"],
+                        acc["Account Type"]
+                    )
+
+                st.session_state.new_client_accounts = []
 
                 st.success(
                     "Client Added Successfully"
