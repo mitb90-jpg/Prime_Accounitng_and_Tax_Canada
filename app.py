@@ -49,6 +49,21 @@ def add_client(name, address, contact_number):
 
 
 
+def update_client(old_name, new_name, address, contact_number):
+
+    supabase.table("clients") \
+        .update(
+            {
+                "client_name": new_name,
+                "address": address,
+                "contact_number": contact_number
+            }
+        ) \
+        .eq("client_name", old_name) \
+        .execute()
+
+
+
 def get_clients():
 
     response = (
@@ -661,13 +676,46 @@ if page == "👥 Clients":
             key="profile_client_select"
         )
 
-        if profile_client != "Select Client":
+    if profile_client != "Select Client":
 
             details = get_client_details(profile_client)
 
             st.write(f"**Name:** {details['client_name']}")
             st.write(f"**Address:** {details.get('address', '')}")
             st.write(f"**Contact Number:** {details.get('contact_number', '')}")
+
+            with st.expander("✏️ Edit Client Details"):
+
+                edit_name = st.text_input(
+                    "Client Name",
+                    value=details['client_name'],
+                    key="edit_client_name"
+                )
+
+                edit_address = st.text_input(
+                    "Address",
+                    value=details.get('address', ''),
+                    key="edit_client_address"
+                )
+
+                edit_contact = st.text_input(
+                    "Contact Number",
+                    value=details.get('contact_number', ''),
+                    key="edit_client_contact"
+                )
+
+                if st.button("💾 Save Changes", key="save_client_edit"):
+
+                    update_client(
+                        profile_client,
+                        edit_name,
+                        edit_address,
+                        edit_contact
+                    )
+
+                    st.success("Client Updated Successfully")
+
+                    st.rerun()
 
             st.divider()
 
