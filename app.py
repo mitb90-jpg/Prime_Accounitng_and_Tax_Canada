@@ -796,6 +796,7 @@ if page == "👥 Clients":
 if page == "🧾 Sales":
 
     st.title("🧾 Sales & Invoice Management")
+    st.subheader("Create Invoice")
 
     # ---------- INVOICE BASIC DETAILS ----------
 
