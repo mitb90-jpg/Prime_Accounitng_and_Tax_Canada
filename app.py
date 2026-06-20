@@ -37,11 +37,13 @@ supabase: Client = create_client(
 
 # ---------------- DATABASE FUNCTIONS ----------------
 
-def add_client(name):
+def add_client(name, address, contact_number):
 
     supabase.table("clients").insert(
         {
-            "client_name": name
+            "client_name": name,
+            "address": address,
+            "contact_number": contact_number
         }
     ).execute()
 
@@ -61,6 +63,19 @@ def get_clients():
         row["client_name"]
         for row in response.data
     ]
+
+
+def get_client_details(client_name):
+
+    response = (
+        supabase
+        .table("clients")
+        .select("*")
+        .eq("client_name", client_name)
+        .execute()
+    )
+
+    return response.data[0] if response.data else None
 
 
 # ---------------- INVOICE FUNCTIONS ----------------
@@ -455,8 +470,7 @@ page = st.sidebar.radio(
     "📋 Navigation",
     [
         "🏠 Dashboard",
-        "👥 Clients",
-        "🏦 Accounts",
+        "👥 Clients",        
         "🧾 Sales",
         "📄 Invoice History",
         "📊 Reports"
@@ -476,12 +490,20 @@ if page == "👥 Clients":
         "Client Name"
     )
 
+    client_address = st.text_input(
+        "Address"
+    )
+
+    client_contact = st.text_input(
+        "Contact Number"
+    )
+
 
     if st.button("➕ Add Client"):
 
         if client_name.strip():
 
-            add_client(client_name)
+            add_client(client_name, client_address, client_contact)
 
             st.success(
                 "Client Added Successfully"
@@ -609,108 +631,60 @@ if page == "👥 Clients":
             "No clients available to delete"
         )
 
-# ================= ACCOUNT PAGE =================
+st.divider()
 
-if page == "🏦 Accounts":
+    st.subheader("📋 Client Profile")
 
-    st.title("🏦 Account Management")
+    if clients:
 
-
-    clients = get_clients()
-
-
-    if not clients:
-
-        st.info(
-            "Please add a client first"
-        )
-
-    else:
-
-
-        selected_client_account = st.selectbox(
-            "Select Client",
+        profile_client = st.selectbox(
+            "Select Client to View Profile",
             ["Select Client"] + clients,
-            key="account_client_select"
+            key="profile_client_select"
         )
 
+        if profile_client != "Select Client":
 
-        if selected_client_account != "Select Client":
+            details = get_client_details(profile_client)
 
-
-            st.success(
-                f"Active Client: {selected_client_account}"
-            )
-
+            st.write(f"**Name:** {details['client_name']}")
+            st.write(f"**Address:** {details.get('address', '')}")
+            st.write(f"**Contact Number:** {details.get('contact_number', '')}")
 
             st.divider()
 
-
-            st.subheader("Add New Account")
-
+            st.subheader("🏦 Accounts")
 
             account_name = st.text_input(
                 "Account Name",
-                placeholder="Example: Scotia Bank"
+                placeholder="Example: Scotia Bank",
+                key="profile_account_name"
             )
-
 
             account_type = st.selectbox(
                 "Account Type",
-                [
-                    "Bank Account",
-                    "Credit Card"
-                ]
+                ["Bank Account", "Credit Card"],
+                key="profile_account_type"
             )
 
-
-
-            if st.button(
-                "➕ Add Account"
-            ):
-
+            if st.button("➕ Add Account", key="profile_add_account"):
 
                 if account_name.strip():
 
+                    add_account(profile_client, account_name, account_type)
 
-                    add_account(
-                        selected_client_account,
-                        account_name,
-                        account_type
-                    )
-
-
-                    st.success(
-                        "Account Added Successfully"
-                    )
-
+                    st.success("Account Added Successfully")
 
                     st.rerun()
 
-
-
-            st.divider()
-
-
-            st.subheader("Existing Accounts")
-
-
-            accounts = get_accounts(
-                selected_client_account
-            )
-
+            accounts = get_accounts(profile_client)
 
             if accounts:
 
-
                 account_df = pd.DataFrame(
                     accounts,
-                    columns=[
-                        "Account Name",
-                        "Account Type"
-                    ]
+                    columns=["Account Name", "Account Type"]
                 )
-
 
                 st.dataframe(
                     account_df,
@@ -718,12 +692,10 @@ if page == "🏦 Accounts":
                     hide_index=True
                 )
 
-
             else:
 
-                st.info(
-                    "No accounts added for this client"
-                )
+                st.info("No accounts added for this client")
+
 
 # ================= SALES PAGE =================
 
