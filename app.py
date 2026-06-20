@@ -438,11 +438,9 @@ section[data-testid="stSidebar"] {
     background-color: #ffffff;
     border-right: 1px solid #e5e7eb;
 }
-
 section[data-testid="stSidebar"] * {
     color: #333333;
 }
-
 section[data-testid="stSidebar"] .stRadio label {
     font-size: 16px;
     padding: 10px 14px;
@@ -450,28 +448,15 @@ section[data-testid="stSidebar"] .stRadio label {
     margin-bottom: 4px;
     display: block;
 }
-
 section[data-testid="stSidebar"] .stRadio label[data-checked="true"] {
     background-color: #eaf1fb;
 }
-
 section[data-testid="stSidebar"] .stRadio label[data-checked="true"] p {
     color: #1f4e79 !important;
     font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
-
-section[data-testid="stSidebar"] .stRadio input[type="radio"] {
-    opacity: 0;
-    position: absolute;
-}
-
-section[data-testid="stSidebar"] .stRadio label {
-    cursor: pointer;
-    position: relative;
-    padding-left: 14px;
-}
 
 # ---------------- HEADER ----------------
 col1, col2 = st.columns([1, 6])
