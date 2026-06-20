@@ -557,15 +557,34 @@ if page == "👥 Clients":
 
     if clients:
 
-        client_df = pd.DataFrame(
-            clients,
-            columns=["Client Name"]
-        )
+        all_clients_data = (
+            supabase
+            .table("clients")
+            .select("*")
+            .order("client_name")
+            .execute()
+        ).data
+
+        client_df = pd.DataFrame(all_clients_data)
 
         st.dataframe(
             client_df,
             use_container_width=True,
             hide_index=True
+        )
+
+        client_excel = io.BytesIO()
+
+        with pd.ExcelWriter(client_excel, engine="openpyxl") as writer:
+            client_df.to_excel(writer, index=False, sheet_name="Clients")
+
+        client_excel.seek(0)
+
+        st.download_button(
+            "⬇️ Export Clients Database",
+            data=client_excel,
+            file_name="Clients_Database.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
     else:
