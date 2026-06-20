@@ -2237,6 +2237,21 @@ elif page == "🏠 Dashboard":
         flex-direction:column;
         justify-content:center;
     }
+    .card-blue {
+        background:#e8f1fb;
+    }
+
+    .card-amber {
+        background:#fef3e0;
+    }
+
+    .card-red {
+        background:#fdeaea;
+    }
+
+    .card-teal {
+        background:#e3f4f4;
+    }
 
     .card-title {
         font-size:18px;
@@ -2282,7 +2297,7 @@ elif page == "🏠 Dashboard":
 
         st.markdown(
             """
-            <div class="card">
+            <div class="card card-blue">
             <div class="card-title">
             👥 Clients
             </div>
@@ -2309,6 +2324,8 @@ elif page == "🏠 Dashboard":
         st.markdown(
             """
             <div class="card">
+
+            <div class="card card-amber">
 
             <div class="card-title">
             📌 Unpaid Invoices
@@ -2341,10 +2358,10 @@ elif page == "🏠 Dashboard":
 
         st.markdown(
             """
-            <div class="card">
+            <div class="card card-red">
 
             <div class="card-title">
-            ⚠️ 30+ Days Overdue 
+            ⚠️ 30+ Days Overdue
             </div>
 
             <div class="card-number">
@@ -2367,7 +2384,7 @@ elif page == "🏠 Dashboard":
 
         st.markdown(
             """
-            <div class="card">
+            <div class="card card-teal">
 
             <div class="card-title">
             💰 Unpaid Total
