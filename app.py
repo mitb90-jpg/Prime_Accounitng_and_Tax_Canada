@@ -1482,14 +1482,14 @@ if page == "📄 Invoice History":
 
         invoice_df.insert(0, "Sr. No", range(1, len(invoice_df) + 1))
 
+        invoice_df = invoice_df.drop(columns=["quantity", "rate"])
+
         invoice_df = invoice_df.rename(columns={
             "invoice_number": "Invoice Number",
             "client_name": "Client Name",
             "invoice_date": "Invoice Date",
             "due_date": "Due Date",
             "description": "Description",
-            "quantity": "Quantity",
-            "rate": "Rate",
             "amount": "Amount",
             "tax": "Tax",
             "total": "Total",
