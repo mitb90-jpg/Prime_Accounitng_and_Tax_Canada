@@ -2418,7 +2418,7 @@ elif page == "🏠 Dashboard":
 
     st.divider()
 
-    st.subheader("📊 Paid vs Unpaid")
+    st.subheader("📊 Paid vs Unpaid Invoices")
 
     paid_total = sum(
         inv["total"] for inv in dashboard_invoices
