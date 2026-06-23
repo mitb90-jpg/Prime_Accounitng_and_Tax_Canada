@@ -2185,7 +2185,7 @@ if page == "📊 Reports":
     with triangle_col1:
         with st.container(key="uploader_triangle_container"):
             uploaded_triangle_pdf = st.file_uploader(
-                "Upload Triangle Mastercard Statement PDF(s)",
+                "Upload Triangle Mastercard 7133 Statements PDF(s)",
                 type=["pdf"],
                 accept_multiple_files=True,
                 key=f"triangle_pdf_uploader_{st.session_state.triangle_uploader_version}"
