@@ -538,23 +538,139 @@ def get_accounts(client_id):
 
 
 # ---------------- FORMAT FUNCTION ----------------
-
-
 def format_amount(x):
-
     try:
-
         if pd.isna(x):
             return ""
-
         if isinstance(x, (int, float)):
             return f"{x:,.2f}"
-
         return x
-
     except:
-
         return x
+
+# ---------------- VISA STATEMENT PARSER ----------------
+
+def parse_visa_statement(pdf_file):
+    """
+    Parses an RBC Visa credit card statement PDF.
+    Returns a DataFrame with columns: Date, Description, Debit, Credit
+    """
+
+    import pdfplumber
+
+    transactions = []
+    current = None
+
+    with pdfplumber.open(pdf_file) as pdf:
+
+        for page in pdf.pages:
+
+            started = False
+
+            words = page.extract_words()
+
+            rows = {}
+
+            for w in words:
+                y = round(float(w["top"]), 1)
+                rows.setdefault(y, []).append(w)
+
+            for y in sorted(rows):
+
+                line_words = sorted(rows[y], key=lambda x: float(x["x0"]))
+
+                text = " ".join(w["text"] for w in line_words)
+                header_text = text.upper()
+
+                if (
+                    "TRANSACTION" in header_text
+                    and "POSTING" in header_text
+                ):
+                    started = True
+                    continue
+
+                if not started:
+                    continue
+
+                if (
+                    "TOTAL ACCOUNT BALANCE" in header_text
+                    or "TIME TO PAY" in header_text
+                    or "INTEREST RATE CHART" in header_text
+                ):
+                    started = False
+                    continue
+
+                if not started:
+                    continue
+
+                if header_text.strip() in ("DATE DATE",):
+                    continue
+
+                first_word = line_words[0]["text"]
+
+                is_date_start = bool(
+                    re.match(r"^(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)$", first_word.upper())
+                )
+
+                if is_date_start and len(line_words) >= 2:
+
+                    if current:
+                        transactions.append(current)
+
+                    trans_date = line_words[0]["text"]
+                    post_date = line_words[1]["text"] if len(line_words) > 1 else ""
+
+                    current = {
+                        "Date": trans_date,
+                        "Post Date": post_date,
+                        "Description": "",
+                        "Amount": ""
+                    }
+
+                    for w in line_words[2:]:
+
+                        x = float(w["x0"])
+                        value = w["text"]
+
+                        if x >= 300:
+                            current["Amount"] += value
+                        else:
+                            current["Description"] += " " + value
+
+                else:
+
+                    if re.fullmatch(r"\d{15,}", first_word):
+                        continue
+
+                    if current:
+                        current["Description"] += " " + text
+
+            if current:
+                transactions.append(current)
+                current = None
+
+    df = pd.DataFrame(transactions)
+
+    if df.empty:
+        return df
+
+    df["Description"] = df["Description"].str.strip()
+
+    df["Amount"] = (
+        df["Amount"]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+    )
+
+    df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce").fillna(0)
+
+    df["Debit"] = df["Amount"].apply(lambda x: x if x > 0 else 0)
+    df["Credit"] = df["Amount"].apply(lambda x: abs(x) if x < 0 else 0)
+
+    df = df.drop(columns=["Amount"])
+
+    return df
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
