@@ -1072,16 +1072,16 @@ div[data-testid="stFileUploader"] button {
 }
 
 /* Scotia - blue */
-.uploader-blue div[data-testid="stFileUploader"] {
+.st-key-uploader_scotia_container div[data-testid="stFileUploader"] {
     border-radius: 14px;
     padding: 14px;
     background-color: #e8f1fb;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
-.uploader-blue div[data-testid="stFileUploader"] button {
+.st-key-uploader_scotia_container div[data-testid="stFileUploader"] button {
     background-color: #1f4e79 !important;
 }
-.uploader-blue div[data-testid="stFileUploader"] button:hover {
+.st-key-uploader_scotia_container div[data-testid="stFileUploader"] button:hover {
     background-color: #163a5c !important;
 }
 
@@ -2140,14 +2140,13 @@ if page == "📊 Reports":
     scotia_col1, scotia_col2 = st.columns([5, 1])
 
     with scotia_col1:
-        st.markdown('<div class="uploader-blue">', unsafe_allow_html=True)
-        uploaded_pdf = st.file_uploader(
-            "Upload Scotia Bank Statement PDF(s)",
-            type=["pdf"],
-            accept_multiple_files=True,
-            key=f"scotia_pdf_uploader_{st.session_state.scotia_uploader_version}"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(key="uploader_scotia_container"):
+            uploaded_pdf = st.file_uploader(
+                "Upload Scotia Bank Statement PDF(s)",
+                type=["pdf"],
+                accept_multiple_files=True,
+                key=f"scotia_pdf_uploader_{st.session_state.scotia_uploader_version}"
+            )
 
     with scotia_col2:
         st.write("")
