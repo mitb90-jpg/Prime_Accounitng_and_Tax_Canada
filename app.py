@@ -1643,10 +1643,22 @@ if page == "📊 Reports":
     )
 
     uploaded_pdf = st.file_uploader(
-        "Upload PDF File(s)",
+        "Upload Scotia Bank Statement PDF(s)",
         type=["pdf"],
-        accept_multiple_files=True
+        accept_multiple_files=True,
+        key="scotia_pdf_uploader"
     )
+
+    uploaded_visa_pdf = st.file_uploader(
+        "Upload Visa Statement PDF(s)",
+        type=["pdf"],
+        accept_multiple_files=True,
+        key="visa_pdf_uploader"
+    )
+
+    df = None
+
+    # ---------------- EXCEL ----------------
 
     if uploaded_excel is not None:
 
@@ -1655,164 +1667,170 @@ if page == "📊 Reports":
         # remove blank Excel columns
         df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed")]
 
+    # ---------------- SCOTIA PDF ----------------
 
-    elif uploaded_pdf is not None:
+    elif uploaded_pdf:
 
         import pdfplumber
 
-    if uploaded_pdf:
-        st.success(f"{len(uploaded_pdf)} PDF file(s) uploaded successfully")
+        st.success(f"{len(uploaded_pdf)} Scotia statement PDF(s) uploaded successfully")
 
         transactions = []
 
-    for pdf_file in uploaded_pdf:
+        for pdf_file in uploaded_pdf:
 
-        with pdfplumber.open(pdf_file) as pdf:
+            with pdfplumber.open(pdf_file) as pdf:
 
-            current = None       
+                current = None
 
-            for page in pdf.pages:
-                started = False
+                for page in pdf.pages:
+                    started = False
 
-                words = page.extract_words()
+                    words = page.extract_words()
 
-                rows = {}
+                    rows = {}
 
-                for w in words:
-                    y = round(float(w["top"]), 1)
+                    for w in words:
+                        y = round(float(w["top"]), 1)
 
-                    if y not in rows:
-                        rows[y] = []
+                        if y not in rows:
+                            rows[y] = []
 
-                    rows[y].append(w)
+                        rows[y].append(w)
 
+                    for y in sorted(rows):
 
-                for y in sorted(rows):
-
-                    line_words = sorted(
-                        rows[y],
-                        key=lambda x: float(x["x0"])
-                    )
-
-                    text = " ".join(
-                        w["text"] for w in line_words
-                    )
-
-
-                    header_text = text.upper()
-
-
-                    # start transaction table
-                    if (
-                        "DATE" in header_text
-                        and "DESCRIPTION" in header_text
-                        and (
-                            "DEBIT" in header_text
-                            or "WITHDRAW" in header_text
+                        line_words = sorted(
+                            rows[y],
+                            key=lambda x: float(x["x0"])
                         )
-                    ):
-                        started = True
-                        continue
 
+                        text = " ".join(
+                            w["text"] for w in line_words
+                        )
 
-                    if not started:
-                        continue
+                        header_text = text.upper()
 
+                        # start transaction table
+                        if (
+                            "DATE" in header_text
+                            and "DESCRIPTION" in header_text
+                            and (
+                                "DEBIT" in header_text
+                                or "WITHDRAW" in header_text
+                            )
+                        ):
+                            started = True
+                            continue
 
-                    # ignore bottom summary
-                    if (
-                        "NO. OF DEBITS" in header_text
-                        or "NO. OF CREDITS" in header_text
-                        or "TOTAL AMOUNT" in header_text
-                        or "PAGE -" in header_text
-                    ):
-                        continue
+                        if not started:
+                            continue
 
+                        # ignore bottom summary
+                        if (
+                            "NO. OF DEBITS" in header_text
+                            or "NO. OF CREDITS" in header_text
+                            or "TOTAL AMOUNT" in header_text
+                            or "PAGE -" in header_text
+                        ):
+                            continue
 
-                    # ignore repeated headers
-                    if (
-                        "DATE" in header_text
-                        and "DESCRIPTION" in header_text
-                    ):
-                        continue
+                        # ignore repeated headers
+                        if (
+                            "DATE" in header_text
+                            and "DESCRIPTION" in header_text
+                        ):
+                            continue
 
+                        first = line_words[0]["text"]
 
-                    first = line_words[0]["text"]
+                        # transaction row
+                        if (
+                            "/" in first
+                            or "-" in first
+                            or "." in first
+                        ):
 
+                            if current:
+                                transactions.append(current)
 
-                    # transaction row
-                    if (
-                        "/" in first
-                        or "-" in first
-                        or "." in first
-                    ):
-
-                        if current:
-                            transactions.append(current)
-
-
-                        current = {
-                            "Date": first,
-                            "Description": "",
-                            "Debit": "",
-                            "Credit": "",
+                            current = {
+                                "Date": first,
+                                "Description": "",
+                                "Debit": "",
+                                "Credit": "",
                             }
 
+                            for w in line_words[1:]:
 
-                        for w in line_words[1:]:
+                                x = float(w["x0"])
+                                value = w["text"]
 
-                            x = float(w["x0"])
-                            value = w["text"]
+                                # amount columns based on PDF layout
 
+                                if x < 260:
+                                    current["Description"] += " " + value
 
-                            # amount columns based on PDF layout
+                                elif x >= 260 and x < 400:
+                                    current["Debit"] += " " + value
 
-                            if x < 260:
-                                current["Description"] += " " + value
+                                elif x >= 400 and x < 540:
+                                    current["Credit"] += " " + value
 
+                        else:
 
-                            elif x >= 260 and x < 400:
-                                current["Debit"] += " " + value
+                            # continuation description
+                            if current:
+                                current["Description"] += " " + text
 
-
-                            elif x >= 400 and x < 540:
-                                current["Credit"] += " " + value
-
-                    else:
-
-                        # continuation description
-                        if current:
-
-                            current["Description"] += " " + text
-
-
-
-            if current:
-                transactions.append(current)
-
-
+                if current:
+                    transactions.append(current)
 
         df = pd.DataFrame(transactions)
 
+        if not df.empty:
+            df = df.apply(
+                lambda x: x.str.strip()
+                if x.dtype == "object"
+                else x
+            )
 
-        df = df.apply(
-            lambda x: x.str.strip()
-            if x.dtype == "object"
-            else x
-        )
+    # ---------------- VISA PDF ----------------
+
+    elif uploaded_visa_pdf:
+
+        st.success(f"{len(uploaded_visa_pdf)} Visa statement(s) uploaded successfully")
+
+        visa_dfs = []
+
+        for visa_file in uploaded_visa_pdf:
+            visa_df = parse_visa_statement(visa_file)
+            if not visa_df.empty:
+                visa_dfs.append(visa_df)
+
+        if visa_dfs:
+            df = pd.concat(visa_dfs, ignore_index=True)
+        else:
+            st.warning("No transactions found in the Visa statement(s).")
+
     # ---------------- CLEAN DATA ----------------
 
-    if uploaded_excel is not None or uploaded_pdf:
+    any_upload = (
+        uploaded_excel is not None
+        or uploaded_pdf
+        or uploaded_visa_pdf
+    )
 
-        if "df" not in locals():
-            st.warning("PDF could not be read. No transactions found.")
+    if any_upload:
+
+        if df is None or df.empty:
+            st.warning("No transactions found in the uploaded file(s).")
             st.stop()
 
         df.columns = df.columns.astype(str).str.strip()
 
-
-        # PDF column normalization
-        if uploaded_pdf is not None:
+        # PDF column normalization (Scotia)
+        if uploaded_pdf:
 
             df.columns = (
                 df.columns
@@ -1821,7 +1839,6 @@ if page == "📊 Reports":
                 .str.strip()
             )
 
-
             for col in df.columns:
 
                 if "Deposit" in col or "Credit" in col:
@@ -1829,7 +1846,6 @@ if page == "📊 Reports":
 
                 if "Withdraw" in col or "Debit" in col:
                     df.rename(columns={col: "Debit"}, inplace=True)
-
 
         # ---------------- CLEAN AMOUNTS ----------------
 
@@ -1850,18 +1866,16 @@ if page == "📊 Reports":
                     errors="coerce"
                 ).fillna(0)
 
-
         # ---------------- RULES ----------------
 
         df.loc[
             df["Credit"].notna() &
             df["Description"].astype(str).str.contains(
-                "MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY",
+                "MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY|SCOTIABANK PAYMENT",
                 case=False
             ),
             "Category"
         ] = "Revenue"
-
 
         df.loc[
             df["Credit"].notna() &
@@ -1872,13 +1886,11 @@ if page == "📊 Reports":
             "Category"
         ] = "Other Income"
 
-
         df.loc[
             df["Debit"].notna() &
             df["Description"].astype(str).str.strip().str.lower().eq("misc payment"),
             "Category"
         ] = "Misc Expenses"
-
 
         df.loc[
             df["Debit"].notna() &
@@ -1886,13 +1898,11 @@ if page == "📊 Reports":
             "Category"
         ] = "Insurance"
 
-
         df.loc[
             df["Debit"].notna() &
             df["Description"].astype(str).str.contains("LOANS", case=False),
             "Category"
         ] = "Car Loan"
-
 
         df.loc[
             df["Debit"].notna() &
@@ -1900,13 +1910,11 @@ if page == "📊 Reports":
             "Category"
         ] = "Purchases"
 
-
         df.loc[
             df["Debit"].notna() &
             df["Description"].astype(str).str.contains("GOODLIFE FITNESS", case=False),
             "Category"
         ] = "Personal Expenses"
-
 
         df.loc[
             df["Debit"].notna() &
@@ -1914,13 +1922,11 @@ if page == "📊 Reports":
             "Category"
         ] = "Parking and Toll"
 
-
         df.loc[
             df["Debit"].notna() &
             df["Description"].astype(str).str.contains("TSCC", case=False),
             "Category"
         ] = "Vehicle Expense"
-
 
         df.loc[
             df["Debit"].notna() &
@@ -1928,13 +1934,11 @@ if page == "📊 Reports":
             "Category"
         ] = "Ask from Customer"
 
-
         df.loc[
             df["Debit"].notna() &
             df["Description"].astype(str).str.contains("SERVICE CHARGE|FEE", case=False),
             "Category"
         ] = "Interest and Bank charges"
-
 
     else:
 
@@ -1959,7 +1963,7 @@ if page == "📊 Reports":
         </div>
         """, unsafe_allow_html=True)
 
-    if ("df" in locals()) and (uploaded_excel is not None or uploaded_pdf):
+    if any_upload and df is not None and not df.empty:
 
         # ---------------- Sr No ----------------
         df = df.reset_index(drop=True)
@@ -1969,6 +1973,10 @@ if page == "📊 Reports":
             "Sr. No",
             range(1, len(df) + 1)
         )
+
+        # (everything from here down — display table, totals, P&L,
+        # category summary, export buttons — stays exactly as you have it,
+        # unchanged)
 
         # ---------------- DISPLAY TABLE ----------------
         display_df = df.copy()
