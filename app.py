@@ -33,7 +33,7 @@ VISA_DEBIT_RULES = {
     "ARTOFDENTISTRY|PHARMACY|BAYANDCOLLEGEIDAPH|Walgreens|SPREGENEX": "Health and safety",
     "Aviva": "Insurance",
     "Interest|Fee|BMORETAILKIOSK": "Interest and Bank charges",
-    "KEBABERIE|TST-PLANTA-YORKVILLE|TIMHORTONS|SOUTHST.BURGERCO.|1HOTEL|10057CAVA|ZAROSBAKERY|ACROUGE|AERA|APROPOS|BASKINROBBINS|BMOFOOD&BEVERAGE|BOOSTERJUICE|BROWNS|BUFFALOANDFORT|CANOE|CASA MEZCAL|CHOTTOMATTE|CHURCHSTREET|EASTCOASTDONAIR|ELNAHUALTACO|SQ|STARBUCKS|RITUAL-SOUTH|THEBLAKEHOUSE|HOUSEONPARLIAMENT|MYDOSAPLACE|SASSAFRAZ|O'GRADY'SRESTAURANT|THEDANISHPASTRY|TRYSTWICKEDLILY|FRESHONCRAWFORD|PAUL'SROTISHOP|THEEPICURESHOP|HAIROFTHEDOG|THEKEGBRAMALEA|SWEETPALACE|GIA|FIRSTWATCH|IRENE|WANASSHAWARMA|TANDOORIFLAME|THEUNDERWINGCAMBRIDGE|MALAPARTE|THECARLU": "Meals and Entertainment",
+    "KEBABERIE|TST-PLANTA-YORKVILLE|TIMHORTONS|SOUTHST.BURGERCO.|1HOTEL|10057CAVA|ZAROSBAKERY|ACROUGE|AERA|APROPOS|BASKINROBBINS|BMOFOOD&BEVERAGE|BOOSTERJUICE|BROWNS|BUFFALOANDFORT|CANOE|CASA MEZCAL|CHOTTOMATTE|CHURCHSTREET|EASTCOASTDONAIR|ELNAHUALTACO|SQ|STARBUCKS|RITUAL-SOUTH|THEBLAKEHOUSE|HOUSEONPARLIAMENT|MYDOSAPLACE|SASSAFRAZ|O'GRADY'SRESTAURANT|THEDANISHPASTRY|TRYSTWICKEDLILY|FRESHONCRAWFORD|PAUL'SROTISHOP|THEEPICURESHOP|HAIROFTHEDOG|THEKEGBRAMALEA|SWEETPALACE|GIA|FIRSTWATCH|IRENE|WANASSHAWARMA|TANDOORIFLAME|THEUNDERWINGCAMBRIDGE|MALAPARTE|THECARLU|WHOLEFOODSMARKET": "Meals and Entertainment",
     "WHOLEFOODSMARKET|SHOPLAZZA|FRESHCO|DOLLARAMA|ESSOCIRCLEK|SHOPPERSDRUGMART|LINCOLNROADSUPERMARK|INDIANFROOTLAND|WALMART|KABULFARMS|ROYALBLUEGROCERY|RABBA|SARKERGROCERIES|CHERRYCRESTESSO|THECORNERCONVENIENCE|WELLESLEYCONVENIENCE|": "Office Supplies",
     "BARTONPERREIRA|CARLZEISSVISION|DITA|KERING|LUXOTTICAOFCANADATORONTOON|MARCOLINCANADA|ORGREENGOLDSMITH|SAFILO|SALTOPTICS|THELIOS|SWEATANDTONIC": "Purchases",
     "AXISMEDICAL": "Repairs and Maintenance",
@@ -719,25 +719,37 @@ def parse_visa_statement(pdf_file):
 
 def apply_visa_categories(df):
     """
-    Applies VISA_DEBIT_RULES and VISA_CREDIT_RULES to a Visa transactions DataFrame.
-    Matches on keywords found in the Description column.
+    Applies VISA_DEBIT_RULES and VISA_CREDIT_RULES to a transactions DataFrame.
+    If a transaction matches more than one rule, all matching categories are
+    joined together and the row is flagged as Needs Review (for manual check).
     """
+
+    categories = [[] for _ in range(len(df))]
 
     for keyword, category in VISA_DEBIT_RULES.items():
 
-        df.loc[
+        mask = (
             (df["Debit"] > 0) &
-            df["Description"].astype(str).str.contains(keyword, case=False, na=False),
-            "Category"
-        ] = category
+            df["Description"].astype(str).str.contains(keyword, case=False, na=False)
+        )
+
+        for idx in df.index[mask]:
+            if category not in categories[df.index.get_loc(idx)]:
+                categories[df.index.get_loc(idx)].append(category)
 
     for keyword, category in VISA_CREDIT_RULES.items():
 
-        df.loc[
+        mask = (
             (df["Credit"] > 0) &
-            df["Description"].astype(str).str.contains(keyword, case=False, na=False),
-            "Category"
-        ] = category
+            df["Description"].astype(str).str.contains(keyword, case=False, na=False)
+        )
+
+        for idx in df.index[mask]:
+            if category not in categories[df.index.get_loc(idx)]:
+                categories[df.index.get_loc(idx)].append(category)
+
+    df["Category"] = [" / ".join(c) if c else "" for c in categories]
+    df["Needs Review"] = [len(c) > 1 for c in categories]
 
     return df
 
@@ -2475,18 +2487,21 @@ if page == "📊 Reports":
                 display_df[col] = display_df[col].apply(format_amount)
 
 
-        # ---------------- BOLD TOTAL ROW ----------------
+        # ---------------- BOLD TOTAL ROW + HIGHLIGHT NEEDS REVIEW ----------------
 
-        def bold_transaction_total(row):
+        def style_transaction_row(row):
 
             if row["Description"] == "TOTAL":
                 return ["font-weight: bold"] * len(row)
+
+            if row.get("Needs Review", False):
+                return ["background-color: #fff3cd"] * len(row)
 
             return [""] * len(row)
 
 
         styled_transactions = display_df.style.apply(
-            bold_transaction_total,
+            style_transaction_row,
             axis=1
         )
 
@@ -2516,10 +2531,28 @@ if page == "📊 Reports":
         - ⚪ **Uncategorized Transactions:** {uncategorized_entries:,}
         """)
 
-        # ---------------- DOWNLOAD TRANSACTIONS ----------------
+        # ---------------- DOWNLOAD TRANSACTIONS (with highlight) ----------------
+        from openpyxl.styles import PatternFill
+
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Transactions")
+
+            worksheet = writer.sheets["Transactions"]
+            highlight_fill = PatternFill(
+                start_color="FFF3CD",
+                end_color="FFF3CD",
+                fill_type="solid"
+            )
+
+            if "Needs Review" in df.columns:
+                review_col_idx = df.columns.get_loc("Needs Review")
+
+                for row_num, needs_review in enumerate(df["Needs Review"], start=2):  # +2: header row + 1-indexed
+                    if needs_review:
+                        for col_num in range(1, len(df.columns) + 1):
+                            worksheet.cell(row=row_num, column=col_num).fill = highlight_fill
+
         output.seek(0)
 
         st.download_button(
