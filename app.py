@@ -45,6 +45,7 @@ VISA_DEBIT_RULES = {
 VISA_CREDIT_RULES = {
     "SCOTIABANKPAYMENT|Payment": "Credit Card Payments",
     "CreditAdjustment|Fee": "Other Income",
+    "ELEGANCEDRYCLEANERS": "Refund",
     
 }
 
