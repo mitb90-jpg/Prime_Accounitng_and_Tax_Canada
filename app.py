@@ -27,10 +27,24 @@ from reportlab.lib import colors
 # ---------------- VISA CATEGORIZATION DICTIONARIES ----------------
 VISA_DEBIT_RULES = {
     "ESSILOR|HCM|NIKONOPTICALMONTREALQC": "Purchases",
+    "REXALL POST OFFICE": "Delivery Expenses",
+    "Google|CAA MEMBERSHIP": "Dues and Subscriptions",
+    "Shell": "Fuel",
+    "ART OF DENTISTRY": "Health and safety",
+    "Aviva": "Insurance",
+    "Interest|Fee": "Interest and Bank charges",
+    "KEBABERIE|TST-PLANTA-YORKVILLE": "Meals and Entertainment",
+    "WHOLE FOODS MARKET|SHOPLAZZA|FRESHCO": "Office Supplies",
+    "BARTON PERREIRA|CARL ZEISS VISION|DITA|KERING|LUXOTTICA OF CANADA|MARCOLIN CANADA|ORGREEN GOLDSMITH|SAFILO|SALT OPTICS|THELIOS|SQ *SWEAT AND TONIC": "Purchases",
+    "AXIS MEDICAL": "Repairs and Maintenance",
+    "UBER|AIR CAN": "Travel Expense",
+    "MERCEDES-BENZ": "Vehicle Expense",
+    "ELEGANCE DRY CLEANERS|HM HENNES|IHUC|LCBO|MEC MOUNTAIN EQUIPMENT|THE BEER STORE": "Personal Expense",
     
 }
 VISA_CREDIT_RULES = {
-    "SCOTIABANKPAYMENT": "Credit Card Payments",
+    "SCOTIABANKPAYMENT|Payment": "Credit Card Payments",
+    "Credit Adjustment|Fee": "Other Income",
     
 }
 
