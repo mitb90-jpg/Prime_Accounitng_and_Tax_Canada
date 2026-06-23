@@ -25,34 +25,53 @@ from reportlab.lib import colors
 
 
 # ---------------- VISA CATEGORIZATION DICTIONARIES ----------------
+
 VISA_DEBIT_RULES = {
-    "ESSILOR|HCM|NIKON OPTICAL MONTREAL QC|ALCON|CANADIAN OPTICAL|J & J VISION CARE|MCCRAY OPTICAL|OPTICIANS ASSOCIATION|SECURE OPTIONS": "Purchases",
+    "ESSILOR|HCM|NIKON OPTICAL MONTREAL QC|ALCON|CANADIAN OPTICAL|J&J VISION CARE|MCCRAY OPTICAL|OPTICIANS ASSOCIATION|SECURE OPTIONS": "Purchases",
+
     "REXALL POST OFFICE|ICS|UPS": "Delivery Expenses",
-    "Google|CAA MEMBERSHIP|Adobe|": "Dues and Subscriptions",
-    "Shell|Circle|COSTCO GAS|Petro|": "Fuel",
-    "ART OF DENTISTRY|PHARMACY|BAYAND COLLEGE IDA PH|Walgreens|SPREGENEX": "Health and safety",
+
+    "Google|CAA MEMBERSHIP|Adobe": "Dues and Subscriptions",
+
+    "Shell|Circle K|COSTCO GAS|Petro": "Fuel",
+
+    "ART OF DENTISTRY|PHARMACY|BAY AND COLLEGE IDA PH|Walgreens|SPREGENEX": "Health and safety",
+
     "Aviva": "Insurance",
+
     "Interest|Fee|BMO RETAIL KIOSK": "Interest and Bank charges",
-    "KEBABERIE|TST-PLANTA-YORKVILLE|TIM HORTONS|SOUTH ST. BURGER CO.|1 HOTEL|10057 CAVA|ZAROS BAKERY|AC ROUGE|AERA|APROPOS|BASKIN ROBBINS|BMO FOOD & BEVERAGE|BOOSTER JUICE|BROWNS|BUFFALOAND FORT|CANOE|CASA MEZCAL|CHOTTO MATTE|CHURCH STREET|EAST COAST DONAIR|EL NAHUAL TACO|SQ|STARBUCKS|RITUAL-SOUTH|THE BLAKE HOUSE|HOUSE ON PARLIAMENT|MY DOSA PLACE|SASSAFRAZ|O'GRADY'S RESTAURANT|THE DANISH PASTRY|TRYST WICKEDLILY|FRESHON CRAWFORD|PAUL'SROTISHOP|THE EPICURE SHOP|HAIR OF THE DOG|THE KEG BRAMAL EA|SWEET PALACE|GIA|FIRST WATCH|IRENE|WANAS SHAWARMA|TANDOORI FLAME|THE UNDER WING CAMBRIDGE|MALAPARTE|THE CARLU|WHOLE FOODS MARKET": "Meals and Entertainment",
-    "WHOLE FOODS MARKET|SHOP LAZZA|FRESHCO|DOLLARAMA|ESSOCIRCLEK|SHOPPERS DRUG MART|LINCOLN ROAD SUPERMARK|INDIAN FROOTLAND|WALMART|KABUL FARMS|ROYAL BLUE GROCERY|RABBA|SARKER GROCERIES|CHERRY CRESTESSO|THE CORNERCONVENIENCE|WELLESLEY CONVENIENCE|": "Office Supplies",
-    "BARTON PERREIRA|CARLZEISS VISION|DITA|KERING|LUXOTTICA OF CANADA TORONTO ON|MARCOLIN CANADA|ORGREEN GOLDSMITH|SAFILO|SALTOPTICS|THELIOS|SWEAT AND TONIC": "Purchases",
+
+    "KEBABERIE|TST-PLANTA-YORKVILLE|TIM HORTONS|SOUTH ST. BURGER CO.|1 HOTEL|10057 CAVA|ZAROS BAKERY|AC ROUGE|AERA|APROPOS|BASKIN ROBBINS|BMO FOOD & BEVERAGE|BOOSTER JUICE|BROWNS|BUFFALO AND FORT ERIE|CANOE|CASA MEZCAL|CHOTTO MATTE|CHURCH STREET|EAST COAST DONAIR|EL NAHUAL TACO|SQ|STARBUCKS|RITUAL-SOUTH|THE BLAKE HOUSE|HOUSE ON PARLIAMENT|MY DOSA PLACE|SASSAFRAZ|O'GRADY'S RESTAURANT|THE DANISH PASTRY|TRYST WICKEDLILY|FRESH ON CRAWFORD|PAUL'S ROTI SHOP|THE EPICURE SHOP|HAIR OF THE DOG|THE KEG BRAMALEA|SWEET PALACE|GIA|FIRST WATCH|IRENE|WANAS SHAWARMA|TANDOORI FLAME|THE UNDERWING CAMBRIDGE|MALAPARTE|THE CARLU|WHOLE FOODS MARKET": "Meals and Entertainment",
+
+    "WHOLE FOODS MARKET|SHOP LAZZA|FRESHCO|DOLLARAMA|ESSO CIRCLE K|SHOPPERS DRUG MART|LINCOLN ROAD SUPERMARK|INDIAN FROOTLAND|WALMART|KABUL FARMS|ROYAL BLUE GROCERY|RABBA|SARKER GROCERIES|CHERRYCREST ESSO|THE CORNER CONVENIENCE|WELLESLEY CONVENIENCE": "Office Supplies",
+
+    "BARTON PERREIRA|CARL ZEISS VISION|DITA|KERING|LUXOTTICA OF CANADA TORONTO ON|MARCOLIN CANADA|ORGREEN GOLDSMITH|SAFILO|SALT OPTICS|THELIOS|SWEAT AND TONIC": "Purchases",
+
     "AXIS MEDICAL": "Repairs and Maintenance",
-    "UBER|AIRCAN|CITY TOR.FERRY DOCKS|TCKT WEB|CURB|MIAMI AIRP CORONA|COCONUT GROVENE WSST 2526|FGTEDCOR LANDO|UPE|SIXT|ROAMI|RCL|Prestobay|Kasaliving|Expedia|ENTERPRISE|Canopy|Budget rent a car|Avion|Austin airport|Air BnB|taxi": "Travel Expense",
+
+    "UBER|AIRCAN|CITY TOR. FERRY DOCKS|TCKT WEB|CURB|MIAMI AIRP CORONA|COCONUT GROVE|FGTEDCORLANDO|UPE|SIXT|ROAMI|RCL|Prestobay|Kasaliving|Expedia|ENTERPRISE|Canopy|Budget Rent A Car|Avion|Austin Airport|Air BnB|taxi": "Travel Expense",
+
     "MERCEDES-BENZ|CDN TIRE STORE|SIRIUSXM": "Vehicle Expense",
-    "ELEGANCE DRY CLEANERS|HM HENNES|IHUC|LCBO|ME CMOUNTAIN EQUIPMENT|THE BEER STORE": "Personal Expense",
+
+    "ELEGANCE DRY CLEANERS|HM HENNES|IHUC|LCBO|MEC MOUNTAIN EQUIPMENT|THE BEER STORE": "Personal Expense",
+
     "EQUIFAX": "Admin Expenses",
+
     "Parking|PARK|BIKE SHARE|TORPRKAUT|ERACTOLL|CP286POF": "Parking and Toll",
+
     "CATALYST": "Promotion",
-    "PPL-21 AVE RD": "Rental",
-    "Amazon|COSTCO WHOLESALE|WWW.COSTCO|AMZN|JAMES TOWN MILK|STAR FRUIT MARKET|STORM CROW MANOR|": "Supplies",
-    "ROGERS|BELL CANADA|FIDO Home|MOBILEKLINIK|T-MOBILESTORE": "Telephone and Internet",
-    
+
+    "PPL - 21 AVE RD": "Rental",
+
+    "Amazon|COSTCO WHOLESALE|WWW.COSTCO|AMZN|JAMESTOWN MILK|STAR FRUIT MARKET|STORM CROW MANOR": "Supplies",
+
+    "ROGERS|BELL CANADA|FIDO Home|MOBILEKLINIK|T-MOBILE STORE": "Telephone and Internet",
 }
+
 VISA_CREDIT_RULES = {
-    "SCOTIABANKPAYMENT|Payment|PMT": "Credit Card Payments",
+    "SCOTIABANK PAYMENT|Payment|PMT": "Credit Card Payments",
     "Credit Adjustment|Fee": "Other Income",
-    "ELEGANCE DRY CLEANERS|REXALL PHARMACY|Air can|ATLANTIS EVENTS WEST|CANADA WIDE PARKING|AMZN|AC ROUGE": "Refund",
-    
+    "ELEGANCE DRY CLEANERS|REXALL PHARMACY|Air Can|ATLANTIS EVENTS WEST|CANADA WIDE PARKING|AMZN|AC ROUGE": "Refund",
 }
 
 
@@ -720,33 +739,67 @@ def parse_visa_statement(pdf_file):
 def apply_visa_categories(df):
     """
     Applies VISA_DEBIT_RULES and VISA_CREDIT_RULES to a transactions DataFrame.
-    If a transaction matches more than one rule, all matching categories are
-    joined together and the row is flagged as Needs Review (for manual check).
+
+    Matching uses word boundaries so short keywords (e.g. "FEE") don't
+    accidentally match inside longer words (e.g. "COFFEE"). Boundaries are
+    only applied on sides of a keyword that start/end with a letter or
+    digit, since terms ending in punctuation (e.g. "CO.") don't work
+    correctly with a trailing word-boundary marker.
+
+    Empty terms (caused by a trailing "|" in a dictionary entry) are
+    automatically skipped.
+
+    If a transaction matches more than one rule, all matching categories
+    are joined together and the row is flagged as Needs Review.
     """
+
+    import re
+
+    desc_upper = df["Description"].astype(str).str.upper()
+
+    def smart_boundary_term(term):
+        escaped = re.escape(term.upper())
+        left = r"\b" if term[0].isalnum() else ""
+        right = r"\b" if term[-1].isalnum() else ""
+        return f"{left}{escaped}{right}"
+
+    def build_pattern(keyword):
+        terms = [t.strip() for t in keyword.split("|") if t.strip() != ""]
+        if not terms:
+            return None
+        return "|".join(smart_boundary_term(t) for t in terms)
 
     categories = [[] for _ in range(len(df))]
 
     for keyword, category in VISA_DEBIT_RULES.items():
 
+        pattern = build_pattern(keyword)
+        if pattern is None:
+            continue
+
         mask = (
             (df["Debit"] > 0) &
-            df["Description"].astype(str).str.contains(keyword, case=False, na=False)
+            desc_upper.str.contains(pattern, na=False, regex=True)
         )
 
-        for idx in df.index[mask]:
-            if category not in categories[df.index.get_loc(idx)]:
-                categories[df.index.get_loc(idx)].append(category)
+        for pos in range(len(df)):
+            if mask.iloc[pos] and category not in categories[pos]:
+                categories[pos].append(category)
 
     for keyword, category in VISA_CREDIT_RULES.items():
 
+        pattern = build_pattern(keyword)
+        if pattern is None:
+            continue
+
         mask = (
             (df["Credit"] > 0) &
-            df["Description"].astype(str).str.contains(keyword, case=False, na=False)
+            desc_upper.str.contains(pattern, na=False, regex=True)
         )
 
-        for idx in df.index[mask]:
-            if category not in categories[df.index.get_loc(idx)]:
-                categories[df.index.get_loc(idx)].append(category)
+        for pos in range(len(df)):
+            if mask.iloc[pos] and category not in categories[pos]:
+                categories[pos].append(category)
 
     df["Category"] = [" / ".join(c) if c else "" for c in categories]
     df["Needs Review"] = [len(c) > 1 for c in categories]
