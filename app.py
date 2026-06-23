@@ -1801,24 +1801,56 @@ if page == "📄 Invoice History":
 
 if page == "📊 Reports":
 
+    # ---------------- UPLOADER RESET COUNTERS ----------------
+
+    if "scotia_uploader_version" not in st.session_state:
+        st.session_state.scotia_uploader_version = 0
+
+    if "visa_uploader_version" not in st.session_state:
+        st.session_state.visa_uploader_version = 0
+
     uploaded_excel = st.file_uploader(
         "Upload Excel File",
         type=["xlsx"]
     )
 
-    uploaded_pdf = st.file_uploader(
-        "Upload Scotia Bank Statement PDF(s)",
-        type=["pdf"],
-        accept_multiple_files=True,
-        key="scotia_pdf_uploader"
-    )
+    # ---------------- SCOTIA UPLOADER ----------------
 
-    uploaded_visa_pdf = st.file_uploader(
-        "Upload Visa Statement PDF(s)",
-        type=["pdf"],
-        accept_multiple_files=True,
-        key="visa_pdf_uploader"
-    )
+    scotia_col1, scotia_col2 = st.columns([5, 1])
+
+    with scotia_col1:
+        uploaded_pdf = st.file_uploader(
+            "Upload Scotia Bank Statement PDF(s)",
+            type=["pdf"],
+            accept_multiple_files=True,
+            key=f"scotia_pdf_uploader_{st.session_state.scotia_uploader_version}"
+        )
+
+    with scotia_col2:
+        st.write("")
+        st.write("")
+        if st.button("🗑️ Clear All", key="clear_scotia_files"):
+            st.session_state.scotia_uploader_version += 1
+            st.rerun()
+
+    # ---------------- VISA UPLOADER ----------------
+
+    visa_col1, visa_col2 = st.columns([5, 1])
+
+    with visa_col1:
+        uploaded_visa_pdf = st.file_uploader(
+            "Upload Visa Statement PDF(s)",
+            type=["pdf"],
+            accept_multiple_files=True,
+            key=f"visa_pdf_uploader_{st.session_state.visa_uploader_version}"
+        )
+
+    with visa_col2:
+        st.write("")
+        st.write("")
+        if st.button("🗑️ Clear All", key="clear_visa_files"):
+            st.session_state.visa_uploader_version += 1
+            st.rerun()
 
     df = None
 
