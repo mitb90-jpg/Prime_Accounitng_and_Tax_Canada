@@ -24,6 +24,17 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
 
+# ---------------- VISA CATEGORIZATION DICTIONARIES ----------------
+VISA_DEBIT_RULES = {
+    "ESSILOR|HCM|NIKONOPTICALMONTREALQC": "Purchases",
+    
+}
+VISA_CREDIT_RULES = {
+    "SCOTIABANKPAYMENT": "Credit Card Payments",
+    
+}
+
+
 # ---------------- DATABASE ----------------
 
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
@@ -680,6 +691,32 @@ def parse_visa_statement(pdf_file):
     df["Credit"] = df["Amount"].apply(lambda x: abs(x) if x < 0 else 0)
 
     df = df.drop(columns=["Amount"])
+
+    return df
+
+# ---------------- APPLY VISA CATEGORIES ----------------
+
+def apply_visa_categories(df):
+    """
+    Applies VISA_DEBIT_RULES and VISA_CREDIT_RULES to a Visa transactions DataFrame.
+    Matches on keywords found in the Description column.
+    """
+
+    for keyword, category in VISA_DEBIT_RULES.items():
+
+        df.loc[
+            (df["Debit"] > 0) &
+            df["Description"].astype(str).str.contains(keyword, case=False, na=False),
+            "Category"
+        ] = category
+
+    for keyword, category in VISA_CREDIT_RULES.items():
+
+        df.loc[
+            (df["Credit"] > 0) &
+            df["Description"].astype(str).str.contains(keyword, case=False, na=False),
+            "Category"
+        ] = category
 
     return df
 
@@ -1937,6 +1974,7 @@ if page == "📊 Reports":
 
         if visa_dfs:
             df = pd.concat(visa_dfs, ignore_index=True)
+            df = apply_visa_categories(df)
         else:
             st.warning("No transactions found in the Visa statement(s).")
 
