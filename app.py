@@ -27,19 +27,19 @@ from reportlab.lib import colors
 # ---------------- VISA CATEGORIZATION DICTIONARIES ----------------
 VISA_DEBIT_RULES = {
     "ESSILOR|HCM|NIKONOPTICALMONTREALQC": "Purchases",
-    "REXALL POST OFFICE": "Delivery Expenses",
-    "Google|CAA MEMBERSHIP": "Dues and Subscriptions",
+    "REXALLPOSTOFFICE": "Delivery Expenses",
+    "Google|CAAMEMBERSHIP": "Dues and Subscriptions",
     "Shell": "Fuel",
-    "ART OF DENTISTRY": "Health and safety",
+    "ARTOFDENTISTRY": "Health and safety",
     "Aviva": "Insurance",
     "Interest|Fee": "Interest and Bank charges",
     "KEBABERIE|TST-PLANTA-YORKVILLE": "Meals and Entertainment",
-    "WHOLE FOODS MARKET|SHOPLAZZA|FRESHCO": "Office Supplies",
-    "BARTON PERREIRA|CARL ZEISS VISION|DITA|KERING|LUXOTTICAOFCANADATORONTOON|MARCOLIN CANADA|ORGREEN GOLDSMITH|SAFILO|SALT OPTICS|THELIOS|SQ *SWEAT AND TONIC": "Purchases",
-    "AXIS MEDICAL": "Repairs and Maintenance",
+    "WHOLEFOODSMARKET|SHOPLAZZA|FRESHCO": "Office Supplies",
+    "BARTONPERREIRA|CARLZEISSVISION|DITA|KERING|LUXOTTICAOFCANADATORONTOON|MARCOLIN CANADA|ORGREENGOLDSMITH|SAFILO|SALTOPTICS|THELIOS|SQ*SWEATANDTONIC": "Purchases",
+    "AXISMEDICAL": "Repairs and Maintenance",
     "UBER|AIR CAN": "Travel Expense",
     "MERCEDES-BENZ": "Vehicle Expense",
-    "ELEGANCE DRY CLEANERS|HM HENNES|IHUC|LCBO|MEC MOUNTAIN EQUIPMENT|THE BEER STORE": "Personal Expense",
+    "ELEGANCEDRYCLEANERS|HMHENNES|IHUC|LCBO|MECMOUNTAINEQUIPMENT|THEBEERSTORE": "Personal Expense",
     
 }
 VISA_CREDIT_RULES = {
