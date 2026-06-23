@@ -553,10 +553,13 @@ def format_amount(x):
 def parse_visa_statement(pdf_file):
     """
     Parses an RBC Visa credit card statement PDF.
-    Returns a DataFrame with columns: Date, Description, Debit, Credit
+    Returns a DataFrame with columns: Date, Post Date, Description, Debit, Credit
     """
 
     import pdfplumber
+
+    def norm(s):
+        return re.sub(r"\s+", "", s)
 
     transactions = []
     current = None
@@ -580,36 +583,41 @@ def parse_visa_statement(pdf_file):
                 line_words = sorted(rows[y], key=lambda x: float(x["x0"]))
 
                 text = " ".join(w["text"] for w in line_words)
-                header_text = text.upper()
+                header_norm = norm(text).upper()
 
-                if (
-                    "TRANSACTION" in header_text
-                    and "POSTING" in header_text
-                ):
+                # start of transaction table
+                if "TRANSACTION" in header_norm and "POSTING" in header_norm:
                     started = True
                     continue
 
                 if not started:
                     continue
 
+                # stop at total / summary lines (no-space match, since
+                # pdfplumber glues these words together with no space)
                 if (
-                    "TOTAL ACCOUNT BALANCE" in header_text
-                    or "TIME TO PAY" in header_text
-                    or "INTEREST RATE CHART" in header_text
+                    "TOTALACCOUNTBALANCE" in header_norm
+                    or "TIMETOPAY" in header_norm
+                    or "INTERESTRATECHART" in header_norm
                 ):
                     started = False
                     continue
 
-                if not started:
-                    continue
+                # ignore sidebar text (Avion Points, Contact Us, etc.)
+                # transaction table content stays left of x=350
+                first_x = float(line_words[0]["x0"])
 
-                if header_text.strip() in ("DATE DATE",):
+                if first_x >= 350:
                     continue
 
                 first_word = line_words[0]["text"]
 
+                # transaction row starts with month+day glued together, e.g. "JAN11"
                 is_date_start = bool(
-                    re.match(r"^(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)$", first_word.upper())
+                    re.match(
+                        r"^(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\d{1,2}$",
+                        first_word.upper()
+                    )
                 )
 
                 if is_date_start and len(line_words) >= 2:
@@ -618,7 +626,7 @@ def parse_visa_statement(pdf_file):
                         transactions.append(current)
 
                     trans_date = line_words[0]["text"]
-                    post_date = line_words[1]["text"] if len(line_words) > 1 else ""
+                    post_date = line_words[1]["text"]
 
                     current = {
                         "Date": trans_date,
@@ -639,9 +647,11 @@ def parse_visa_statement(pdf_file):
 
                 else:
 
+                    # reference number line (long digits only) -> ignore
                     if re.fullmatch(r"\d{15,}", first_word):
                         continue
 
+                    # otherwise treat as continuation of description
                     if current:
                         current["Description"] += " " + text
 
@@ -665,6 +675,7 @@ def parse_visa_statement(pdf_file):
 
     df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce").fillna(0)
 
+    # Visa convention: negative = payment/credit, positive = purchase (Debit)
     df["Debit"] = df["Amount"].apply(lambda x: x if x > 0 else 0)
     df["Credit"] = df["Amount"].apply(lambda x: abs(x) if x < 0 else 0)
 
