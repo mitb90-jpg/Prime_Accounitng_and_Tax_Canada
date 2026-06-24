@@ -3117,7 +3117,7 @@ st.markdown(
         padding-top:12px;
         border-top:1px solid #e6e6e6;
         text-align:right;
-        font-size:12px;
+        font-size:22px;
         color:#888;
     ">
         Prime Automated Categorization & Reporting System<br>
