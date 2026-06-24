@@ -2207,18 +2207,6 @@ if page == "📊 Reports":
 
     st.divider()
 
-    # ---------------- UPLOADER RESET COUNTERS ----------------
-
-    if "scotia_uploader_version" not in st.session_state:
-        st.session_state.scotia_uploader_version = 0
-
-    if "visa_uploader_version" not in st.session_state:
-        st.session_state.visa_uploader_version = 0
-
-    uploaded_excel = st.file_uploader(
-        "Upload Excel File",
-        type=["xlsx"]
-    )
 
     # ---------------- SCOTIA UPLOADER ----------------
 
@@ -2283,25 +2271,20 @@ if page == "📊 Reports":
             st.session_state.triangle_uploader_version += 1
             st.rerun()
 
-    df = None
+        df = None
     scotia_df = None
     visa_df = None
     triangle_df = None
 
-    client_file_prefix = re.sub(r"[^A-Za-z0-9_\-]+", "_", selected_report_client).strip("_")
+    client_file_prefix = re.sub(
+        r"[^A-Za-z0-9_\-]+",
+        "_",
+        selected_report_client
+    ).strip("_")
 
-    # ---------------- EXCEL (mutually exclusive with PDF uploaders) ----------------
+    # ---------------- SCOTIA PDF ----------------
 
-    if uploaded_excel is not None:
-
-        df = pd.read_excel(uploaded_excel)
-
-        # remove blank Excel columns
-        df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed")]
-
-    else:
-
-        # ---------------- SCOTIA PDF ----------------
+      
 
         if uploaded_pdf:
 
