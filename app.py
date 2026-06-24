@@ -75,6 +75,54 @@ VISA_CREDIT_RULES = {
 }
 
 
+# ---------------- PROFIT & LOSS STRUCTURE ----------------
+# Defines which existing Category names belong in each P&L section, and the
+# display order within that section. Categories not listed here fall through
+# to "Other/Uncategorized" at the bottom of Expenses. Category names are NOT
+# renamed -- they appear in the P&L exactly as produced by the categorization
+# rules above.
+
+PL_REVENUE_CATEGORIES = [
+    "Revenue",
+    "Other Income",
+    "Refund",
+]
+
+PL_COGS_CATEGORIES = [
+    "Purchases",
+]
+
+PL_EXPENSE_CATEGORIES = [
+    "Meals and Entertainment",
+    "Trades and Sub-Contracts",
+    "Interest and Bank charges",
+    "Supplies",
+    "Office Supplies",
+    "Dues and Subscriptions",
+    "Professional Fee",
+    "Admin Expenses",
+    "Telephone and Internet",
+    "Insurance",
+    "Travel Expense",
+    "Promotion",
+    "Vehicle Expense",
+    "Delivery Expenses",
+    "Repairs and Maintenance",
+    "Parking and Toll",
+    "Fuel",
+    "Health and safety",
+    "Misc Expenses",
+    "Rental",
+]
+
+# Categories that should never appear in the P&L (internal transfers, not
+# real revenue or expense)
+PL_EXCLUDED_CATEGORIES = [
+    "Credit Card Payments",
+]
+
+
+
 # ---------------- DATABASE ----------------
 
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
@@ -2850,35 +2898,187 @@ if page == "📊 Reports":
             ignore_index=True
         )
 
+        # drop categories that should never appear on the P&L (e.g. internal
+        # credit card payments between the client's own accounts)
+        combined_df = combined_df[~combined_df["Category"].isin(PL_EXCLUDED_CATEGORIES)]
+
         st.subheader(f"📊 Combined Profit & Loss Statement — {selected_report_client}")
 
-        revenue = combined_df.loc[combined_df["Category"] == "Revenue", "Credit"].fillna(0).sum()
-        expense_df = combined_df[combined_df["Category"] != "Revenue"]
-        expense_summary = expense_df.groupby("Category")["Debit"].sum().reset_index()
+        revenue_by_cat = (
+            combined_df[combined_df["Category"].isin(PL_REVENUE_CATEGORIES)]
+            .groupby("Category")["Credit"].sum()
+        )
 
-        total_expenses = expense_summary["Debit"].sum()
-        net_profit = revenue - total_expenses
+        cogs_by_cat = (
+            combined_df[combined_df["Category"].isin(PL_COGS_CATEGORIES)]
+            .groupby("Category")["Debit"].sum()
+        )
 
-        pl_rows = [["Revenue", revenue], ["Less: Expenses", ""]]
+        expense_by_cat = (
+            combined_df[combined_df["Category"].isin(PL_EXPENSE_CATEGORIES)]
+            .groupby("Category")["Debit"].sum()
+        )
 
-        for _, r in expense_summary.iterrows():
-            pl_rows.append([r["Category"], r["Debit"]])
+        known_categories = (
+            set(PL_REVENUE_CATEGORIES)
+            | set(PL_COGS_CATEGORIES)
+            | set(PL_EXPENSE_CATEGORIES)
+            | set(PL_EXCLUDED_CATEGORIES)
+        )
 
-        pl_rows += [["Total Expenses", total_expenses],
-                    ["Net Profit", net_profit]]
+        leftover_df = combined_df[~combined_df["Category"].isin(known_categories)]
+        # also treat blank/uncategorized rows as "Other/Uncategorized"
+        other_uncategorized = leftover_df["Debit"].sum() - leftover_df["Credit"].sum()
 
-        pl_df = pd.DataFrame(pl_rows, columns=["Description", "Amount"])
-        pl_df_display = pl_df.copy()
-        pl_df_display["Amount"] = pl_df_display["Amount"].apply(format_amount)
+        total_revenue = sum(revenue_by_cat.get(c, 0) for c in PL_REVENUE_CATEGORIES)
+        total_cogs = sum(cogs_by_cat.get(c, 0) for c in PL_COGS_CATEGORIES)
+        gross_profit = total_revenue - total_cogs
 
-        st.dataframe(pl_df_display, use_container_width=True, hide_index=True)
+        total_expenses = sum(expense_by_cat.get(c, 0) for c in PL_EXPENSE_CATEGORIES)
+        if other_uncategorized:
+            total_expenses += other_uncategorized
 
-        # ---------------- COMBINED P&L DOWNLOAD (with client header) ----------------
+        net_income_before_taxes = gross_profit - total_expenses
+
+        # ---------------- TAX RATE INPUTS ----------------
+
+        tax_col1, tax_col2 = st.columns(2)
+
+        with tax_col1:
+            federal_tax_rate = st.number_input(
+                "Federal Tax Rate (%)",
+                min_value=0.0,
+                value=0.0,
+                step=0.5,
+                key="pl_federal_tax_rate"
+            )
+
+        with tax_col2:
+            provincial_tax_rate = st.number_input(
+                "Provincial Tax Rate (%)",
+                min_value=0.0,
+                value=0.0,
+                step=0.5,
+                key="pl_provincial_tax_rate"
+            )
+
+        combined_tax_rate = federal_tax_rate + provincial_tax_rate
+
+        tax_expense = (
+            net_income_before_taxes * (combined_tax_rate / 100)
+            if net_income_before_taxes > 0
+            else 0
+        )
+
+        net_income_after_taxes = net_income_before_taxes - tax_expense
+
+        # ---------------- BUILD P&L ROW LIST ----------------
+        # Each row: (label, amount_or_None, row_type)
+        # row_type drives styling: "section" (blue), "subtotal" (gray/bold),
+        # "line" (plain), "rate" (plain, percentage)
+
+        pl_rows = []
+
+        pl_rows.append(("Revenue", None, "section"))
+        for cat in PL_REVENUE_CATEGORIES:
+            pl_rows.append((cat, revenue_by_cat.get(cat, 0), "line"))
+        pl_rows.append(("Total Revenue", total_revenue, "subtotal"))
+
+        pl_rows.append(("Cost of Goods Sold", None, "section"))
+        for cat in PL_COGS_CATEGORIES:
+            pl_rows.append((cat, cogs_by_cat.get(cat, 0), "line"))
+        pl_rows.append(("Total Cost of Goods Sold", total_cogs, "subtotal"))
+
+        pl_rows.append(("Gross Profit", gross_profit, "grossprofit"))
+
+        pl_rows.append(("Expenses", None, "section"))
+        for cat in PL_EXPENSE_CATEGORIES:
+            pl_rows.append((cat, expense_by_cat.get(cat, 0), "line"))
+        if other_uncategorized:
+            pl_rows.append(("Other/Uncategorized", other_uncategorized, "line"))
+        pl_rows.append(("Total Expenses", total_expenses, "subtotal"))
+
+        pl_rows.append(("Net income before taxes", net_income_before_taxes, "subtotal"))
+        pl_rows.append(("Federal Tax rate", federal_tax_rate, "rate"))
+        pl_rows.append(("Provincial Tax rate", provincial_tax_rate, "rate"))
+        pl_rows.append(("Tax Expense", tax_expense, "line"))
+        pl_rows.append(("Net income after taxes", net_income_after_taxes, "subtotal"))
+
+        pl_df = pd.DataFrame(pl_rows, columns=["Description", "Amount", "RowType"])
+
+        # ---------------- DISPLAY ----------------
+
+        pl_display = pl_df.copy()
+
+        def format_pl_amount(row):
+            if row["RowType"] == "rate":
+                return f"{row['Amount']:.2f}%" if pd.notna(row["Amount"]) else ""
+            return format_amount(row["Amount"]) if pd.notna(row["Amount"]) else ""
+
+        pl_display["Amount"] = pl_display.apply(format_pl_amount, axis=1)
+        pl_display = pl_display.drop(columns=["RowType"])
+
+        def style_pl_row(row):
+            row_type = pl_df.loc[row.name, "RowType"]
+            if row_type == "section":
+                return ["background-color: #1f4e79; color: white; font-weight: bold"] * len(row)
+            if row_type == "grossprofit":
+                return ["background-color: #e0e0e0; font-weight: bold"] * len(row)
+            if row_type == "subtotal":
+                return ["font-weight: bold; border-top: 1px solid #999"] * len(row)
+            return [""] * len(row)
+
+        styled_pl = pl_display.style.apply(style_pl_row, axis=1)
+
+        st.dataframe(styled_pl, use_container_width=True, hide_index=True)
+
+        # ---------------- COMBINED P&L DOWNLOAD (with client header + colored sections) ----------------
+
+        from openpyxl.styles import PatternFill, Font
+
         pl_output = io.BytesIO()
+
         with pd.ExcelWriter(pl_output, engine="openpyxl") as writer:
-            pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss", startrow=1)
+
+            pl_df.drop(columns=["RowType"]).to_excel(
+                writer, index=False, sheet_name="Profit & Loss", startrow=1
+            )
+
             worksheet = writer.sheets["Profit & Loss"]
-            worksheet.cell(row=1, column=1).value = f"Client: {selected_report_client}  |  Combined Profit & Loss"
+            worksheet.cell(row=1, column=1).value = (
+                f"Client: {selected_report_client}  |  Combined Profit & Loss"
+            )
+
+            section_fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+            section_font = Font(color="FFFFFF", bold=True)
+
+            grossprofit_fill = PatternFill(start_color="E0E0E0", end_color="E0E0E0", fill_type="solid")
+            bold_font = Font(bold=True)
+
+            # data starts at Excel row 3 (row 1 = client header, row 2 = column headers)
+            for i, row_type in enumerate(pl_df["RowType"]):
+                excel_row = i + 3
+
+                if row_type == "rate":
+                    # write as a numeric percentage value in the Amount column
+                    amount_value = pl_df.loc[i, "Amount"]
+                    cell = worksheet.cell(row=excel_row, column=2)
+                    cell.value = amount_value / 100 if pd.notna(amount_value) else None
+                    cell.number_format = "0.00%"
+
+                if row_type == "section":
+                    for col_num in range(1, 3):
+                        worksheet.cell(row=excel_row, column=col_num).fill = section_fill
+                        worksheet.cell(row=excel_row, column=col_num).font = section_font
+
+                elif row_type == "grossprofit":
+                    for col_num in range(1, 3):
+                        worksheet.cell(row=excel_row, column=col_num).fill = grossprofit_fill
+                        worksheet.cell(row=excel_row, column=col_num).font = bold_font
+
+                elif row_type == "subtotal":
+                    for col_num in range(1, 3):
+                        worksheet.cell(row=excel_row, column=col_num).font = bold_font
 
         pl_output.seek(0)
 
@@ -2889,6 +3089,8 @@ if page == "📊 Reports":
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             key="download_combined_pl"
         )
+
+
 
 elif page == "🏠 Dashboard":
 
