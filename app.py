@@ -1188,7 +1188,7 @@ with col2:
     today_display = datetime.date.today().strftime("%A, %B %d, %Y")
 
     st.markdown(
-        f"<p style='font-size:16px; color:#1f4e79; margin-top:-10px;'>👋 Welcome back — today is {today_display}</p>",
+        f"<p style='font-size:16px; color:#1f4e79; margin-top:-10px;'>👋 Welcome back — Today is {today_display}</p>",
         unsafe_allow_html=True
     )
 
