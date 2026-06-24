@@ -813,7 +813,7 @@ def parse_triangle_statement(pdf_file):
     Parses a Triangle World Elite Mastercard (Canadian Tire Bank) statement PDF.
     Returns a DataFrame with columns: Date, Description, Debit, Credit
     Credit = Payments received + Returns and other credits
-    Debit  = Purchases
+    Debit  = Purchases + Cash transactions + Fees
     """
 
     import pdfplumber
@@ -900,6 +900,18 @@ def parse_triangle_statement(pdf_file):
                     in_table = False
                     continue
 
+                # Cash transactions section (may wrap onto two lines, e.g.
+                # "Cash transactions (includes Balance Transfers" / "if applicable)")
+                if header_norm.startswith("CASHTRANSACTIONS"):
+                    current_section = "debit"
+                    in_table = False
+                    continue
+
+                if header_norm == "FEES":
+                    current_section = "debit"
+                    in_table = False
+                    continue
+
                 # table header row -> start capturing (only if we know which section we're in)
                 if "TRANSACTION" in header_norm and "POSTING" in header_norm:
                     if current_section is not None:
@@ -918,6 +930,8 @@ def parse_triangle_statement(pdf_file):
                     or header_norm.startswith("TOTALRETURNSANDCREDITS")
                     or header_norm.startswith("TOTALPURCHASES")
                     or header_norm.startswith("TOTALINTERESTCHARGES")
+                    or header_norm.startswith("TOTALCASHTRANSACTIONS")
+                    or header_norm.startswith("TOTALFEES")
                 ):
                     in_table = False
                     current_section = None
