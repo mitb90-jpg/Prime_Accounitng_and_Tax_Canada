@@ -895,6 +895,11 @@ def parse_triangle_statement(pdf_file):
                     in_table = False
                     continue
 
+                if header_norm == "INTERESTCHARGES":
+                    current_section = "debit"
+                    in_table = False
+                    continue
+
                 # table header row -> start capturing (only if we know which section we're in)
                 if "TRANSACTION" in header_norm and "POSTING" in header_norm:
                     if current_section is not None:
@@ -912,6 +917,7 @@ def parse_triangle_statement(pdf_file):
                     header_norm.startswith("TOTALPAYMENTSRECEIVED")
                     or header_norm.startswith("TOTALRETURNSANDCREDITS")
                     or header_norm.startswith("TOTALPURCHASES")
+                    or header_norm.startswith("TOTALINTERESTCHARGES")
                 ):
                     in_table = False
                     current_section = None
