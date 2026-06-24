@@ -3122,7 +3122,7 @@ st.markdown(
     ">
         Prime Automated Categorization & Reporting System<br>
         <span style="font-weight:600;color:#1f4e79;">
-            Powered by MiT_Prime Accounting & Tax
+            Powered by: MiT_Prime Accounting & Tax
         </span>
     </div>
     """,
