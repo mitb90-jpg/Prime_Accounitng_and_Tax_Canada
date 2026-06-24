@@ -2207,6 +2207,18 @@ if page == "📊 Reports":
 
     st.divider()
 
+    # ---------------- UPLOADER RESET COUNTERS ----------------
+
+    if "scotia_uploader_version" not in st.session_state:
+        st.session_state.scotia_uploader_version = 0
+
+    if "visa_uploader_version" not in st.session_state:
+        st.session_state.visa_uploader_version = 0
+
+    uploaded_excel = st.file_uploader(
+        "Upload Excel File",
+        type=["xlsx"]
+    )
 
     # ---------------- SCOTIA UPLOADER ----------------
 
@@ -2264,7 +2276,7 @@ if page == "📊 Reports":
                 key=f"triangle_pdf_uploader_{st.session_state.triangle_uploader_version}"
             )
 
-        with triangle_col2:
+    with triangle_col2:
         st.write("")
         st.write("")
         if st.button("🗑️ Clear All", key="clear_triangle_files"):
@@ -2276,27 +2288,22 @@ if page == "📊 Reports":
     visa_df = None
     triangle_df = None
 
-    client_file_prefix = re.sub(
-        r"[^A-Za-z0-9_\-]+",
-        "_",
-        selected_report_client
-    ).strip("_")
+    client_file_prefix = re.sub(r"[^A-Za-z0-9_\-]+", "_", selected_report_client).strip("_")
 
-    # ---------------- SCOTIA PDF ----------------
+    # ---------------- EXCEL (mutually exclusive with PDF uploaders) ----------------
 
-    if uploaded_pdf:
+    if uploaded_excel is not None:
 
-        import pdfplumber
+        df = pd.read_excel(uploaded_excel)
 
-        st.success(
-            f"{len(uploaded_pdf)} Scotia statement PDF(s) uploaded successfully"
-        )
+        # remove blank Excel columns
+        df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed")]
 
-        transactions = []
+    else:
 
-        for pdf_file in uploaded_pdf:
+        # ---------------- SCOTIA PDF ----------------
 
-            with pdfplumber.open(pdf_file) as pdf:
+        if uploaded_pdf:
 
             import pdfplumber
 
