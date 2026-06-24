@@ -1014,17 +1014,6 @@ st.set_page_config(
 )
 
 
-# ---------------- FORMAT FUNCTION ----------------
-def format_amount(x):
-    try:
-        if pd.isna(x):
-            return ""
-        if isinstance(x, (int, float)):
-            return f"{x:,.2f}"
-        return x
-    except:
-        return x
-
 # ---------------- CSS ----------------
 st.markdown("""
 <style>
@@ -1151,7 +1140,7 @@ with col2:
     today_display = datetime.date.today().strftime("%A, %B %d, %Y")
 
     st.markdown(
-        f"<p style='font-size:16px; color:#1f4e79; margin-top:-10px;'>👋 Welcome back — Today is {today_display}</p>",
+        f"<p style='font-size:16px; color:#1f4e79; margin-top:-10px;'>👋 Welcome back — today is {today_display}</p>",
         unsafe_allow_html=True
     )
 
@@ -1663,7 +1652,7 @@ if page == "🧾 Sales":
             )
 
 
-          
+
     # -------- DISPLAY / EDIT ITEMS --------
 
     if st.session_state.invoice_items:
@@ -2145,6 +2134,31 @@ if page == "📄 Invoice History":
 
 if page == "📊 Reports":
 
+    # ---------------- CLIENT SELECTOR ----------------
+
+    reports_clients = get_clients()
+
+    reports_client_names = [c["client_name"] for c in reports_clients]
+
+    selected_report_client = st.selectbox(
+        "Select Client",
+        ["Select Client"] + reports_client_names,
+        key="reports_client_select"
+    )
+
+    if selected_report_client == "Select Client":
+
+        st.info("👆 Please select a client before uploading statements.")
+
+        st.stop()
+
+    st.markdown(
+        f"<p style='font-size:16px; color:#1f4e79;'>📁 Working on reports for: <b>{selected_report_client}</b></p>",
+        unsafe_allow_html=True
+    )
+
+    st.divider()
+
     # ---------------- UPLOADER RESET COUNTERS ----------------
 
     if "scotia_uploader_version" not in st.session_state:
@@ -2222,8 +2236,13 @@ if page == "📊 Reports":
             st.rerun()
 
     df = None
+    scotia_df = None
+    visa_df = None
+    triangle_df = None
 
-    # ---------------- EXCEL ----------------
+    client_file_prefix = re.sub(r"[^A-Za-z0-9_\-]+", "_", selected_report_client).strip("_")
+
+    # ---------------- EXCEL (mutually exclusive with PDF uploaders) ----------------
 
     if uploaded_excel is not None:
 
@@ -2232,171 +2251,283 @@ if page == "📊 Reports":
         # remove blank Excel columns
         df = df.loc[:, ~df.columns.astype(str).str.contains("^Unnamed")]
 
-    # ---------------- SCOTIA PDF ----------------
+    else:
 
-    elif uploaded_pdf:
+        # ---------------- SCOTIA PDF ----------------
 
-        import pdfplumber
+        if uploaded_pdf:
 
-        st.success(f"{len(uploaded_pdf)} Scotia statement PDF(s) uploaded successfully")
+            import pdfplumber
 
-        transactions = []
+            st.success(f"{len(uploaded_pdf)} Scotia statement PDF(s) uploaded successfully")
 
-        for pdf_file in uploaded_pdf:
+            transactions = []
 
-            with pdfplumber.open(pdf_file) as pdf:
+            for pdf_file in uploaded_pdf:
 
-                current = None
+                with pdfplumber.open(pdf_file) as pdf:
 
-                for page in pdf.pages:
-                    started = False
+                    current = None
 
-                    words = page.extract_words()
+                    for page in pdf.pages:
+                        started = False
 
-                    rows = {}
+                        words = page.extract_words()
 
-                    for w in words:
-                        y = round(float(w["top"]), 1)
+                        rows = {}
 
-                        if y not in rows:
-                            rows[y] = []
+                        for w in words:
+                            y = round(float(w["top"]), 1)
 
-                        rows[y].append(w)
+                            if y not in rows:
+                                rows[y] = []
 
-                    for y in sorted(rows):
+                            rows[y].append(w)
 
-                        line_words = sorted(
-                            rows[y],
-                            key=lambda x: float(x["x0"])
-                        )
+                        for y in sorted(rows):
 
-                        text = " ".join(
-                            w["text"] for w in line_words
-                        )
-
-                        header_text = text.upper()
-
-                        # start transaction table
-                        if (
-                            "DATE" in header_text
-                            and "DESCRIPTION" in header_text
-                            and (
-                                "DEBIT" in header_text
-                                or "WITHDRAW" in header_text
+                            line_words = sorted(
+                                rows[y],
+                                key=lambda x: float(x["x0"])
                             )
-                        ):
-                            started = True
-                            continue
 
-                        if not started:
-                            continue
+                            text = " ".join(
+                                w["text"] for w in line_words
+                            )
 
-                        # ignore bottom summary
-                        if (
-                            "NO. OF DEBITS" in header_text
-                            or "NO. OF CREDITS" in header_text
-                            or "TOTAL AMOUNT" in header_text
-                            or "PAGE -" in header_text
-                        ):
-                            continue
+                            header_text = text.upper()
 
-                        # ignore repeated headers
-                        if (
-                            "DATE" in header_text
-                            and "DESCRIPTION" in header_text
-                        ):
-                            continue
+                            # start transaction table
+                            if (
+                                "DATE" in header_text
+                                and "DESCRIPTION" in header_text
+                                and (
+                                    "DEBIT" in header_text
+                                    or "WITHDRAW" in header_text
+                                )
+                            ):
+                                started = True
+                                continue
 
-                        first = line_words[0]["text"]
+                            if not started:
+                                continue
 
-                        # transaction row
-                        if (
-                            "/" in first
-                            or "-" in first
-                            or "." in first
-                        ):
+                            # ignore bottom summary
+                            if (
+                                "NO. OF DEBITS" in header_text
+                                or "NO. OF CREDITS" in header_text
+                                or "TOTAL AMOUNT" in header_text
+                                or "PAGE -" in header_text
+                            ):
+                                continue
 
-                            if current:
-                                transactions.append(current)
+                            # ignore repeated headers
+                            if (
+                                "DATE" in header_text
+                                and "DESCRIPTION" in header_text
+                            ):
+                                continue
 
-                            current = {
-                                "Date": first,
-                                "Description": "",
-                                "Debit": "",
-                                "Credit": "",
-                            }
+                            first = line_words[0]["text"]
 
-                            for w in line_words[1:]:
+                            # transaction row
+                            if (
+                                "/" in first
+                                or "-" in first
+                                or "." in first
+                            ):
 
-                                x = float(w["x0"])
-                                value = w["text"]
+                                if current:
+                                    transactions.append(current)
 
-                                # amount columns based on PDF layout
+                                current = {
+                                    "Date": first,
+                                    "Description": "",
+                                    "Debit": "",
+                                    "Credit": "",
+                                }
 
-                                if x < 260:
-                                    current["Description"] += " " + value
+                                for w in line_words[1:]:
 
-                                elif x >= 260 and x < 400:
-                                    current["Debit"] += " " + value
+                                    x = float(w["x0"])
+                                    value = w["text"]
 
-                                elif x >= 400 and x < 540:
-                                    current["Credit"] += " " + value
+                                    # amount columns based on PDF layout
 
-                        else:
+                                    if x < 260:
+                                        current["Description"] += " " + value
 
-                            # continuation description
-                            if current:
-                                current["Description"] += " " + text
+                                    elif x >= 260 and x < 400:
+                                        current["Debit"] += " " + value
 
-                if current:
-                    transactions.append(current)
+                                    elif x >= 400 and x < 540:
+                                        current["Credit"] += " " + value
 
-        df = pd.DataFrame(transactions)
+                            else:
 
-        if not df.empty:
-            df = df.apply(
-                lambda x: x.str.strip()
-                if x.dtype == "object"
-                else x
-            )
+                                # continuation description
+                                if current:
+                                    current["Description"] += " " + text
 
-    # ---------------- VISA PDF ----------------
+                    if current:
+                        transactions.append(current)
 
-    elif uploaded_visa_pdf:
+            scotia_df = pd.DataFrame(transactions)
 
-        st.success(f"{len(uploaded_visa_pdf)} Visa statement(s) uploaded successfully")
+            if not scotia_df.empty:
+                scotia_df = scotia_df.apply(
+                    lambda x: x.str.strip()
+                    if x.dtype == "object"
+                    else x
+                )
 
-        visa_dfs = []
+                scotia_df.columns = (
+                    scotia_df.columns
+                    .astype(str)
+                    .str.replace("\n", " ", regex=False)
+                    .str.strip()
+                )
 
-        for visa_file in uploaded_visa_pdf:
-            visa_df = parse_visa_statement(visa_file)
-            if not visa_df.empty:
-                visa_dfs.append(visa_df)
+                for col in scotia_df.columns:
 
-        if visa_dfs:
-            df = pd.concat(visa_dfs, ignore_index=True)
-            df = apply_visa_categories(df)
-        else:
-            st.warning("No transactions found in the Visa statement(s).")
+                    if "Deposit" in col or "Credit" in col:
+                        scotia_df.rename(columns={col: "Credit"}, inplace=True)
 
-    elif uploaded_triangle_pdf:
+                    if "Withdraw" in col or "Debit" in col:
+                        scotia_df.rename(columns={col: "Debit"}, inplace=True)
 
-        st.success(f"{len(uploaded_triangle_pdf)} Triangle Mastercard statement(s) uploaded successfully")
+                for col in ["Debit", "Credit"]:
 
-        triangle_dfs = []
+                    if col in scotia_df.columns:
 
-        for triangle_file in uploaded_triangle_pdf:
-            triangle_df = parse_triangle_statement(triangle_file)
-            if not triangle_df.empty:
-                triangle_dfs.append(triangle_df)
+                        scotia_df[col] = (
+                            scotia_df[col]
+                            .astype(str)
+                            .str.replace("$", "", regex=False)
+                            .str.replace(",", "", regex=False)
+                            .str.strip()
+                        )
 
-        if triangle_dfs:
-            df = pd.concat(triangle_dfs, ignore_index=True)
-            df = apply_visa_categories(df)
-        else:
-            st.warning("No transactions found in the Triangle Mastercard statement(s).")
+                        scotia_df[col] = pd.to_numeric(
+                            scotia_df[col],
+                            errors="coerce"
+                        ).fillna(0)
 
-    # ---------------- CLEAN DATA ----------------
+                # ---------------- SCOTIA RULES ----------------
+
+                scotia_df.loc[
+                    scotia_df["Credit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains(
+                        "MISC PAYMENT|TRANSFER FROM|DEPOSIT|DEP. FROM ANOTHER PARTY|SCOTIABANK PAYMENT",
+                        case=False
+                    ),
+                    "Category"
+                ] = "Revenue"
+
+                scotia_df.loc[
+                    scotia_df["Credit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains(
+                        "Insurance|HEALTH/DENTAL CLAIM",
+                        case=False
+                    ),
+                    "Category"
+                ] = "Other Income"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.strip().str.lower().eq("misc payment"),
+                    "Category"
+                ] = "Misc Expenses"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("INSURANCE", case=False),
+                    "Category"
+                ] = "Insurance"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("LOANS", case=False),
+                    "Category"
+                ] = "Car Loan"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("PC Bill Payment", case=False),
+                    "Category"
+                ] = "Purchases"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("GOODLIFE FITNESS", case=False),
+                    "Category"
+                ] = "Personal Expenses"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("HIGHWAY", case=False),
+                    "Category"
+                ] = "Parking and Toll"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("TSCC", case=False),
+                    "Category"
+                ] = "Vehicle Expense"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("Debit Memo", case=False),
+                    "Category"
+                ] = "Ask from Customer"
+
+                scotia_df.loc[
+                    scotia_df["Debit"].notna() &
+                    scotia_df["Description"].astype(str).str.contains("SERVICE CHARGE|FEE", case=False),
+                    "Category"
+                ] = "Interest and Bank charges"
+            else:
+                st.warning("No transactions found in the Scotia statement(s).")
+
+        # ---------------- VISA PDF ----------------
+
+        if uploaded_visa_pdf:
+
+            st.success(f"{len(uploaded_visa_pdf)} Visa statement(s) uploaded successfully")
+
+            visa_dfs = []
+
+            for visa_file in uploaded_visa_pdf:
+                parsed_visa = parse_visa_statement(visa_file)
+                if not parsed_visa.empty:
+                    visa_dfs.append(parsed_visa)
+
+            if visa_dfs:
+                visa_df = pd.concat(visa_dfs, ignore_index=True)
+                visa_df = apply_visa_categories(visa_df)
+            else:
+                st.warning("No transactions found in the Visa statement(s).")
+
+        # ---------------- TRIANGLE MASTERCARD PDF ----------------
+
+        if uploaded_triangle_pdf:
+
+            st.success(f"{len(uploaded_triangle_pdf)} Triangle Mastercard statement(s) uploaded successfully")
+
+            triangle_dfs = []
+
+            for triangle_file in uploaded_triangle_pdf:
+                parsed_triangle = parse_triangle_statement(triangle_file)
+                if not parsed_triangle.empty:
+                    triangle_dfs.append(parsed_triangle)
+
+            if triangle_dfs:
+                triangle_df = pd.concat(triangle_dfs, ignore_index=True)
+                triangle_df = apply_visa_categories(triangle_df)
+            else:
+                st.warning("No transactions found in the Triangle Mastercard statement(s).")
+
+    # ---------------- CLEAN DATA (Excel path only; PDF sources are cleaned above) ----------------
 
     any_upload = (
         uploaded_excel is not None
@@ -2405,33 +2536,36 @@ if page == "📊 Reports":
         or uploaded_triangle_pdf
     )
 
-    if any_upload:
+    if not any_upload:
+
+        st.markdown("""
+        <div style="
+            background:#f5f9ff;
+            padding:25px;
+            border-radius:20px;
+            text-align:center;
+            border:1px solid #d6e4f0;
+        ">
+
+        <h2 style="color:#1f4e79;">
+        👋 Welcome to Prime Accounting
+        </h2>
+
+        <p style="font-size:18px;color:#555;">
+        Upload a bank statement or credit card statement
+        to start automated categorization and reporting
+        </p>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+    if uploaded_excel is not None:
 
         if df is None or df.empty:
             st.warning("No transactions found in the uploaded file(s).")
             st.stop()
 
         df.columns = df.columns.astype(str).str.strip()
-
-        # PDF column normalization (Scotia)
-        if uploaded_pdf:
-
-            df.columns = (
-                df.columns
-                .astype(str)
-                .str.replace("\n", " ", regex=False)
-                .str.strip()
-            )
-
-            for col in df.columns:
-
-                if "Deposit" in col or "Credit" in col:
-                    df.rename(columns={col: "Credit"}, inplace=True)
-
-                if "Withdraw" in col or "Debit" in col:
-                    df.rename(columns={col: "Debit"}, inplace=True)
-
-        # ---------------- CLEAN AMOUNTS ----------------
 
         for col in ["Debit", "Credit"]:
 
@@ -2524,81 +2658,30 @@ if page == "📊 Reports":
             "Category"
         ] = "Interest and Bank charges"
 
-    else:
+    # =====================================================================
+    # REUSABLE RENDER: transaction table + category summary for one source
+    # (P&L is intentionally NOT generated here — see combined P&L below)
+    # =====================================================================
 
-        st.markdown("""
-        <div style="
-            background:#f5f9ff;
-            padding:25px;
-            border-radius:20px;
-            text-align:center;
-            border:1px solid #d6e4f0;
-        ">
+    def render_source_section(source_df, source_label, file_key):
 
-        <h2 style="color:#1f4e79;">
-        👋 Welcome to Prime Accounting
-        </h2>
+        source_df = source_df.reset_index(drop=True)
 
-        <p style="font-size:18px;color:#555;">
-        Upload a bank statement or credit card statement
-        to start automated categorization and reporting
-        </p>
-
-        </div>
-        """, unsafe_allow_html=True)
-
-    if any_upload and df is not None and not df.empty:
-
-        # ---------------- Sr No ----------------
-        df = df.reset_index(drop=True)
-
-        df.insert(
-            0,
-            "Sr. No",
-            range(1, len(df) + 1)
-        )
-
-        # (everything from here down — display table, totals, P&L,
-        # category summary, export buttons — stays exactly as you have it,
-        # unchanged)
+        source_df.insert(0, "Sr. No", range(1, len(source_df) + 1))
 
         # ---------------- DISPLAY TABLE ----------------
-        display_df = df.copy()
+        display_source_df = source_df.copy()
 
         for col in ["Credit", "Debit"]:
-            if col in display_df.columns:
-                display_df[col] = display_df[col].apply(format_amount)
+            if col in display_source_df.columns:
+                display_source_df[col] = display_source_df[col].apply(format_amount)
 
-        st.subheader("📊 Categorized Transactions")
-
+        st.subheader(f"📊 {source_label} — Categorized Transactions")
 
         # ---------------- TOTAL ROW ----------------
 
-        debit_total = (
-            pd.to_numeric(
-                df["Debit"]
-                .astype(str)
-                .str.replace(",", "", regex=False)
-                .str.replace("$", "", regex=False),
-                errors="coerce"
-            )
-            .fillna(0)
-            .sum()
-        )
-
-
-        credit_total = (
-            pd.to_numeric(
-                df["Credit"]
-                .astype(str)
-                .str.replace(",", "", regex=False)
-                .str.replace("$", "", regex=False),
-                errors="coerce"
-            )
-            .fillna(0)
-            .sum()
-        )
-
+        debit_total = pd.to_numeric(source_df["Debit"], errors="coerce").fillna(0).sum()
+        credit_total = pd.to_numeric(source_df["Credit"], errors="coerce").fillna(0).sum()
 
         total_row = pd.DataFrame([{
             "Sr. No": "",
@@ -2606,25 +2689,13 @@ if page == "📊 Reports":
             "Description": "TOTAL",
             "Debit": debit_total,
             "Credit": credit_total
-            }])
+        }])
 
-
-        display_df = pd.concat(
-            [
-                display_df,
-                total_row
-            ],
-            ignore_index=True
-        )
-
+        display_source_df = pd.concat([display_source_df, total_row], ignore_index=True)
 
         for col in ["Credit", "Debit"]:
-
-            if col in display_df.columns:
-                display_df[col] = display_df[col].apply(format_amount)
-
-
-        # ---------------- BOLD TOTAL ROW + HIGHLIGHT NEEDS REVIEW ----------------
+            if col in display_source_df.columns:
+                display_source_df[col] = display_source_df[col].apply(format_amount)
 
         def style_transaction_row(row):
 
@@ -2636,74 +2707,153 @@ if page == "📊 Reports":
 
             return [""] * len(row)
 
+        styled_transactions = display_source_df.style.apply(style_transaction_row, axis=1)
 
-        styled_transactions = display_df.style.apply(
-            style_transaction_row,
-            axis=1
-        )
-
-
-        st.dataframe(
-            styled_transactions,
-            use_container_width=True,
-            hide_index=True
-        )
+        st.dataframe(styled_transactions, use_container_width=True, hide_index=True)
 
         # ---------------- CATEGORY STATUS COUNT ----------------
-        total_entries = len(df)
+
+        total_entries = len(source_df)
+
         categorized_entries = (
-        df["Category"]
-        .fillna("")
-        .astype(str)
-        .str.strip()
-        .ne("")
-        .sum()
-    )
+            source_df["Category"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .ne("")
+            .sum()
+        )
+
         uncategorized_entries = total_entries - categorized_entries
 
-        st.markdown("### 📌 Categorization Summary")
+        st.markdown(f"**📌 {source_label} Categorization Summary**")
         st.markdown(f"""
         - ✅ **Total Transactions:** {total_entries:,}
         - 🟢 **Categorized Transactions:** {categorized_entries:,}
         - ⚪ **Uncategorized Transactions:** {uncategorized_entries:,}
         """)
 
-        # ---------------- DOWNLOAD TRANSACTIONS (with highlight) ----------------
+        # ---------------- DOWNLOAD TRANSACTIONS (with highlight + client header) ----------------
         from openpyxl.styles import PatternFill
 
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            df.to_excel(writer, index=False, sheet_name="Transactions")
+            source_df.to_excel(writer, index=False, sheet_name="Transactions", startrow=1)
 
             worksheet = writer.sheets["Transactions"]
+            worksheet.cell(row=1, column=1).value = f"Client: {selected_report_client}  |  Source: {source_label}"
+
             highlight_fill = PatternFill(
                 start_color="FFF3CD",
                 end_color="FFF3CD",
                 fill_type="solid"
             )
 
-            if "Needs Review" in df.columns:
-                review_col_idx = df.columns.get_loc("Needs Review")
-
-                for row_num, needs_review in enumerate(df["Needs Review"], start=2):  # +2: header row + 1-indexed
+            if "Needs Review" in source_df.columns:
+                for row_num, needs_review in enumerate(source_df["Needs Review"], start=3):
                     if needs_review:
-                        for col_num in range(1, len(df.columns) + 1):
+                        for col_num in range(1, len(source_df.columns) + 1):
                             worksheet.cell(row=row_num, column=col_num).fill = highlight_fill
 
         output.seek(0)
 
         st.download_button(
-            "⬇️ Export Categorized Data",
+            f"⬇️ Export {source_label} Categorized Data",
             data=output,
-            file_name="Auto_Categorized_Data.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            file_name=f"{client_file_prefix}_{source_label.replace(' ', '_')}_Categorized_Data.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key=f"download_{file_key}_transactions"
         )
 
-        # ---------------- PROFIT & LOSS ----------------
-        st.subheader("📊 Profit & Loss Statement")
+        # ---------------- CATEGORY SUMMARY ----------------
 
-        revenue = df.loc[df["Category"] == "Revenue", "Credit"].fillna(0).sum()
-        expense_df = df[df["Category"] != "Revenue"]
+        source_df["Amount"] = source_df["Credit"].fillna(0) + source_df["Debit"].fillna(0)
+
+        summary = source_df.groupby("Category")["Amount"].sum().reset_index()
+
+        display_summary = summary.copy()
+        display_summary["Amount"] = display_summary["Amount"].apply(format_amount)
+
+        summary_total = summary["Amount"].sum()
+
+        total_summary_row = pd.DataFrame([{
+            "Category": "TOTAL",
+            "Amount": format_amount(summary_total)
+        }])
+
+        display_summary = pd.concat([display_summary, total_summary_row], ignore_index=True)
+
+        st.subheader(f"📋 {source_label} — Category Summary")
+
+        def bold_total(row):
+            if row["Category"] == "TOTAL":
+                return ["font-weight: bold"] * len(row)
+            return [""] * len(row)
+
+        styled_summary = display_summary.style.apply(bold_total, axis=1)
+
+        st.dataframe(styled_summary, use_container_width=True, hide_index=True)
+
+        # ---------------- SUMMARY DOWNLOAD (with client header) ----------------
+
+        summary_output = io.BytesIO()
+
+        with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
+            summary.to_excel(writer, index=False, sheet_name="Category Summary", startrow=1)
+            worksheet = writer.sheets["Category Summary"]
+            worksheet.cell(row=1, column=1).value = f"Client: {selected_report_client}  |  Source: {source_label}"
+
+        summary_output.seek(0)
+
+        st.download_button(
+            f"⬇️ Export {source_label} Summary Data",
+            data=summary_output,
+            file_name=f"{client_file_prefix}_{source_label.replace(' ', '_')}_Category_Summary.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key=f"download_{file_key}_summary"
+        )
+
+        st.divider()
+
+        return source_df
+
+    # =====================================================================
+    # RENDER EACH UPLOADED SOURCE SEPARATELY
+    # =====================================================================
+
+    combined_pl_sources = []
+
+    if uploaded_excel is not None and df is not None and not df.empty:
+        df = render_source_section(df, "Excel Upload", "excel")
+        combined_pl_sources.append(df)
+
+    if scotia_df is not None and not scotia_df.empty:
+        scotia_df = render_source_section(scotia_df, "Scotia Bank", "scotia")
+        combined_pl_sources.append(scotia_df)
+
+    if visa_df is not None and not visa_df.empty:
+        visa_df = render_source_section(visa_df, "Visa", "visa")
+        combined_pl_sources.append(visa_df)
+
+    if triangle_df is not None and not triangle_df.empty:
+        triangle_df = render_source_section(triangle_df, "Triangle Mastercard", "triangle")
+        combined_pl_sources.append(triangle_df)
+
+    # =====================================================================
+    # ONE COMBINED PROFIT & LOSS ACROSS ALL UPLOADED SOURCES
+    # =====================================================================
+
+    if combined_pl_sources:
+
+        combined_df = pd.concat(
+            [d[["Description", "Debit", "Credit", "Category"]] for d in combined_pl_sources],
+            ignore_index=True
+        )
+
+        st.subheader(f"📊 Combined Profit & Loss Statement — {selected_report_client}")
+
+        revenue = combined_df.loc[combined_df["Category"] == "Revenue", "Credit"].fillna(0).sum()
+        expense_df = combined_df[combined_df["Category"] != "Revenue"]
         expense_summary = expense_df.groupby("Category")["Debit"].sum().reset_index()
 
         total_expenses = expense_summary["Debit"].sum()
@@ -2718,115 +2868,26 @@ if page == "📊 Reports":
                     ["Net Profit", net_profit]]
 
         pl_df = pd.DataFrame(pl_rows, columns=["Description", "Amount"])
-        pl_df["Amount"] = pl_df["Amount"].apply(format_amount)
+        pl_df_display = pl_df.copy()
+        pl_df_display["Amount"] = pl_df_display["Amount"].apply(format_amount)
 
-        st.dataframe(pl_df, use_container_width=True, hide_index=True)
+        st.dataframe(pl_df_display, use_container_width=True, hide_index=True)
 
-        # ---------------- P&L DOWNLOAD ----------------
+        # ---------------- COMBINED P&L DOWNLOAD (with client header) ----------------
         pl_output = io.BytesIO()
         with pd.ExcelWriter(pl_output, engine="openpyxl") as writer:
-            pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss")
+            pl_df.to_excel(writer, index=False, sheet_name="Profit & Loss", startrow=1)
+            worksheet = writer.sheets["Profit & Loss"]
+            worksheet.cell(row=1, column=1).value = f"Client: {selected_report_client}  |  Combined Profit & Loss"
+
         pl_output.seek(0)
 
         st.download_button(
-            "📊 Export Profit & Loss Statement",
+            "📊 Export Combined Profit & Loss Statement",
             data=pl_output,
-            file_name="Profit_and_Loss.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-
-        # ---------------- CATEGORY SUMMARY ----------------
-
-        df["Amount"] = (
-            df["Credit"].fillna(0) +
-            df["Debit"].fillna(0)
-        )
-
-
-        summary = (
-            df.groupby("Category")["Amount"]
-            .sum()
-            .reset_index()
-        )
-
-
-        display_summary = summary.copy()
-
-
-        display_summary["Amount"] = (
-            display_summary["Amount"]
-            .apply(format_amount)
-        )
-
-
-        # ---------------- TOTAL ROW ----------------
-
-        summary_total = summary["Amount"].sum()
-
-
-        total_summary_row = pd.DataFrame([{
-            "Category": "TOTAL",
-            "Amount": format_amount(summary_total)
-        }])
-
-
-        display_summary = pd.concat(
-            [
-                display_summary,
-                total_summary_row
-            ],
-            ignore_index=True
-        )
-
-
-        st.subheader("📋 Category Summary")
-
-
-        # ---------------- BOLD TOTAL ROW ----------------
-
-        def bold_total(row):
-
-            if row["Category"] == "TOTAL":
-                return ["font-weight: bold"] * len(row)
-
-            return [""] * len(row)
-
-
-        styled_summary = display_summary.style.apply(
-            bold_total,
-            axis=1
-        )
-
-
-        st.dataframe(
-            styled_summary,
-            use_container_width=True,
-            hide_index=True
-        )
-
-
-        # ---------------- SUMMARY DOWNLOAD ----------------
-
-        summary_output = io.BytesIO()
-
-
-        with pd.ExcelWriter(summary_output, engine="openpyxl") as writer:
-
-            summary.to_excel(
-                writer,
-                index=False,
-                sheet_name="Category Summary"
-            )
-
-
-        summary_output.seek(0)
-
-
-        st.download_button(
-            "⬇️ Export Summary Data",
-            data=summary_output,
-            file_name="Category_Summary.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            file_name=f"{client_file_prefix}_Profit_and_Loss.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key="download_combined_pl"
         )
 
 elif page == "🏠 Dashboard":
@@ -3109,22 +3170,3 @@ elif page == "🏠 Dashboard":
     else:
 
         st.info("No invoices due in the next 7 days")
-
-st.markdown(
-    """
-    <div style="
-        margin-top:40px;
-        padding-top:12px;
-        border-top:1px solid #e6e6e6;
-        text-align:right;
-        font-size:16px;
-        color:#888;
-    ">
-        Prime Automated Categorization & Reporting System<br>
-        <span style="font-weight:600;color:#1f4e79;">
-            Powered by: MiT_Prime Accounting & Tax
-        </span>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
