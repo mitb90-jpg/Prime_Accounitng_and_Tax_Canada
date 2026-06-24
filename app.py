@@ -2998,11 +2998,11 @@ if page == "📊 Reports":
             pl_rows.append(("Other/Uncategorized", other_uncategorized, "line"))
         pl_rows.append(("Total Expenses", total_expenses, "subtotal"))
 
-        pl_rows.append(("Net income before taxes", net_income_before_taxes, "subtotal"))
+        pl_rows.append(("Net income before taxes", net_income_before_taxes, "grossprofit"))
         pl_rows.append(("Federal Tax rate", federal_tax_rate, "rate"))
         pl_rows.append(("Provincial Tax rate", provincial_tax_rate, "rate"))
-        pl_rows.append(("Tax Expense", tax_expense, "line"))
-        pl_rows.append(("Net income after taxes", net_income_after_taxes, "subtotal"))
+        pl_rows.append(("Tax Expense", tax_expense, "grossprofit"))
+        pl_rows.append(("Net income after taxes", net_income_after_taxes, "section_total"))
 
         pl_df = pd.DataFrame(pl_rows, columns=["Description", "Amount", "RowType"])
 
@@ -3021,6 +3021,8 @@ if page == "📊 Reports":
         def style_pl_row(row):
             row_type = pl_df.loc[row.name, "RowType"]
             if row_type == "section":
+                return ["background-color: #1f4e79; color: white; font-weight: bold"] * len(row)
+            if row_type == "section_total":
                 return ["background-color: #1f4e79; color: white; font-weight: bold"] * len(row)
             if row_type == "grossprofit":
                 return ["background-color: #e0e0e0; font-weight: bold"] * len(row)
@@ -3071,6 +3073,11 @@ if page == "📊 Reports":
                         worksheet.cell(row=excel_row, column=col_num).fill = section_fill
                         worksheet.cell(row=excel_row, column=col_num).font = section_font
 
+                elif row_type == "section_total":
+                    for col_num in range(1, 3):
+                        worksheet.cell(row=excel_row, column=col_num).fill = section_fill
+                        worksheet.cell(row=excel_row, column=col_num).font = section_font
+
                 elif row_type == "grossprofit":
                     for col_num in range(1, 3):
                         worksheet.cell(row=excel_row, column=col_num).fill = grossprofit_fill
@@ -3079,6 +3086,7 @@ if page == "📊 Reports":
                 elif row_type == "subtotal":
                     for col_num in range(1, 3):
                         worksheet.cell(row=excel_row, column=col_num).font = bold_font
+
 
         pl_output.seek(0)
 
