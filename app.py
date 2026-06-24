@@ -3109,3 +3109,12 @@ elif page == "🏠 Dashboard":
     else:
 
         st.info("No invoices due in the next 7 days")
+
+st.markdown(
+    """
+    <div style='text-align: center; color: gray; font-size: 14px; margin-top: 30px;'>
+        Powered by: <b>Prime Accounting and Tax</b>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
