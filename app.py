@@ -1713,16 +1713,13 @@ if page == "🧾 Sales":
 
 
 
-    # -------- DISPLAY / EDIT ITEMS --------
-
     if st.session_state.invoice_items:
 
         item_df = pd.DataFrame(
             st.session_state.invoice_items
         )
 
-
-# recalculate amount
+        # recalculate amount
         item_df["Amount"] = (
             (
                 pd.to_numeric(item_df["Quantity"], errors="coerce").fillna(0)
