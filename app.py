@@ -1694,6 +1694,15 @@ if page == "🧾 Sales":
                 }
             )
 
+            for k in [
+                "item_description",
+                "invoice_quantity",
+                "invoice_rate",
+                "invoice_discount",
+            ]:
+                if k in st.session_state:
+                    del st.session_state[k]
+
             st.rerun()
 
         else:
