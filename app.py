@@ -1598,6 +1598,9 @@ if page == "🧾 Sales":
 
     st.subheader("Create Invoice")
 
+    st.write("DEBUG sales_customer_label:", st.session_state.get("sales_customer_label", "NOT SET"))
+    st.write("DEBUG item_description:", st.session_state.get("item_description", "NOT SET"))
+
     # ---------- INVOICE BASIC DETAILS ----------
 
     col1, col2 = st.columns(2)
