@@ -1867,6 +1867,7 @@ if page == "🧾 Sales":
 
 # -------- GENERATE INVOICE --------
     if st.button("🧾 Generate Invoice"):
+        st.write("BUTTON CLICKED")   # TEMPORARY TEST LINE
         # ================= TOTAL =================
         amount = sum(
             item["Amount"]
