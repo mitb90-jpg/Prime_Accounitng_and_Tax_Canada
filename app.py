@@ -1729,7 +1729,11 @@ if page == "🧾 Sales":
             -
             pd.to_numeric(item_df["Discount"], errors="coerce").fillna(0)
         )
-        st.data_editor(
+
+        # add a Delete? column for selection
+        item_df["Delete?"] = False
+
+        edited_df = st.data_editor(
             item_df,
             use_container_width=True,
             hide_index=True,
@@ -1756,32 +1760,28 @@ if page == "🧾 Sales":
                     "Amount",
                     format="$%.2f",
                     disabled=True
+                ),
+                "Delete?": st.column_config.CheckboxColumn(
+                    "Delete?",
+                    default=False
                 )
-            }
+            },
+            key="invoice_items_editor"
         )
-        # update session items with calculated amount
-        st.session_state.invoice_items = (
-            item_df.to_dict("records")
-        )
-        amount = item_df["Amount"].sum()
 
-        # -------- DELETE ITEM --------
-        delete_options = [
-            f"{i+1}. {item['Description']} (${item['Amount']:,.2f})"
-            for i, item in enumerate(st.session_state.invoice_items)
-        ]
-        delete_choice = st.selectbox(
-            "Select Item to Delete",
-            ["Select Item"] + delete_options,
-            key="delete_item_select"
-        )
-        if delete_choice != "Select Item":
-            if st.button("🗑️ Delete Item", key="delete_item_button"):
-                delete_index = int(delete_choice.split(".")[0]) - 1
-                st.session_state.invoice_items.pop(delete_index)
-                if "delete_item_select" in st.session_state:
-                    del st.session_state["delete_item_select"]
+        # remove rows ticked for deletion
+        if edited_df["Delete?"].any():
+            if st.button("🗑️ Remove Selected", key="remove_selected_items"):
+                kept_df = edited_df[edited_df["Delete?"] == False].drop(columns=["Delete?"])
+                st.session_state.invoice_items = kept_df.to_dict("records")
                 st.rerun()
+
+        # update session items with calculated amount (when nothing being deleted)
+        st.session_state.invoice_items = (
+            edited_df.drop(columns=["Delete?"]).to_dict("records")
+        )
+
+        amount = edited_df["Amount"].sum()
 
     else:
         amount = 0
