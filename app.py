@@ -1722,8 +1722,7 @@ if page == "🧾 Sales":
         )
 
 
-        # recalculate amount
-
+# recalculate amount
         item_df["Amount"] = (
             (
                 pd.to_numeric(item_df["Quantity"], errors="coerce").fillna(0)
@@ -1733,117 +1732,62 @@ if page == "🧾 Sales":
             -
             pd.to_numeric(item_df["Discount"], errors="coerce").fillna(0)
         )
-
-
         st.data_editor(
             item_df,
             use_container_width=True,
             hide_index=True,
             column_config={
-
                 "Description": st.column_config.TextColumn(
                     "Description"
                 ),
-
                 "Quantity": st.column_config.NumberColumn(
                     "Quantity",
                     min_value=1,
                     step=1
                 ),
-
                 "Rate": st.column_config.NumberColumn(
                     "Rate",
                     min_value=0.0,
                     step=0.01
                 ),
-
                 "Discount": st.column_config.NumberColumn(
                     "Discount",
                     min_value=0.0,
                     step=0.01
                 ),
-
                 "Amount": st.column_config.NumberColumn(
                     "Amount",
                     format="$%.2f",
                     disabled=True
                 )
-
             }
         )
-
-
         # update session items with calculated amount
-
         st.session_state.invoice_items = (
             item_df.to_dict("records")
         )
-
-
         amount = item_df["Amount"].sum()
 
         # -------- DELETE ITEM --------
-
         delete_options = [
             f"{i+1}. {item['Description']} (${item['Amount']:,.2f})"
             for i, item in enumerate(st.session_state.invoice_items)
         ]
-
         delete_choice = st.selectbox(
             "Select Item to Delete",
             ["Select Item"] + delete_options,
             key="delete_item_select"
         )
-
         if delete_choice != "Select Item":
-
             if st.button("🗑️ Delete Item", key="delete_item_button"):
-
                 delete_index = int(delete_choice.split(".")[0]) - 1
-
                 st.session_state.invoice_items.pop(delete_index)
-
                 if "delete_item_select" in st.session_state:
                     del st.session_state["delete_item_select"]
-
                 st.rerun()
 
-
     else:
-
         amount = 0
-
-        # -------- DELETE ITEM --------
-
-        delete_options = [
-            f"{i+1}. {item['Description']} (${item['Amount']:,.2f})"
-            for i, item in enumerate(st.session_state.invoice_items)
-        ]
-
-        delete_choice = st.selectbox(
-            "Select Item to Delete",
-            ["Select Item"] + delete_options,
-            key="delete_item_select"
-        )
-
-        if delete_choice != "Select Item":
-
-            if st.button("🗑️ Delete Item", key="delete_item_button"):
-
-                delete_index = int(delete_choice.split(".")[0]) - 1
-
-                st.session_state.invoice_items.pop(delete_index)
-
-                if "delete_item_select" in st.session_state:
-                    del st.session_state["delete_item_select"]
-
-                st.rerun()
-
-
-    else:
-
-        amount = 0
-
 
     st.info(
         f"Service Amount: ${amount:,.2f}"
