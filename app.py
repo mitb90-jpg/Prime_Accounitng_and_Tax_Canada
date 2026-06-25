@@ -1586,7 +1586,8 @@ if page == "🧾 Sales":
 
         customer_label = st.selectbox(
             "Customer",
-            ["Select Client"] + sales_client_labels
+            ["Select Client"] + sales_client_labels,
+            key="sales_customer_label"
         )
 
         customer_name = (
@@ -1599,7 +1600,8 @@ if page == "🧾 Sales":
 
         invoice_date = st.date_input(
             "Invoice Date",
-            format="DD-MM-YYYY"
+            format="DD-MM-YYYY",
+            key="sales_invoice_date"
         )
 
     col3, col4 = st.columns(2)
@@ -1621,7 +1623,8 @@ if page == "🧾 Sales":
 
         due_date = st.date_input(
             "Due Date",
-            format="DD-MM-YYYY"
+            format="DD-MM-YYYY",
+            key="sales_due_date"
         )
 
     st.divider()
@@ -1787,7 +1790,8 @@ if page == "🧾 Sales":
         "HST Rate (%)",
         min_value=0.0,
         value=13.0,
-        step=0.5
+        step=0.5,
+        key="sales_hst_rate"
     )
 
 
@@ -1798,7 +1802,8 @@ if page == "🧾 Sales":
         "HST Amount",
         min_value=0.0,
         value=float(calculated_hst),
-        step=0.01
+        step=0.01,
+        key="sales_tax"
     )
 
 
@@ -1832,7 +1837,8 @@ if page == "🧾 Sales":
         [
             "Unpaid",
             "Paid"
-        ]
+        ],
+        key="sales_payment_status"
     )
 
 
@@ -1850,18 +1856,35 @@ if page == "🧾 Sales":
 
     st.divider()
 
-        # -------- GENERATE INVOICE --------
-
+# -------- GENERATE INVOICE --------
     if st.button("🧾 Generate Invoice"):
-
         # ================= TOTAL =================
-
         amount = sum(
             item["Amount"]
             for item in st.session_state.invoice_items
         )
-
         total = amount + tax
+
+        # ---- reset everything for next invoice ----
+        st.session_state.invoice_items = []
+        st.session_state.current_invoice_number = generate_invoice_number()
+
+        for k in [
+            "sales_customer_label",
+            "sales_invoice_date",
+            "sales_due_date",
+            "item_description",
+            "invoice_quantity",
+            "invoice_rate",
+            "invoice_discount",
+            "sales_hst_rate",
+            "sales_tax",
+            "sales_payment_status",
+        ]:
+            if k in st.session_state:
+                del st.session_state[k]
+
+        st.rerun()
 
         # -------- SAVE DATABASE --------
 
