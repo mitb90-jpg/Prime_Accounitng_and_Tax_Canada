@@ -35,7 +35,7 @@ VISA_DEBIT_RULES = {
 
     "Shell|Circle K|COSTCO GAS|Petro": "Fuel",
 
-    "ART OF DENTISTRY Toronto On|PHARMACY|BAY AND COLLEGE IDA PH|Walgreens|SP REGENEX": "Health and safety",
+    "ART OF DENTISTRY|PHARMACY|BAY AND COLLEGE IDA PH|Walgreens|SP REGENEX": "Health and safety",
 
     "Aviva": "Insurance",
 
