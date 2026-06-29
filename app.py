@@ -2059,19 +2059,45 @@ if page == "🧾 Sales":
         with col_d:
             st.metric("90+ Days", f"${bucket_summary['90+ Days']:,.2f}")
 
+        aging_display_df = aging_df[
+            [
+                "invoice_number",
+                "client_name",
+                "due_date",
+                "days_overdue",
+                "Bucket",
+                "total"
+            ]
+        ].sort_values("days_overdue", ascending=False)
+
         st.dataframe(
-            aging_df[
-                [
-                    "invoice_number",
-                    "client_name",
-                    "due_date",
-                    "days_overdue",
-                    "Bucket",
-                    "total"
-                ]
-            ].sort_values("days_overdue", ascending=False),
+            aging_display_df,
             use_container_width=True,
             hide_index=True
+        )
+
+        # -------- DOWNLOAD AGING SUMMARY --------
+
+        aging_excel_df = aging_display_df.rename(columns={
+            "invoice_number": "Invoice Number",
+            "client_name": "Client Name",
+            "due_date": "Due Date",
+            "days_overdue": "Days Overdue",
+            "Bucket": "Aging Bucket",
+            "total": "Total"
+        })
+
+        excel_buffer = io.BytesIO()
+
+        with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+            aging_excel_df.to_excel(writer, index=False, sheet_name="Aging Summary")
+
+        st.download_button(
+            label="📥 Download Aging Summary (Excel)",
+            data=excel_buffer.getvalue(),
+            file_name=f"invoice_aging_summary_{pd.Timestamp.now().strftime('%Y%m%d')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key="download_aging_excel"
         )
 
     if aging_df.empty:
