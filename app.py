@@ -3428,6 +3428,77 @@ elif page == "🏠 Dashboard":
 
     st.divider()
 
+    st.subheader("📅 Invoice Aging Summary")
+
+    aging_dashboard_invoices = [
+        inv for inv in dashboard_invoices
+        if inv["payment_status"] == "Unpaid"
+    ]
+
+    if aging_dashboard_invoices:
+
+        aging_dash_df = pd.DataFrame(aging_dashboard_invoices)
+
+        aging_dash_df["due_date"] = pd.to_datetime(aging_dash_df["due_date"], errors="coerce")
+
+        today_ts = pd.Timestamp.now().normalize()
+
+        aging_dash_df["days_overdue"] = (today_ts - aging_dash_df["due_date"]).dt.days
+
+        aging_dash_df = aging_dash_df[aging_dash_df["days_overdue"] > 0]
+
+        if not aging_dash_df.empty:
+
+            def aging_bucket(days):
+                if days <= 10:
+                    return "0-10 Days"
+                elif days <= 30:
+                    return "10-30 Days"
+                elif days <= 90:
+                    return "30-90 Days"
+                else:
+                    return "90+ Days"
+
+            aging_dash_df["Bucket"] = aging_dash_df["days_overdue"].apply(aging_bucket)
+
+            bucket_order = ["0-10 Days", "10-30 Days", "30-90 Days", "90+ Days"]
+
+            aging_bucket_totals = (
+                aging_dash_df.groupby("Bucket")["total"]
+                .sum()
+                .reindex(bucket_order, fill_value=0)
+            )
+
+            aging_fig = go.Figure(data=[
+                go.Bar(
+                    x=bucket_order,
+                    y=aging_bucket_totals.values,
+                    marker=dict(color=["#3a8fa3", "#f0ad4e", "#d9706b", "#a83232"]),
+                    text=[f"${v:,.0f}" for v in aging_bucket_totals.values],
+                    textposition="outside"
+                )
+            ])
+
+            aging_fig.update_layout(
+                height=320,
+                margin=dict(t=20, b=10, l=10, r=10),
+                xaxis_title="Days Overdue",
+                yaxis_title="Amount ($)"
+            )
+
+            st.plotly_chart(aging_fig, use_container_width=True)
+
+        else:
+
+            st.info("No overdue invoices 🎉")
+
+    else:
+
+        st.info("No unpaid invoices to analyze")
+
+
+    st.divider()
+
 
     st.subheader("⏰ Upcoming Due Dates (Next 7 Days)")
 
