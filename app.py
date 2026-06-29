@@ -2061,13 +2061,13 @@ if page == "🧾 Sales":
 
         aging_display_df = aging_df[
             [
-                "invoice_number": "Invoice Number",
-                "client_name": "Client Name",
-                "invoice_date": "Invoice Date",
-                "due_date": "Due Date",
-                "days_overdue": "Days Overdue",
-                "Bucket": "Bucket",
-                "total": "Total"
+                "invoice_number",
+                "client_name",
+                "invoice_date",
+                "due_date",
+                "days_overdue",
+                "Bucket",
+                "total"
             ]
         ].sort_values("days_overdue", ascending=False)
 
