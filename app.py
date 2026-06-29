@@ -803,12 +803,19 @@ def apply_visa_categories(df):
 
     import re
 
-    desc_upper = df["Description"].astype(str).str.upper()
+    # Bank descriptions sometimes arrive with no spaces at all
+    # (e.g. "ARTOFDENTISTRYTorontoOn"), so we strip ALL whitespace from both
+    # the description and each rule keyword before comparing. This makes
+    # "ART OF DENTISTRY Toronto On" correctly match "ARTOFDENTISTRYTorontoOn".
+    desc_upper = (
+        df["Description"].astype(str).str.upper().str.replace(r"\s+", "", regex=True)
+    )
 
     def smart_boundary_term(term):
-        escaped = re.escape(term.upper())
-        left = r"\b" if term[0].isalnum() else ""
-        right = r"\b" if term[-1].isalnum() else ""
+        term_nospace = re.sub(r"\s+", "", term.upper())
+        escaped = re.escape(term_nospace)
+        left = r"\b" if term_nospace[0].isalnum() else ""
+        right = r"\b" if term_nospace[-1].isalnum() else ""
         return f"{left}{escaped}{right}"
 
     def build_pattern(keyword):
