@@ -2061,14 +2061,19 @@ if page == "🧾 Sales":
 
         aging_display_df = aging_df[
             [
-                "invoice_number",
-                "client_name",
-                "due_date",
-                "days_overdue",
-                "Bucket",
-                "total"
+                "invoice_number": "Invoice Number",
+                "client_name": "Client Name",
+                "invoice_date": "Invoice Date",
+                "due_date": "Due Date",
+                "days_overdue": "Days Overdue",
+                "Bucket": "Bucket",
+                "total": "Total"
             ]
         ].sort_values("days_overdue", ascending=False)
+
+        aging_display_df["invoice_date"] = pd.to_datetime(
+            aging_display_df["invoice_date"], errors="coerce"
+        ).dt.strftime("%Y-%m-%d")
 
         aging_display_df["due_date"] = aging_display_df["due_date"].dt.strftime("%Y-%m-%d")
 
