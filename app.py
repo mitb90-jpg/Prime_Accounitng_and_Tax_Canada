@@ -2021,6 +2021,9 @@ if page == "🧾 Sales":
         today = pd.Timestamp.now().normalize()
 
         aging_df["days_overdue"] = (today - aging_df["due_date"]).dt.days
+        aging_df["days_overdue"] = (today - aging_df["due_date"]).dt.days
+
+        aging_df = aging_df[aging_df["days_overdue"] > 0]
 
         def bucket_label(days):
             if days <= 10:
@@ -2070,6 +2073,9 @@ if page == "🧾 Sales":
             use_container_width=True,
             hide_index=True
         )
+
+    if aging_df.empty:
+            st.info("No overdue invoices 🎉")
 
     else:
 
