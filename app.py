@@ -1212,8 +1212,7 @@ nav_items = [
     "🏠 Dashboard",
     "👥 Clients",
     "🧾 Sales",
-    "📄 Invoice History",
-    "🗂️ Client Tracker",
+    "📄 Invoice History",    
     "📊 Reports"
 ]
 
