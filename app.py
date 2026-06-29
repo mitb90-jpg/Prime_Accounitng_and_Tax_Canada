@@ -2007,24 +2007,14 @@ if page == "🧾 Sales":
             "No unpaid invoices"
         )
         # -------- AGING ANALYSIS --------
-
     st.divider()
-
     st.subheader("📅 Aging Analysis")
-
     if unpaid_invoices:
-
         aging_df = pd.DataFrame(unpaid_invoices)
-
         aging_df["due_date"] = pd.to_datetime(aging_df["due_date"], errors="coerce")
-
         today = pd.Timestamp.now().normalize()
-
         aging_df["days_overdue"] = (today - aging_df["due_date"]).dt.days
-        aging_df["days_overdue"] = (today - aging_df["due_date"]).dt.days
-
         aging_df = aging_df[aging_df["days_overdue"] > 0]
-
         def bucket_label(days):
             if days <= 10:
                 return "0-10 Days"
@@ -2034,28 +2024,20 @@ if page == "🧾 Sales":
                 return "30-90 Days"
             else:
                 return "90+ Days"
-
         aging_df["Bucket"] = aging_df["days_overdue"].apply(bucket_label)
-
         bucket_order = ["0-10 Days", "10-30 Days", "30-90 Days", "90+ Days"]
-
         bucket_summary = (
             aging_df.groupby("Bucket")["total"]
             .sum()
             .reindex(bucket_order, fill_value=0)
         )
-
         col_a, col_b, col_c, col_d = st.columns(4)
-
         with col_a:
             st.metric("0-10 Days", f"${bucket_summary['0-10 Days']:,.2f}")
-
         with col_b:
             st.metric("10-30 Days", f"${bucket_summary['10-30 Days']:,.2f}")
-
         with col_c:
             st.metric("30-90 Days", f"${bucket_summary['30-90 Days']:,.2f}")
-
         with col_d:
             st.metric("90+ Days", f"${bucket_summary['90+ Days']:,.2f}")
 
@@ -2074,7 +2056,6 @@ if page == "🧾 Sales":
         aging_display_df["invoice_date"] = pd.to_datetime(
             aging_display_df["invoice_date"], errors="coerce"
         ).dt.strftime("%Y-%m-%d")
-
         aging_display_df["due_date"] = aging_display_df["due_date"].dt.strftime("%Y-%m-%d")
 
         st.dataframe(
@@ -2082,14 +2063,8 @@ if page == "🧾 Sales":
             use_container_width=True,
             hide_index=True
         )
-        st.dataframe(
-            aging_display_df,
-            use_container_width=True,
-            hide_index=True
-        )
 
         aging_grand_total = aging_display_df["total"].sum()
-
         st.markdown(f"**Total Overdue Amount: ${aging_grand_total:,.2f}**")
 
         # -------- DOWNLOAD AGING SUMMARY --------
@@ -2129,14 +2104,12 @@ if page == "🧾 Sales":
             key="download_aging_excel"
         )
 
-    if aging_df.empty:
+        if aging_df.empty:
             st.info("No overdue invoices 🎉")
 
     else:
 
-        st.info(
-            "No unpaid invoices to analyze"
-        )
+        st.info("No unpaid invoices to analyze")
 
 
 
