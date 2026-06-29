@@ -814,9 +814,10 @@ def apply_visa_categories(df):
     def smart_boundary_term(term):
         term_nospace = re.sub(r"\s+", "", term.upper())
         escaped = re.escape(term_nospace)
-        left = r"\b" if term_nospace[0].isalnum() else ""
-        right = r"\b" if term_nospace[-1].isalnum() else ""
-        return f"{left}{escaped}{right}"
+        # No leading/trailing \b: once spaces are stripped, merchant names
+        # run directly into surrounding text (e.g. "ESSILORCANADAST-LAURENTQC"),
+        # so a trailing word-boundary would block legitimate matches.
+        return escaped
 
     def build_pattern(keyword):
         terms = [t.strip() for t in keyword.split("|") if t.strip() != ""]
