@@ -690,7 +690,11 @@ def parse_visa_statement(pdf_file):
 
                 st.write(header_norm)
 
-                # Detect transaction table
+                # Debug every line that contains TRANSACTION or POSTING
+                if "TRANSACTION" in header_norm or "POSTING" in header_norm:
+                    st.error(header_norm)
+
+                # Start of transaction table
                 if "TRANSACTION" in header_norm and "POSTING" in header_norm:
                     st.success("FOUND HEADER")
                     started = True
