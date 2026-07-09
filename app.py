@@ -651,7 +651,7 @@ def format_amount(x):
 
 def parse_visa_statement(pdf_file):
 
-    print("******** VISA PARSER CALLED ********")
+    st.error("VISA PARSER CALLED")
 
     """
     Parses an RBC Visa credit card statement PDF.
