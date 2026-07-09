@@ -650,6 +650,9 @@ def format_amount(x):
 # ---------------- VISA STATEMENT PARSER ----------------
 
 def parse_visa_statement(pdf_file):
+
+    print("******** VISA PARSER CALLED ********")
+
     """
     Parses an RBC Visa credit card statement PDF.
     Returns a DataFrame with columns: Date, Post Date, Description, Debit, Credit
