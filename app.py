@@ -650,8 +650,10 @@ def format_amount(x):
 # ---------------- VISA STATEMENT PARSER ----------------
 
 def parse_visa_statement(pdf_file):
-
-    st.error("VISA PARSER CALLED")
+    """
+    Parses an RBC Visa credit card statement PDF.
+    Returns a DataFrame with columns: Date, Post Date, Description, Debit, Credit
+    """
 
     import pdfplumber
 
@@ -663,23 +665,17 @@ def parse_visa_statement(pdf_file):
 
     with pdfplumber.open(pdf_file) as pdf:
 
-        for page_no, page in enumerate(pdf.pages, start=1):
-
-            st.write(f"========== PAGE {page_no} ==========")
+        for page in pdf.pages:
 
             started = False
 
             words = page.extract_words()
-
-            st.write("WORDS FOUND:", len(words))
 
             rows = {}
 
             for w in words:
                 y = round(float(w["top"]), 1)
                 rows.setdefault(y, []).append(w)
-
-            st.write("ROWS FOUND:", len(rows))
 
             for y in sorted(rows):
 
@@ -688,40 +684,34 @@ def parse_visa_statement(pdf_file):
                 text = " ".join(w["text"] for w in line_words)
                 header_norm = norm(text).upper()
 
-                st.write(header_norm)
-
-                # Debug every line that contains TRANSACTION or POSTING
-                if "TRANSACTION" in header_norm or "POSTING" in header_norm:
-                    st.error(header_norm)
-
-                # Start of transaction table
+                # start of transaction table
                 if "TRANSACTION" in header_norm and "POSTING" in header_norm:
-                    st.success("FOUND HEADER")
                     started = True
                     continue
 
                 if not started:
                     continue
 
-                # Stop at summary
+                # stop at total / summary lines (no-space match, since
+                # pdfplumber glues these words together with no space)
                 if (
                     "TOTALACCOUNTBALANCE" in header_norm
                     or "TIMETOPAY" in header_norm
                     or "INTERESTRATECHART" in header_norm
                 ):
-                    st.warning("END OF TABLE")
                     started = False
                     continue
 
+                # ignore sidebar text (Avion Points, Contact Us, etc.)
+                # transaction table content stays left of x=350
                 first_x = float(line_words[0]["x0"])
 
                 if first_x >= 350:
                     continue
 
-                st.write("LINE:", [w["text"] for w in line_words])
-
                 first_word = line_words[0]["text"]
 
+                # transaction row starts with month+day glued together, e.g. "JAN11"
                 is_date_start = bool(
                     re.match(
                         r"^(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\d{1,2}$",
@@ -729,12 +719,7 @@ def parse_visa_statement(pdf_file):
                     )
                 )
 
-                st.write("FIRST WORD:", first_word)
-                st.write("DATE MATCH:", is_date_start)
-
                 if is_date_start and len(line_words) >= 2:
-
-                    st.success("TRANSACTION FOUND")
 
                     if current:
                         transactions.append(current)
@@ -761,17 +746,17 @@ def parse_visa_statement(pdf_file):
 
                 else:
 
+                    # reference number line (long digits only) -> ignore
                     if re.fullmatch(r"\d{15,}", first_word):
                         continue
 
+                    # otherwise treat as continuation of description
                     if current:
                         current["Description"] += " " + text
 
             if current:
                 transactions.append(current)
                 current = None
-
-    st.error(f"TOTAL TRANSACTIONS = {len(transactions)}")
 
     df = pd.DataFrame(transactions)
 
@@ -789,6 +774,7 @@ def parse_visa_statement(pdf_file):
 
     df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce").fillna(0)
 
+    # Visa convention: negative = payment/credit, positive = purchase (Debit)
     df["Debit"] = df["Amount"].apply(lambda x: x if x > 0 else 0)
     df["Credit"] = df["Amount"].apply(lambda x: abs(x) if x < 0 else 0)
 
