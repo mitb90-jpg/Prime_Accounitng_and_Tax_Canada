@@ -684,8 +684,11 @@ def parse_visa_statement(pdf_file):
                 text = " ".join(w["text"] for w in line_words)
                 header_norm = norm(text).upper()
 
+                print(header_norm)
+
                 # start of transaction table
                 if "TRANSACTION" in header_norm and "POSTING" in header_norm:
+                    print("FOUND HEADER")
                     started = True
                     continue
 
