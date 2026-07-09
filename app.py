@@ -710,6 +710,9 @@ def parse_visa_statement(pdf_file):
                     continue
 
                 first_word = line_words[0]["text"]
+                print(line_words)
+                print([w["text"] for w in line_words])
+                print("-" * 80)
 
                 # transaction row starts with month+day glued together, e.g. "JAN11"
                 is_date_start = bool(
