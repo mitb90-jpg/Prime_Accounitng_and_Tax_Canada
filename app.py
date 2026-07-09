@@ -670,6 +670,7 @@ def parse_visa_statement(pdf_file):
             started = False
 
             words = page.extract_words()
+            print("TOTAL WORDS:", len(words))
 
             rows = {}
 
@@ -764,6 +765,7 @@ def parse_visa_statement(pdf_file):
                 transactions.append(current)
                 current = None
 
+    print("TOTAL TRANSACTIONS:", len(transactions))
     df = pd.DataFrame(transactions)
 
     if df.empty:
