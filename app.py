@@ -272,6 +272,8 @@ if not st.session_state.logged_in:
 with st.sidebar:
     st.write(f"👤 {st.session_state.user_name}")
     st.write(f"Role: **{st.session_state.role}**")
+    if st.button("🔄 Refresh"):
+        st.rerun()
     if st.button("Logout"):
         logout()
     if st.session_state.role == "admin":
