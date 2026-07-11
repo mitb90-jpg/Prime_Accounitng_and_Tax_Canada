@@ -19,116 +19,21 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
-
-# ---------------- VISA CATEGORIZATION DICTIONARIES ----------------
-
-VISA_DEBIT_RULES = {
-    "ESSILOR|HCM|NIKON OPTICAL MONTREAL QC|ALCON|CANADIAN OPTICAL|J&J VISION CARE|MCCRAY OPTICAL|OPTICIANS ASSOCIATION|SECURE OPTIONS": "Purchases",
-
-    "REXALL POST OFFICE|ICS|UPS": "Delivery Expenses",
-
-    "Google|CAA MEMBERSHIP|Adobe": "Dues and Subscriptions",
-
-    "Shell|Circle K|COSTCO GAS|Petro": "Fuel",
-
-    "ART OF DENTISTRY|PHARMACY|BAY AND COLLEGE IDA PH|Walgreens|SP REGENEX": "Health and safety",
-
-    "Aviva": "Insurance",
-
-    "Interest|Fee|BMO RETAIL KIOSK": "Interest and Bank charges",
-
-    "KEBABERIE|TST-PLANTA-YORKVILLE|TIM HORTONS|SOUTH ST. BURGER CO.|1 HOTEL|10057 CAVA|ZAROS BAKERY|AC ROUGE|AERA|APROPOS|BASKIN ROBBINS|BMO FOOD & BEVERAGE|BOOSTER JUICE|BROWNS|BUFFALO AND FORT ERIE|CANOE|CASA MEZCAL|CHOTTO MATTE|CHURCH STREET|EAST COAST DONAIR|EL NAHUAL TACO|SQ|STARBUCKS|RITUAL-SOUTH|THE BLAKE HOUSE|HOUSE ON PARLIAMENT|MY DOSA PLACE|SASSAFRAZ|O'GRADY'S RESTAURANT|THE DANISH PASTRY|TRYST WICKEDLILY|FRESH ON CRAWFORD|PAUL'S ROTI SHOP|THE EPICURE SHOP|HAIR OF THE DOG|THE KEG BRAMALEA|SWEET PALACE|GIA|FIRST WATCH|IRENE|WANAS SHAWARMA|TANDOORI FLAME|THE UNDERWING CAMBRIDGE|MALAPARTE|THE CARLU|WHOLE FOODS MARKET": "Meals and Entertainment",
-
-    "WHOLE FOODS MARKET|SHOP LAZZA|FRESHCO|DOLLARAMA|ESSO CIRCLE K|SHOPPERS DRUG MART|LINCOLN ROAD SUPERMARK|INDIAN FROOTLAND|WALMART|KABUL FARMS|ROYAL BLUE GROCERY|RABBA|SARKER GROCERIES|CHERRYCREST ESSO|THE CORNER CONVENIENCE|WELLESLEY CONVENIENCE": "Office Supplies",
-
-    "BARTON PERREIRA|CARL ZEISS VISION|DITA|KERING|LUXOTTICA OF CANADA TORONTO ON|MARCOLIN CANADA|ORGREEN GOLDSMITH|SAFILO|SALT OPTICS|THELIOS|SWEAT AND TONIC": "Purchases",
-
-    "AXIS MEDICAL": "Repairs and Maintenance",
-
-    "UBER|AIRCAN|CITY TOR. FERRY DOCKS|TCKT WEB|CURB|MIAMI AIRP CORONA|COCONUT GROVE|FGTEDCORLANDO|UPE|SIXT|ROAMI|RCL|Prestobay|Kasaliving|Expedia|ENTERPRISE|Canopy|Budget Rent A Car|Avion|Austin Airport|Air BnB|taxi": "Travel Expense",
-
-    "MERCEDES-BENZ|CDN TIRE STORE|SIRIUSXM": "Vehicle Expense",
-
-    "ELEGANCE DRY CLEANERS|HM HENNES|IHUC|LCBO|MEC MOUNTAIN EQUIPMENT|THE BEER STORE|NETFLIX|Air Can|BANANA REPUBLIC|MDHAIR|STORM CROW MANOR|EQUINOX|ATLANTIS EVENTS WEST|FOX & FIDDLE|GABBYS ISABELLA|WOODYS ON CHURCH|WINNERS 379|THE WINE SHOP|THE GREEN CLOSET|TBJ CONCESSIONS|SuitSupply|PALAIS ROYALE|MIXCLOUD LONDON|LA VAPE|HUGO BOSS|HARRY ROSEN|COME RIGHT INN|BUDDIES IN BAD TIMES|BAR+ MUSIC STUDIO|5 DRIVE IN": "Personal Expense",
-
-    "EQUIFAX": "Admin Expenses",
-
-    "Parking|PARK|BIKE SHARE|TORPRKAUT|ERACTOLL|CP 286 POF|ETOLLBGT|CITIPARK": "Parking and Toll",
-
-    "CATALYST": "Promotion",
-
-    "PPL - 21 AVE RD": "Rental",
-
-    "Amazon|COSTCO WHOLESALE|COSTCO|AMZN|JAMESTOWN MILK|STAR FRUIT MARKET|WELLESLEY CONVENIENCE": "Supplies",
-
-    "ROGERS|BELL CANADA|FIDO Home|MOBILEKLINIK|T-MOBILE STORE": "Telephone and Internet",
-}
-
-VISA_CREDIT_RULES = {
-    "SCOTIABANK PAYMENT|PMT|Telepayments": "Credit Card Payments",
-    "Credit Adjustment|Fee": "Other Income",
-    "ELEGANCE DRY CLEANERS|REXALL PHARMACY|Costco Wholesale|Air Can|ATLANTIS EVENTS WEST|CANADA WIDE PARKING|AMZN|AC ROUGE|Freshco": "Refund",
-}
-
-
-# ---------------- PROFIT & LOSS STRUCTURE ----------------
-# Defines which existing Category names belong in each P&L section, and the
-# display order within that section. Categories not listed here fall through
-# to "Other/Uncategorized" at the bottom of Expenses. Category names are NOT
-# renamed -- they appear in the P&L exactly as produced by the categorization
-# rules above.
-
-PL_REVENUE_CATEGORIES = [
-    "Revenue",
-    "Other Income",
-    "Refund",
-]
-
-PL_COGS_CATEGORIES = [
-    "Purchases",
-]
-
-PL_EXPENSE_CATEGORIES = [
-    "Meals and Entertainment",
-    "Trades and Sub-Contracts",
-    "Interest and Bank charges",
-    "Supplies",
-    "Office Supplies",
-    "Dues and Subscriptions",
-    "Professional Fee",
-    "Admin Expenses",
-    "Telephone and Internet",
-    "Insurance",
-    "Travel Expense",
-    "Promotion",
-    "Vehicle Expense",
-    "Delivery Expenses",
-    "Repairs and Maintenance",
-    "Parking and Toll",
-    "Fuel",
-    "Health and safety",
-    "Misc Expenses",
-    "Rental",
-]
-
-# Categories that should never appear in the P&L (internal transfers, not
-# real revenue or expense)
-PL_EXCLUDED_CATEGORIES = [
-    "Credit Card Payments",
-]
-
-
+# ---------------- PAGE CONFIG ----------------
+st.set_page_config(
+    page_title="Smart Transaction Categorizer",
+    page_icon="📊",
+    layout="wide"
+)
 
 # ---------------- DATABASE ----------------
-
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-
-
 supabase: Client = create_client(
     SUPABASE_URL,
     SUPABASE_KEY
 )
+
 # ---------------- AUTH ----------------
 def signup_form():
     st.subheader("📝 Request Access")
@@ -244,6 +149,104 @@ def admin_pending_requests():
                     {"status": "rejected"}
                 ).eq("id", person["id"]).execute()
                 st.rerun()
+
+# ---------------- VISA CATEGORIZATION DICTIONARIES ----------------
+
+VISA_DEBIT_RULES = {
+    "ESSILOR|HCM|NIKON OPTICAL MONTREAL QC|ALCON|CANADIAN OPTICAL|J&J VISION CARE|MCCRAY OPTICAL|OPTICIANS ASSOCIATION|SECURE OPTIONS": "Purchases",
+
+    "REXALL POST OFFICE|ICS|UPS": "Delivery Expenses",
+
+    "Google|CAA MEMBERSHIP|Adobe": "Dues and Subscriptions",
+
+    "Shell|Circle K|COSTCO GAS|Petro": "Fuel",
+
+    "ART OF DENTISTRY|PHARMACY|BAY AND COLLEGE IDA PH|Walgreens|SP REGENEX": "Health and safety",
+
+    "Aviva": "Insurance",
+
+    "Interest|Fee|BMO RETAIL KIOSK": "Interest and Bank charges",
+
+    "KEBABERIE|TST-PLANTA-YORKVILLE|TIM HORTONS|SOUTH ST. BURGER CO.|1 HOTEL|10057 CAVA|ZAROS BAKERY|AC ROUGE|AERA|APROPOS|BASKIN ROBBINS|BMO FOOD & BEVERAGE|BOOSTER JUICE|BROWNS|BUFFALO AND FORT ERIE|CANOE|CASA MEZCAL|CHOTTO MATTE|CHURCH STREET|EAST COAST DONAIR|EL NAHUAL TACO|SQ|STARBUCKS|RITUAL-SOUTH|THE BLAKE HOUSE|HOUSE ON PARLIAMENT|MY DOSA PLACE|SASSAFRAZ|O'GRADY'S RESTAURANT|THE DANISH PASTRY|TRYST WICKEDLILY|FRESH ON CRAWFORD|PAUL'S ROTI SHOP|THE EPICURE SHOP|HAIR OF THE DOG|THE KEG BRAMALEA|SWEET PALACE|GIA|FIRST WATCH|IRENE|WANAS SHAWARMA|TANDOORI FLAME|THE UNDERWING CAMBRIDGE|MALAPARTE|THE CARLU|WHOLE FOODS MARKET": "Meals and Entertainment",
+
+    "WHOLE FOODS MARKET|SHOP LAZZA|FRESHCO|DOLLARAMA|ESSO CIRCLE K|SHOPPERS DRUG MART|LINCOLN ROAD SUPERMARK|INDIAN FROOTLAND|WALMART|KABUL FARMS|ROYAL BLUE GROCERY|RABBA|SARKER GROCERIES|CHERRYCREST ESSO|THE CORNER CONVENIENCE|WELLESLEY CONVENIENCE": "Office Supplies",
+
+    "BARTON PERREIRA|CARL ZEISS VISION|DITA|KERING|LUXOTTICA OF CANADA TORONTO ON|MARCOLIN CANADA|ORGREEN GOLDSMITH|SAFILO|SALT OPTICS|THELIOS|SWEAT AND TONIC": "Purchases",
+
+    "AXIS MEDICAL": "Repairs and Maintenance",
+
+    "UBER|AIRCAN|CITY TOR. FERRY DOCKS|TCKT WEB|CURB|MIAMI AIRP CORONA|COCONUT GROVE|FGTEDCORLANDO|UPE|SIXT|ROAMI|RCL|Prestobay|Kasaliving|Expedia|ENTERPRISE|Canopy|Budget Rent A Car|Avion|Austin Airport|Air BnB|taxi": "Travel Expense",
+
+    "MERCEDES-BENZ|CDN TIRE STORE|SIRIUSXM": "Vehicle Expense",
+
+    "ELEGANCE DRY CLEANERS|HM HENNES|IHUC|LCBO|MEC MOUNTAIN EQUIPMENT|THE BEER STORE|NETFLIX|Air Can|BANANA REPUBLIC|MDHAIR|STORM CROW MANOR|EQUINOX|ATLANTIS EVENTS WEST|FOX & FIDDLE|GABBYS ISABELLA|WOODYS ON CHURCH|WINNERS 379|THE WINE SHOP|THE GREEN CLOSET|TBJ CONCESSIONS|SuitSupply|PALAIS ROYALE|MIXCLOUD LONDON|LA VAPE|HUGO BOSS|HARRY ROSEN|COME RIGHT INN|BUDDIES IN BAD TIMES|BAR+ MUSIC STUDIO|5 DRIVE IN": "Personal Expense",
+
+    "EQUIFAX": "Admin Expenses",
+
+    "Parking|PARK|BIKE SHARE|TORPRKAUT|ERACTOLL|CP 286 POF|ETOLLBGT|CITIPARK": "Parking and Toll",
+
+    "CATALYST": "Promotion",
+
+    "PPL - 21 AVE RD": "Rental",
+
+    "Amazon|COSTCO WHOLESALE|COSTCO|AMZN|JAMESTOWN MILK|STAR FRUIT MARKET|WELLESLEY CONVENIENCE": "Supplies",
+
+    "ROGERS|BELL CANADA|FIDO Home|MOBILEKLINIK|T-MOBILE STORE": "Telephone and Internet",
+}
+
+VISA_CREDIT_RULES = {
+    "SCOTIABANK PAYMENT|PMT|Telepayments": "Credit Card Payments",
+    "Credit Adjustment|Fee": "Other Income",
+    "ELEGANCE DRY CLEANERS|REXALL PHARMACY|Costco Wholesale|Air Can|ATLANTIS EVENTS WEST|CANADA WIDE PARKING|AMZN|AC ROUGE|Freshco": "Refund",
+}
+
+
+# ---------------- PROFIT & LOSS STRUCTURE ----------------
+# Defines which existing Category names belong in each P&L section, and the
+# display order within that section. Categories not listed here fall through
+# to "Other/Uncategorized" at the bottom of Expenses. Category names are NOT
+# renamed -- they appear in the P&L exactly as produced by the categorization
+# rules above.
+
+PL_REVENUE_CATEGORIES = [
+    "Revenue",
+    "Other Income",
+    "Refund",
+]
+
+PL_COGS_CATEGORIES = [
+    "Purchases",
+]
+
+PL_EXPENSE_CATEGORIES = [
+    "Meals and Entertainment",
+    "Trades and Sub-Contracts",
+    "Interest and Bank charges",
+    "Supplies",
+    "Office Supplies",
+    "Dues and Subscriptions",
+    "Professional Fee",
+    "Admin Expenses",
+    "Telephone and Internet",
+    "Insurance",
+    "Travel Expense",
+    "Promotion",
+    "Vehicle Expense",
+    "Delivery Expenses",
+    "Repairs and Maintenance",
+    "Parking and Toll",
+    "Fuel",
+    "Health and safety",
+    "Misc Expenses",
+    "Rental",
+]
+
+# Categories that should never appear in the P&L (internal transfers, not
+# real revenue or expense)
+PL_EXCLUDED_CATEGORIES = [
+    "Credit Card Payments",
+]
+
 
 # ---------------- ROLE HELPERS ----------------
 def can_edit():
@@ -1204,13 +1207,6 @@ def parse_triangle_statement(pdf_file):
     df = df.drop(columns=["Amount", "Section"])
 
     return df
-
-# ---------------- PAGE CONFIG ----------------
-st.set_page_config(
-    page_title="Smart Transaction Categorizer",
-    page_icon="📊",
-    layout="wide"
-)
 
 
 # ---------------- CSS ----------------
