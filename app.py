@@ -249,6 +249,19 @@ def admin_pending_requests():
                 ).eq("id", person["id"]).execute()
                 st.rerun()
 
+# ---------------- ROLE HELPERS ----------------
+def can_edit():
+    return st.session_state.role in ["admin", "accountant"]
+
+def can_delete():
+    return st.session_state.role == "admin"
+
+def is_admin():
+    return st.session_state.role == "admin"
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
