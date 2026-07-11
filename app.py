@@ -285,15 +285,14 @@ with st.sidebar:
 # ---------------- DATABASE FUNCTIONS ----------------
 
 def add_client(name, address, contact_number):
-
     response = supabase.table("clients").insert(
         {
             "client_name": name,
             "address": address,
-            "contact_number": contact_number
+            "contact_number": contact_number,
+            "created_by": st.session_state.get("user_name", "Unknown")
         }
     ).execute()
-
     return response.data[0]["id"]
 
 
@@ -412,21 +411,22 @@ def add_invoice(
 
     supabase.table("invoices").insert(
         {
-            "invoice_number": invoice_number,
-            "client_name": client_name,
-            "invoice_date": str(invoice_date),
-            "due_date": str(due_date),
-            "description": description,
-            "quantity": quantity,
-            "rate": rate,
-            "amount": amount,
-            "tax": tax,
-            "total": total,
-            "payment_status": payment_status,
+            "invoice_number": Invoice_Number,
+            "client_name": Client_Name,
+            "invoice_date": str(Invoice_Date),
+            "due_date": str(Due_Date),
+            "description": Description,
+            "quantity": Quantity,
+            "rate": Rate,
+            "amount": Amount,
+            "tax": Tax,
+            "total": Total,
+            "payment_status": Payment_Status,
             "received_date":
-                str(received_date)
+                str(Received_Date)
                 if received_date
-                else None
+                else None,
+            "created_by": st.session_state.get("user_name", "Unknown")
         }
     ).execute()
 
@@ -1535,7 +1535,8 @@ if page == "👥 Clients":
                 "id": "Client ID",
                 "client_name": "Client Name",
                 "address": "Address",
-                "contact_number": "Contact Number"
+                "contact_number": "Contact Number",
+                "created_by": "Created By"
             })
 
             client_df.insert(0, "Sr. No", range(1, len(client_df) + 1))
@@ -2123,9 +2124,10 @@ if page == "🧾 Sales":
                     "invoice_date",
                     "due_date",
                     "total",
-                    "payment_status"
+                    "payment_status",
+                    "created_by"
                 ]
-            ],
+            ].rename(columns={"created_by": "Created By"}),
             use_container_width=True,
             hide_index=True
         )
