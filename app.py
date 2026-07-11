@@ -1412,8 +1412,9 @@ if page == "👥 Clients":
             st.session_state.clients_active_tab = "All Clients"
 
     with tab_col2:
-        if st.button("➕ Add Client", use_container_width=True):
-            st.session_state.clients_active_tab = "Add Client"
+        if can_edit():
+            if st.button("➕ Add Client", use_container_width=True):
+                st.session_state.clients_active_tab = "Add Client"
 
     with tab_col3:
         if st.button("👤 Client Profile", use_container_width=True):
@@ -1570,53 +1571,54 @@ if page == "👥 Clients":
 
         st.divider()
 
-        st.subheader("Delete Client")
+        if can_delete():
+            st.subheader("Delete Client")
 
-        if clients:
+            if clients:
 
-            delete_client_label = st.selectbox(
-                "Select Client",
-                options=["Select Client"] + client_labels,
-                index=0,
-                key="delete_client_dropdown"
-            )
-
-            if "confirm_delete" not in st.session_state:
-                st.session_state.confirm_delete = False
-
-            if st.button("🗑️ Delete Client"):
-
-                if delete_client_label != "Select Client":
-                    st.session_state.confirm_delete = True
-                else:
-                    st.warning("Please select a client first")
-
-            if st.session_state.confirm_delete:
-
-                st.warning(
-                    f"⚠️ Are you sure you want to delete '{delete_client_label}'?"
+                delete_client_label = st.selectbox(
+                    "Select Client",
+                    options=["Select Client"] + client_labels,
+                    index=0,
+                    key="delete_client_dropdown"
                 )
 
-                c1, c2 = st.columns(2)
+                if "confirm_delete" not in st.session_state:
+                    st.session_state.confirm_delete = False
 
-                with c1:
-                    if st.button("✅ Yes, Delete"):
-                        delete_id = get_client_id_from_label(delete_client_label)
-                        delete_client(delete_id)
-                        st.session_state.confirm_delete = False
-                        st.success("Client Deleted")
-                        st.rerun()
+                if st.button("🗑️ Delete Client"):
 
-                with c2:
-                    if st.button("❌ Cancel"):
-                        st.session_state.confirm_delete = False
-                        st.rerun()
+                    if delete_client_label != "Select Client":
+                        st.session_state.confirm_delete = True
+                    else:
+                        st.warning("Please select a client first")
 
-        else:
+                if st.session_state.confirm_delete:
 
-            st.info(
-                "No clients available to delete"
-            )
+                    st.warning(
+                        f"⚠️ Are you sure you want to delete '{delete_client_label}'?"
+                    )
+
+                    c1, c2 = st.columns(2)
+
+                    with c1:
+                        if st.button("✅ Yes, Delete"):
+                            delete_id = get_client_id_from_label(delete_client_label)
+                            delete_client(delete_id)
+                            st.session_state.confirm_delete = False
+                            st.success("Client Deleted")
+                            st.rerun()
+
+                    with c2:
+                        if st.button("❌ Cancel"):
+                            st.session_state.confirm_delete = False
+                            st.rerun()
+
+            else:
+
+                st.info(
+                    "No clients available to delete"
+                )
 
     if st.session_state.clients_active_tab == "Client Profile":
 
@@ -1640,61 +1642,63 @@ if page == "👥 Clients":
                 st.write(f"**Address:** {details.get('address', '')}")
                 st.write(f"**Contact Number:** {details.get('contact_number', '')}")
 
-                with st.expander("✏️ Edit Client Details"):
+                if can_edit():
+                    with st.expander("✏️ Edit Client Details"):
 
-                    edit_name = st.text_input(
-                        "Client Name",
-                        value=details['client_name'],
-                        key=f"edit_client_name_{details['id']}"
-                    )
-
-                    edit_address = st.text_input(
-                        "Address",
-                        value=details.get('address', ''),
-                        key=f"edit_client_address_{details['id']}"
-                    )
-
-                    edit_contact = st.text_input(
-                        "Contact Number",
-                        value=details.get('contact_number', ''),
-                        key=f"edit_client_contact_{details['id']}"
-                    )
-
-                    if st.button("💾 Save Changes", key="save_client_edit"):
-
-                        update_client(
-                            profile_client_id,
-                            edit_name,
-                            edit_address,
-                            edit_contact
+                        edit_name = st.text_input(
+                            "Client Name",
+                            value=details['client_name'],
+                            key=f"edit_client_name_{details['id']}"
                         )
 
-                        st.success("Client Updated Successfully")
+                        edit_address = st.text_input(
+                            "Address",
+                            value=details.get('address', ''),
+                            key=f"edit_client_address_{details['id']}"
+                        )
 
-                        st.rerun()
+                        edit_contact = st.text_input(
+                            "Contact Number",
+                            value=details.get('contact_number', ''),
+                            key=f"edit_client_contact_{details['id']}"
+                        )
+
+                        if st.button("💾 Save Changes", key="save_client_edit"):
+
+                            update_client(
+                                profile_client_id,
+                                edit_name,
+                                edit_address,
+                                edit_contact
+                            )
+
+                            st.success("Client Updated Successfully")
+
+                            st.rerun()
 
                 st.divider()
 
                 st.subheader("🏦 Accounts")
 
-                account_name = st.text_input(
-                    "Account Name",
-                    placeholder="Example: Scotia Bank",
-                    key="profile_account_name"
-                )
+                if can_edit():
+                    account_name = st.text_input(
+                        "Account Name",
+                        placeholder="Example: Scotia Bank",
+                        key="profile_account_name"
+                    )
 
-                account_type = st.selectbox(
-                    "Account Type",
-                    ["Bank Account", "Credit Card"],
-                    key="profile_account_type"
-                )
+                    account_type = st.selectbox(
+                        "Account Type",
+                        ["Bank Account", "Credit Card"],
+                        key="profile_account_type"
+                    )
 
-                if st.button("➕ Add Account", key="profile_add_account"):
+                    if st.button("➕ Add Account", key="profile_add_account"):
 
-                    if account_name.strip():
-                        add_account(details["id"], details['client_name'], account_name, account_type)
-                        st.success("Account Added Successfully")
-                        st.rerun()
+                        if account_name.strip():
+                            add_account(details["id"], details['client_name'], account_name, account_type)
+                            st.success("Account Added Successfully")
+                            st.rerun()
 
                 accounts = get_accounts(details["id"])
 
