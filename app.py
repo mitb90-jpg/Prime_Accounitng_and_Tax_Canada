@@ -243,7 +243,7 @@ def admin_pending_requests():
                     {"role": "newbie", "status": "approved"}
                 ).eq("id", person["id"]).execute()
                 st.rerun()
- if c3.button("❌ Reject", key=f"rej_{person['id']}"):
+            if c3.button("❌ Reject", key=f"rej_{person['id']}"):
                 supabase.table("profiles").update(
                     {"status": "rejected"}
                 ).eq("id", person["id"]).execute()
