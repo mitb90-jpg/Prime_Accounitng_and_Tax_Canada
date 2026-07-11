@@ -261,9 +261,6 @@ def is_admin():
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
 if not st.session_state.logged_in:
     login()
     st.stop()
@@ -351,7 +348,6 @@ def get_client_details_by_id(client_id):
 
 # ---------------- INVOICE FUNCTIONS ----------------
 
-import datetime
 
 
 def generate_invoice_number():
@@ -410,19 +406,19 @@ def add_invoice(
 
     supabase.table("invoices").insert(
         {
-            "invoice_number": Invoice_Number,
-            "client_name": Client_Name,
-            "invoice_date": str(Invoice_Date),
-            "due_date": str(Due_Date),
-            "description": Description,
-            "quantity": Quantity,
-            "rate": Rate,
-            "amount": Amount,
-            "tax": Tax,
-            "total": Total,
-            "payment_status": Payment_Status,
+            "invoice_number": invoice_number,
+            "client_name": client_name,
+            "invoice_date": str(invoice_date),
+            "due_date": str(due_date),
+            "description": description,
+            "quantity": quantity,
+            "rate": rate,
+            "amount": amount,
+            "tax": tax,
+            "total": total,
+            "payment_status": payment_status,
             "received_date":
-                str(Received_Date)
+                str(received_date)
                 if received_date
                 else None,
             "created_by": st.session_state.get("user_name", "Unknown")
