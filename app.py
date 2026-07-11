@@ -133,6 +133,138 @@ supabase: Client = create_client(
     SUPABASE_URL,
     SUPABASE_KEY
 )
+# ---------------- AUTH ----------------
+def signup_form():
+    st.subheader("📝 Request Access")
+    name = st.text_input("Full Name", key="su_name")
+    dob = st.date_input("Date of Birth", key="su_dob",
+                         min_value=datetime.date(1950, 1, 1),
+                         max_value=datetime.date.today())
+    designation = st.text_input("Designation", key="su_designation")
+    location = st.text_input("Location of Workplace", key="su_location")
+    email = st.text_input("Email", key="su_email")
+    password = st.text_input("Password", type="password", key="su_password")
+
+    if st.button("Submit Request"):
+        if not all([name, designation, location, email, password]):
+            st.warning("Please fill all fields")
+            return
+        try:
+            result = supabase.auth.sign_up(
+                {"email": email, "password": password}
+            )
+            user_id = result.user.id
+            supabase.table("profiles").insert({
+                "id": user_id,
+                "email": email,
+                "name": name,
+                "dob": str(dob),
+                "designation": designation,
+                "location": location,
+                "role": None,
+                "status": "pending"
+            }).execute()
+            st.success("Request submitted! Wait for admin approval before logging in.")
+        except Exception as e:
+            st.error(f"Could not submit request: {e}")
+
+def login():
+    
+    st.title("🔒 Login")
+    tab_login, tab_signup = st.tabs(["Login", "Request Access"])
+
+    with tab_login:
+        email = st.text_input("Email", key="login_email")
+        password = st.text_input("Password", type="password", key="login_password")
+        if st.button("Login"):
+            try:
+                result = supabase.auth.sign_in_with_password(
+                    {"email": email, "password": password}
+                )
+                user_id = result.user.id
+                profile = (
+                    supabase.table("profiles")
+                    .select("*")
+                    .eq("id", user_id)
+                    .execute()
+                )
+                if not profile.data:
+                    st.error("No profile found. Contact admin.")
+                    return
+                p = profile.data[0]
+                if p["status"] == "pending":
+                    st.warning("Your account is still waiting for admin approval.")
+                    return
+                if p["status"] == "rejected":
+                    st.error("Your access request was rejected. Contact admin.")
+                    return
+                st.session_state.logged_in = True
+                st.session_state.user_email = email
+                st.session_state.user_name = p["name"]
+                st.session_state.role = p["role"]
+                st.rerun()
+            except Exception as e:
+                st.error("Invalid email or password")
+
+    with tab_signup:
+        signup_form()
+
+def logout():
+    supabase.auth.sign_out()
+    for key in ["logged_in", "user_email", "user_name", "role"]:
+        st.session_state.pop(key, None)
+    st.rerun()
+
+
+def admin_pending_requests():
+    st.subheader("🛂 Pending Access Requests")
+    
+    pending = (
+        supabase.table("profiles")
+        .select("*")
+        .eq("status", "pending")
+        .execute()
+    ).data
+    if not pending:
+        st.info("No pending requests")
+        return
+    for person in pending:
+        with st.container(border=True):
+            st.write(f"**{person['name']}** ({person['email']})")
+            st.write(f"Designation: {person['designation']} | Location: {person['location']} | DOB: {person['dob']}")
+            c1, c2, c3 = st.columns(3)
+            if c1.button("✅ Approve as Accountant", key=f"acc_{person['id']}"):
+                supabase.table("profiles").update(
+                    {"role": "accountant", "status": "approved"}
+                ).eq("id", person["id"]).execute()
+                st.rerun()
+            if c2.button("✅ Approve as Newbie", key=f"new_{person['id']}"):
+                supabase.table("profiles").update(
+                    {"role": "newbie", "status": "approved"}
+                ).eq("id", person["id"]).execute()
+                st.rerun()
+ if c3.button("❌ Reject", key=f"rej_{person['id']}"):
+                supabase.table("profiles").update(
+                    {"status": "rejected"}
+                ).eq("id", person["id"]).execute()
+                st.rerun()
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    login()
+    st.stop()
+
+with st.sidebar:
+    st.write(f"👤 {st.session_state.user_name}")
+    st.write(f"Role: **{st.session_state.role}**")
+    if st.button("Logout"):
+        logout()
+    if st.session_state.role == "admin":
+        with st.expander("🛂 Manage Requests"):
+            admin_pending_requests()
+
 
 
 # ---------------- DATABASE FUNCTIONS ----------------
