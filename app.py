@@ -6,10 +6,7 @@ import json
 import os
 import datetime
 import plotly.graph_objects as go
-
 from supabase import create_client, Client
-
-
 # ReportLab PDF
 from reportlab.platypus import (
     SimpleDocTemplate,
@@ -19,7 +16,6 @@ from reportlab.platypus import (
     TableStyle,
     Image
 )
-
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
