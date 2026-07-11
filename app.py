@@ -1261,6 +1261,11 @@ section[data-testid="stSidebar"] {
 section[data-testid="stSidebar"] * {
     color: #333333;
 }
+
+section[data-testid="stSidebar"] .sidebar-user-card,
+section[data-testid="stSidebar"] .sidebar-user-card * {
+    color: white !important;
+}
 section[data-testid="stSidebar"] .stRadio label {
     font-size: 16px;
     padding: 10px 14px;
