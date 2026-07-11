@@ -1642,7 +1642,7 @@ if page == "👥 Clients":
                 st.write(f"**Address:** {details.get('address', '')}")
                 st.write(f"**Contact Number:** {details.get('contact_number', '')}")
 
-                if can_edit():
+                if is_admin():
                     with st.expander("✏️ Edit Client Details"):
 
                         edit_name = st.text_input(
@@ -1743,349 +1743,350 @@ if page == "🧾 Sales":
 
             st.rerun()
 
-    st.subheader("Create Invoice")
+    if can_edit():
+        st.subheader("Create Invoice")
 
 
 
-    # ---------- INVOICE BASIC DETAILS ----------
+        # ---------- INVOICE BASIC DETAILS ----------
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
-    with col1:
+        with col1:
 
-        sales_clients = get_clients()
+            sales_clients = get_clients()
 
-        sales_client_labels = [
-            f"{c['client_name']} (ID: {c['id']})"
-            for c in sales_clients
-        ]
+            sales_client_labels = [
+                f"{c['client_name']} (ID: {c['id']})"
+                for c in sales_clients
+            ]
 
-        customer_label = st.selectbox(
-            "Customer",
-            ["Select Client"] + sales_client_labels,
-            key=f"sales_customer_label_{v}"
-        )
-
-        customer_name = (
-            customer_label.split(" (ID:")[0]
-            if customer_label != "Select Client"
-            else "Select Client"
-        )
-
-    with col2:
-
-        invoice_date = st.date_input(
-            "Invoice Date",
-            format="DD-MM-YYYY",
-            key=f"sales_invoice_date_{v}"
-        )
-
-    col3, col4 = st.columns(2)
-
-    with col3:
-
-        if "current_invoice_number" not in st.session_state:
-            st.session_state.current_invoice_number = generate_invoice_number()
-
-        invoice_number = st.session_state.current_invoice_number
-
-        st.text_input(
-            "Invoice Number",
-            value=invoice_number,
-            disabled=True
-        )
-
-    with col4:
-
-        due_date = st.date_input(
-            "Due Date",
-            format="DD-MM-YYYY",
-            key=f"sales_due_date_{v}"
-        )
-
-    st.divider()
-
-    # -------- MULTIPLE INVOICE ITEMS --------
-
-    if "invoice_items" not in st.session_state:
-        st.session_state.invoice_items = []
-
-    st.subheader("Invoice Items")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-
-        item_description = st.text_input(
-            "Description",
-            key=f"item_description_{v}"
-        )
-
-    with col2:
-
-        quantity = st.number_input(
-            "Quantity",
-            min_value=1,
-            value=1,
-            key=f"invoice_quantity_{v}"
-        )
-
-    with col3:
-
-        rate = st.number_input(
-            "Rate",
-            min_value=0.0,
-            key=f"invoice_rate_{v}"
-        )
-
-    with col4:
-
-        discount = st.number_input(
-            "Discount",
-            min_value=0.0,
-            value=0.0,
-            key=f"invoice_discount_{v}"
-        )
-
-    item_total = (quantity * rate) - discount
-
-    st.info(
-        f"Item Total: ${item_total:,.2f}"
-    )
-
-    if st.button(
-        "➕ Add Item",
-        key="add_invoice_item"
-    ):
-
-        if item_description.strip():
-
-            st.session_state.invoice_items.append(
-                {
-                    "Description": item_description,
-                    "Quantity": quantity,
-                    "Rate": rate,
-                    "Discount": discount,
-                    "Amount": item_total
-                }
+            customer_label = st.selectbox(
+                "Customer",
+                ["Select Client"] + sales_client_labels,
+                key=f"sales_customer_label_{v}"
             )
 
-            for k in [
-                "item_description",
-                "invoice_quantity",
-                "invoice_rate",
-                "invoice_discount",
-            ]:
-                if k in st.session_state:
-                    del st.session_state[k]
+            customer_name = (
+                customer_label.split(" (ID:")[0]
+                if customer_label != "Select Client"
+                else "Select Client"
+            )
 
-            st.rerun()
+        with col2:
+
+            invoice_date = st.date_input(
+                "Invoice Date",
+                format="DD-MM-YYYY",
+                key=f"sales_invoice_date_{v}"
+            )
+
+        col3, col4 = st.columns(2)
+
+        with col3:
+
+            if "current_invoice_number" not in st.session_state:
+                st.session_state.current_invoice_number = generate_invoice_number()
+
+            invoice_number = st.session_state.current_invoice_number
+
+            st.text_input(
+                "Invoice Number",
+                value=invoice_number,
+                disabled=True
+            )
+
+        with col4:
+
+            due_date = st.date_input(
+                "Due Date",
+                format="DD-MM-YYYY",
+                key=f"sales_due_date_{v}"
+            )
+
+        st.divider()
+
+        # -------- MULTIPLE INVOICE ITEMS --------
+
+        if "invoice_items" not in st.session_state:
+            st.session_state.invoice_items = []
+
+        st.subheader("Invoice Items")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+
+            item_description = st.text_input(
+                "Description",
+                key=f"item_description_{v}"
+            )
+
+        with col2:
+
+            quantity = st.number_input(
+                "Quantity",
+                min_value=1,
+                value=1,
+                key=f"invoice_quantity_{v}"
+            )
+
+        with col3:
+
+            rate = st.number_input(
+                "Rate",
+                min_value=0.0,
+                key=f"invoice_rate_{v}"
+            )
+
+        with col4:
+
+            discount = st.number_input(
+                "Discount",
+                min_value=0.0,
+                value=0.0,
+                key=f"invoice_discount_{v}"
+            )
+
+        item_total = (quantity * rate) - discount
+
+        st.info(
+            f"Item Total: ${item_total:,.2f}"
+        )
+
+        if st.button(
+            "➕ Add Item",
+            key="add_invoice_item"
+        ):
+
+            if item_description.strip():
+
+                st.session_state.invoice_items.append(
+                    {
+                        "Description": item_description,
+                        "Quantity": quantity,
+                        "Rate": rate,
+                        "Discount": discount,
+                        "Amount": item_total
+                    }
+                )
+
+                for k in [
+                    "item_description",
+                    "invoice_quantity",
+                    "invoice_rate",
+                    "invoice_discount",
+                ]:
+                    if k in st.session_state:
+                        del st.session_state[k]
+
+                st.rerun()
+
+            else:
+
+                st.warning(
+                    "Please enter description"
+                )
+
+
+
+        if st.session_state.invoice_items:
+
+            item_df = pd.DataFrame(
+                st.session_state.invoice_items
+            )
+
+            # recalculate amount
+            item_df["Amount"] = (
+                (
+                    pd.to_numeric(item_df["Quantity"], errors="coerce").fillna(0)
+                    *
+                    pd.to_numeric(item_df["Rate"], errors="coerce").fillna(0)
+                )
+                -
+                pd.to_numeric(item_df["Discount"], errors="coerce").fillna(0)
+            )
+
+            # add a Delete? column for selection
+            item_df["Delete?"] = False
+
+            edited_df = st.data_editor(
+                item_df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Description": st.column_config.TextColumn(
+                        "Description"
+                    ),
+                    "Quantity": st.column_config.NumberColumn(
+                        "Quantity",
+                        min_value=1,
+                        step=1
+                    ),
+                    "Rate": st.column_config.NumberColumn(
+                        "Rate",
+                        min_value=0.0,
+                        step=0.01
+                    ),
+                    "Discount": st.column_config.NumberColumn(
+                        "Discount",
+                        min_value=0.0,
+                        step=0.01
+                    ),
+                    "Amount": st.column_config.NumberColumn(
+                        "Amount",
+                        format="$%.2f",
+                        disabled=True
+                    ),
+                    "Delete?": st.column_config.CheckboxColumn(
+                        "Delete?",
+                        default=False
+                    )
+                },
+                key="invoice_items_editor"
+            )
+
+            # remove rows ticked for deletion
+            if edited_df["Delete?"].any():
+                if st.button("🗑️ Remove Selected", key="remove_selected_items"):
+                    kept_df = edited_df[edited_df["Delete?"] == False].drop(columns=["Delete?"])
+                    st.session_state.invoice_items = kept_df.to_dict("records")
+                    st.rerun()
+
+            # update session items with calculated amount (when nothing being deleted)
+            st.session_state.invoice_items = (
+                edited_df.drop(columns=["Delete?"]).to_dict("records")
+            )
+
+            amount = edited_df["Amount"].sum()
+
+        else:
+            amount = 0
+
+        st.info(
+            f"Service Amount: ${amount:,.2f}"
+        )
+
+
+        # -------- HST --------
+
+        hst_rate = st.number_input(
+            "HST Rate (%)",
+            min_value=0.0,
+            value=13.0,
+            step=0.5,
+            key=f"sales_hst_rate_{v}"
+        )
+
+
+        calculated_hst = amount * (hst_rate / 100)
+
+
+        tax = st.number_input(
+            "HST Amount",
+            min_value=0.0,
+            value=float(calculated_hst),
+            step=0.01,
+            key=f"sales_tax_{v}"
+        )
+
+
+        total = amount + tax
+
+        # -------- TOTAL AMOUNT DUE --------
+
+        st.info(
+            f"Service Amount: ${amount:,.2f}"
+        )
+
+
+        st.warning(
+            f"HST: ${tax:,.2f}"
+        )
+
+
+        st.success(
+            f"Total Amount Due: ${total:,.2f}"
+        )
+
+
+        st.divider()
+
+
+
+        # -------- PAYMENT STATUS --------
+
+        payment_status = st.selectbox(
+            "Status",
+            [
+                "Unpaid",
+                "Paid"
+            ],
+            key=f"sales_payment_status_{v}"
+        )
+
+
+        if payment_status == "Paid":
+
+            received_date = st.date_input(
+                "Payment Received Date"
+            )
 
         else:
 
-            st.warning(
-                "Please enter description"
+            received_date = None
+
+
+
+        st.divider()
+
+    # -------- GENERATE INVOICE --------
+        if st.button("🧾 Generate Invoice"):
+            st.write("BUTTON CLICKED")   # TEMPORARY TEST LINE
+            # ================= TOTAL =================
+            amount = sum(
+                item["Amount"]
+                for item in st.session_state.invoice_items
+            )
+            total = amount + tax
+
+            # -------- SAVE DATABASE --------
+            total_quantity = sum(
+                item["Quantity"]
+                for item in st.session_state.invoice_items
+            )
+            item_descriptions = ", ".join(
+                item["Description"]
+                for item in st.session_state.invoice_items
+            )
+            add_invoice(
+                invoice_number,
+                customer_name,
+                invoice_date,
+                due_date,
+                item_descriptions,
+                total_quantity,
+                0,
+                amount,
+                tax,
+                total,
+                payment_status,
+                received_date
+            )
+            add_invoice_items(
+                invoice_number,
+                st.session_state.invoice_items
+            )
+            st.success(
+                "Invoice saved successfully ✅"
             )
 
+            # ---- reset everything for next invoice ----
+            st.session_state.invoice_items = []
+            st.session_state.current_invoice_number = generate_invoice_number()
+            st.session_state.sales_form_version += 1
 
-
-    if st.session_state.invoice_items:
-
-        item_df = pd.DataFrame(
-            st.session_state.invoice_items
-        )
-
-        # recalculate amount
-        item_df["Amount"] = (
-            (
-                pd.to_numeric(item_df["Quantity"], errors="coerce").fillna(0)
-                *
-                pd.to_numeric(item_df["Rate"], errors="coerce").fillna(0)
-            )
-            -
-            pd.to_numeric(item_df["Discount"], errors="coerce").fillna(0)
-        )
-
-        # add a Delete? column for selection
-        item_df["Delete?"] = False
-
-        edited_df = st.data_editor(
-            item_df,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Description": st.column_config.TextColumn(
-                    "Description"
-                ),
-                "Quantity": st.column_config.NumberColumn(
-                    "Quantity",
-                    min_value=1,
-                    step=1
-                ),
-                "Rate": st.column_config.NumberColumn(
-                    "Rate",
-                    min_value=0.0,
-                    step=0.01
-                ),
-                "Discount": st.column_config.NumberColumn(
-                    "Discount",
-                    min_value=0.0,
-                    step=0.01
-                ),
-                "Amount": st.column_config.NumberColumn(
-                    "Amount",
-                    format="$%.2f",
-                    disabled=True
-                ),
-                "Delete?": st.column_config.CheckboxColumn(
-                    "Delete?",
-                    default=False
-                )
-            },
-            key="invoice_items_editor"
-        )
-
-        # remove rows ticked for deletion
-        if edited_df["Delete?"].any():
-            if st.button("🗑️ Remove Selected", key="remove_selected_items"):
-                kept_df = edited_df[edited_df["Delete?"] == False].drop(columns=["Delete?"])
-                st.session_state.invoice_items = kept_df.to_dict("records")
-                st.rerun()
-
-        # update session items with calculated amount (when nothing being deleted)
-        st.session_state.invoice_items = (
-            edited_df.drop(columns=["Delete?"]).to_dict("records")
-        )
-
-        amount = edited_df["Amount"].sum()
-
-    else:
-        amount = 0
-
-    st.info(
-        f"Service Amount: ${amount:,.2f}"
-    )
-
-
-    # -------- HST --------
-
-    hst_rate = st.number_input(
-        "HST Rate (%)",
-        min_value=0.0,
-        value=13.0,
-        step=0.5,
-        key=f"sales_hst_rate_{v}"
-    )
-
-
-    calculated_hst = amount * (hst_rate / 100)
-
-
-    tax = st.number_input(
-        "HST Amount",
-        min_value=0.0,
-        value=float(calculated_hst),
-        step=0.01,
-        key=f"sales_tax_{v}"
-    )
-
-
-    total = amount + tax
-
-    # -------- TOTAL AMOUNT DUE --------
-
-    st.info(
-        f"Service Amount: ${amount:,.2f}"
-    )
-
-
-    st.warning(
-        f"HST: ${tax:,.2f}"
-    )
-
-
-    st.success(
-        f"Total Amount Due: ${total:,.2f}"
-    )
-
-
-    st.divider()
-
-
-
-    # -------- PAYMENT STATUS --------
-
-    payment_status = st.selectbox(
-        "Status",
-        [
-            "Unpaid",
-            "Paid"
-        ],
-        key=f"sales_payment_status_{v}"
-    )
-
-
-    if payment_status == "Paid":
-
-        received_date = st.date_input(
-            "Payment Received Date"
-        )
-
-    else:
-
-        received_date = None
-
-
-
-    st.divider()
-
-# -------- GENERATE INVOICE --------
-    if st.button("🧾 Generate Invoice"):
-        st.write("BUTTON CLICKED")   # TEMPORARY TEST LINE
-        # ================= TOTAL =================
-        amount = sum(
-            item["Amount"]
-            for item in st.session_state.invoice_items
-        )
-        total = amount + tax
-
-        # -------- SAVE DATABASE --------
-        total_quantity = sum(
-            item["Quantity"]
-            for item in st.session_state.invoice_items
-        )
-        item_descriptions = ", ".join(
-            item["Description"]
-            for item in st.session_state.invoice_items
-        )
-        add_invoice(
-            invoice_number,
-            customer_name,
-            invoice_date,
-            due_date,
-            item_descriptions,
-            total_quantity,
-            0,
-            amount,
-            tax,
-            total,
-            payment_status,
-            received_date
-        )
-        add_invoice_items(
-            invoice_number,
-            st.session_state.invoice_items
-        )
-        st.success(
-            "Invoice saved successfully ✅"
-        )
-
-        # ---- reset everything for next invoice ----
-        st.session_state.invoice_items = []
-        st.session_state.current_invoice_number = generate_invoice_number()
-        st.session_state.sales_form_version += 1
-
-        st.rerun()
+            st.rerun()
 
     # -------- UNPAID INVOICES --------
 
@@ -2141,19 +2142,14 @@ if page == "🧾 Sales":
             key="mark_paid_select"
         )
 
-        if mark_paid_invoice != "Select Invoice":
-
+        if mark_paid_invoice != "Select Invoice" and can_edit():
             payment_received_date = st.date_input(
                 "Payment Received Date",
                 key="mark_paid_date"
             )
-
             if st.button("✅ Mark as Paid", key="mark_paid_button"):
-
                 mark_invoice_paid(mark_paid_invoice, payment_received_date)
-
                 st.success("Invoice marked as Paid")
-
                 st.rerun()
 
 
