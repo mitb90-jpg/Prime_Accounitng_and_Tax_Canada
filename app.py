@@ -266,12 +266,34 @@ if not st.session_state.logged_in:
     st.stop()
 
 with st.sidebar:
-    st.write(f"👤 {st.session_state.user_name}")
-    st.write(f"Role: **{st.session_state.role}**")
-    if st.button("🔄 Refresh"):
-        st.rerun()
-    if st.button("Logout"):
-        logout()
+
+    role_badge_class = {
+        "admin": "role-badge-admin",
+        "accountant": "role-badge-accountant",
+        "newbie": "role-badge-newbie"
+    }.get(st.session_state.role, "role-badge-newbie")
+
+    user_initial = st.session_state.user_name[0].upper() if st.session_state.user_name else "?"
+
+    st.markdown(
+        f"""
+        <div class="sidebar-user-card">
+            <div class="sidebar-user-avatar">{user_initial}</div>
+            <div class="sidebar-user-name">{st.session_state.user_name}</div>
+            <span class="role-badge {role_badge_class}">{st.session_state.role}</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col_refresh, col_logout = st.columns(2)
+    with col_refresh:
+        if st.button("🔄 Refresh", use_container_width=True):
+            st.rerun()
+    with col_logout:
+        if st.button("🚪 Logout", use_container_width=True):
+            logout()
+
     if st.session_state.role == "admin":
         with st.expander("🛂 Manage Requests"):
             admin_pending_requests()
@@ -1315,6 +1337,99 @@ div[data-testid="stFileUploader"] button {
 .st-key-uploader_triangle_container div[data-testid="stFileUploader"] button:hover {
     background-color: #235e5e !important;
 }
+
+/* ---------------- SIDEBAR USER CARD ---------------- */
+
+.sidebar-user-card {
+    background: linear-gradient(135deg, #1f4e79 0%, #163a5c 100%);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.sidebar-user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    float: left;
+    margin-right: 12px;
+}
+
+.sidebar-user-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.role-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-badge-admin {
+    background: #d4af37;
+    color: #3a2e00;
+}
+
+.role-badge-accountant {
+    background: #3a8fa3;
+    color: white;
+}
+
+.role-badge-newbie {
+    background: #8b96a3;
+    color: white;
+}
+
+/* ---------------- SIDEBAR NAV ---------------- */
+
+section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+    background-color: #3a8fa3 !important;
+    border-left: 4px solid #d4af37 !important;
+}
+
+/* ---------------- SIDEBAR STATS FOOTER ---------------- */
+
+.sidebar-stats-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 10px;
+}
+
+.sidebar-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.sidebar-stat-label {
+    color: #666;
+}
+
+.sidebar-stat-value {
+    font-weight: 700;
+    color: #1f4e79;
+    font-size: 16px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1360,8 +1475,15 @@ nav_items = [
 ]
 
 for item in nav_items:
-    if st.sidebar.button(item, key=f"nav_{item}", use_container_width=True):
+    is_active = (item == page)
+    if st.sidebar.button(
+        item,
+        key=f"nav_{item}",
+        use_container_width=True,
+        type="primary" if is_active else "secondary"
+    ):
         st.session_state.page = item
+        st.rerun()
 
 page = st.session_state.page
 
@@ -1378,9 +1500,15 @@ unpaid_count = len([
 
 st.sidebar.markdown(
     f"""
-    <div style="font-size:14px; line-height:1.8;">
-    👥 <b>Total Clients:</b> {total_clients}<br>
-    📌 <b>Unpaid Invoices:</b> {unpaid_count}
+    <div class="sidebar-stats-card">
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">👥 Total Clients</span>
+            <span class="sidebar-stat-value">{total_clients}</span>
+        </div>
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">📌 Unpaid Invoices</span>
+            <span class="sidebar-stat-value">{unpaid_count}</span>
+        </div>
     </div>
     """,
     unsafe_allow_html=True
