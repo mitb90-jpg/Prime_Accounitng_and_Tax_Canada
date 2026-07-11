@@ -2515,7 +2515,7 @@ if page == "📊 Reports":
     with visa_col1:
         with st.container(key="uploader_visa_container"):
             uploaded_visa_pdf = st.file_uploader(
-                "Upload Royal Bank Visa",
+                "Upload Visa - 6023 or 7866 Statement PDF(s)",
                 type=["pdf"],
                 accept_multiple_files=True,
                 key=f"visa_pdf_uploader_{st.session_state.visa_uploader_version}"
