@@ -267,6 +267,13 @@ if not st.session_state.logged_in:
 
 with st.sidebar:
 
+    st.image("Logo.jpeg", width=70)
+    st.markdown(
+        "<h2 style='color:#1f4e79; margin-top:0px;'>Prime Accounting & Tax</h2>",
+        unsafe_allow_html=True
+    )
+    st.markdown("---")
+
     role_badge_class = {
         "admin": "role-badge-admin",
         "accountant": "role-badge-accountant",
@@ -1454,16 +1461,6 @@ with col2:
         f"<p style='font-size:16px; color:#1f4e79; margin-top:-10px;'>👋 Welcome back — Today is {today_display}</p>",
         unsafe_allow_html=True
     )
-
-
-st.sidebar.image("Logo.jpeg", width=70)
-
-st.sidebar.markdown(
-    "<h2 style='color:#1f4e79; margin-top:0px;'>Prime Accounting & Tax</h2>",
-    unsafe_allow_html=True
-)
-
-st.sidebar.markdown("---")
 
 
 # ---------------- APP MENU ----------------
