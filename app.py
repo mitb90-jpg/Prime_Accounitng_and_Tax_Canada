@@ -1475,7 +1475,7 @@ nav_items = [
 ]
 
 for item in nav_items:
-    is_active = (item == page)
+    is_active = (item == st.session_state.page)
     if st.sidebar.button(
         item,
         key=f"nav_{item}",
