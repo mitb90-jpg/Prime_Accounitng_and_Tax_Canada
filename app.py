@@ -1477,7 +1477,7 @@ st.markdown("""
 <style>
 div.stDownloadButton > button {
     width: 100%;
-    background-color: #1f4e79;
+    background-color: #c6cacf;
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -1500,7 +1500,7 @@ div.stButton > button:hover {
     background-color: #163a5c;
 }
 section[data-testid="stSidebar"] {
-    background-color: #90E0FE;
+    background-color: #f0f2f5;
     border-right: 1px solid #e5e7eb;
 }
 section[data-testid="stSidebar"] * {
