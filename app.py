@@ -190,28 +190,65 @@ def admin_pending_requests():
         .execute()
     ).data
     if not pending:
-        st.info("No pending requests")
-        return
-    for person in pending:
-        with st.container(border=True):
-            st.write(f"**{person['name']}** ({person['email']})")
-            st.write(f"Designation: {person['designation']} | Location: {person['location']} | DOB: {person['dob']}")
-            c1, c2, c3 = st.columns(3)
-            if c1.button("✅ Approve as Accountant", key=f"acc_{person['id']}"):
-                supabase.table("profiles").update(
-                    {"role": "accountant", "status": "approved"}
-                ).eq("id", person["id"]).execute()
-                st.rerun()
-            if c2.button("✅ Approve as Newbie", key=f"new_{person['id']}"):
-                supabase.table("profiles").update(
-                    {"role": "newbie", "status": "approved"}
-                ).eq("id", person["id"]).execute()
-                st.rerun()
-            if c3.button("❌ Reject", key=f"rej_{person['id']}"):
-                supabase.table("profiles").update(
-                    {"status": "rejected"}
-                ).eq("id", person["id"]).execute()
-                st.rerun()
+        st.info("No pending access requests")
+    else:
+        for person in pending:
+            with st.container(border=True):
+                st.write(f"**{person['name']}** ({person['email']})")
+                st.write(f"Designation: {person['designation']} | Location: {person['location']} | DOB: {person['dob']}")
+                c1, c2, c3 = st.columns(3)
+                if c1.button("✅ Approve as Accountant", key=f"acc_{person['id']}"):
+                    supabase.table("profiles").update(
+                        {"role": "accountant", "status": "approved"}
+                    ).eq("id", person["id"]).execute()
+                    st.rerun()
+                if c2.button("✅ Approve as Newbie", key=f"new_{person['id']}"):
+                    supabase.table("profiles").update(
+                        {"role": "newbie", "status": "approved"}
+                    ).eq("id", person["id"]).execute()
+                    st.rerun()
+                if c3.button("❌ Reject", key=f"rej_{person['id']}"):
+                    supabase.table("profiles").update(
+                        {"status": "rejected"}
+                    ).eq("id", person["id"]).execute()
+                    st.rerun()
+
+    st.divider()
+
+    st.subheader("🚫 Pending Void Invoice Requests")
+
+    all_invoices_for_void = get_invoices()
+
+    pending_voids = [
+        inv for inv in all_invoices_for_void
+        if inv.get("void_requested") and not inv.get("is_voided")
+    ]
+
+    if not pending_voids:
+        st.info("No pending void requests")
+    else:
+        for req in pending_voids:
+            with st.container(border=True):
+                st.write(f"**Invoice:** {req['invoice_number']} | **Client:** {req['client_name']}")
+                st.write(f"**Requested by:** {req.get('void_requested_by', '')}")
+                st.write(f"**Reason:** {req.get('void_requested_reason', '')}")
+
+                c1, c2 = st.columns(2)
+
+                with c1:
+                    if st.button("✅ Approve & Void", key=f"sidebar_approve_void_{req['invoice_number']}"):
+                        void_invoice(
+                            req['invoice_number'],
+                            req.get('void_requested_reason', '')
+                        )
+                        st.success(f"Invoice {req['invoice_number']} voided")
+                        st.rerun()
+
+                with c2:
+                    if st.button("❌ Reject", key=f"sidebar_reject_void_{req['invoice_number']}"):
+                        reject_void_request(req['invoice_number'])
+                        st.info("Request rejected")
+                        st.rerun()
 
 # ---------------- VISA CATEGORIZATION DICTIONARIES ----------------
 
