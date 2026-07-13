@@ -70,45 +70,108 @@ def signup_form():
             st.error(f"Could not submit request: {e}")
 
 def login():
-    
-    st.title("🔒 Login")
-    tab_login, tab_signup = st.tabs(["Login", "Request Access"])
 
-    with tab_login:
-        email = st.text_input("Email", key="login_email")
-        password = st.text_input("Password", type="password", key="login_password")
-        if st.button("Login"):
-            try:
-                result = supabase.auth.sign_in_with_password(
-                    {"email": email, "password": password}
-                )
-                user_id = result.user.id
-                profile = (
-                    supabase.table("profiles")
-                    .select("*")
-                    .eq("id", user_id)
-                    .execute()
-                )
-                if not profile.data:
-                    st.error("No profile found. Contact admin.")
-                    return
-                p = profile.data[0]
-                if p["status"] == "pending":
-                    st.warning("Your account is still waiting for admin approval.")
-                    return
-                if p["status"] == "rejected":
-                    st.error("Your access request was rejected. Contact admin.")
-                    return
-                st.session_state.logged_in = True
-                st.session_state.user_email = email
-                st.session_state.user_name = p["name"]
-                st.session_state.role = p["role"]
-                st.rerun()
-            except Exception as e:
-                st.error("Invalid email or password")
+    st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] {
+        background: radial-gradient(circle at 15% 15%, #1a3a6b 0%, #0a1128 40%, #05070f 100%) !important;
+    }
+    [data-testid="stHeader"] {
+        background: transparent !important;
+    }
+    .st-key-login_card_container {
+        background: white;
+        border-radius: 18px;
+        padding: 36px 32px 26px 32px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+        max-width: 440px;
+        margin: 40px auto;
+    }
+    .login-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f4e79;
+        text-align: center;
+        margin-top: 12px;
+        margin-bottom: 2px;
+    }
+    .login-subtitle {
+        font-size: 14px;
+        color: #888;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .st-key-login_card_container .stTextInput input {
+        border-radius: 8px !important;
+        border: 1.5px solid #e0e0e0 !important;
+        padding: 10px 12px !important;
+    }
+    .st-key-login_card_container div.stButton > button {
+        background: linear-gradient(135deg, #1f4e79, #163a5c) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 11px !important;
+        border: none !important;
+        margin-top: 6px !important;
+        width: 100% !important;
+        color: white !important;
+    }
+    .st-key-login_card_container div.stButton > button:hover {
+        background: linear-gradient(135deg, #163a5c, #0f2a44) !important;
+    }
+    .st-key-login_card_container [data-baseweb="tab-list"] {
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    with tab_signup:
-        signup_form()
+    with st.container(key="login_card_container"):
+
+        logo_col1, logo_col2, logo_col3 = st.columns([1, 1, 1])
+        with logo_col2:
+            st.image("Logo.jpeg", width=70)
+
+        st.markdown('<div class="login-title">Prime Accounting and Tax</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-subtitle">Sign in to your account</div>', unsafe_allow_html=True)
+
+        tab_login, tab_signup = st.tabs(["Login", "Request Access"])
+
+        with tab_login:
+            email = st.text_input("Email", key="login_email")
+            password = st.text_input("Password", type="password", key="login_password")
+            if st.button("Login"):
+                try:
+                    result = supabase.auth.sign_in_with_password(
+                        {"email": email, "password": password}
+                    )
+                    user_id = result.user.id
+                    profile = (
+                        supabase.table("profiles")
+                        .select("*")
+                        .eq("id", user_id)
+                        .execute()
+                    )
+                    if not profile.data:
+                        st.error("No profile found. Contact admin.")
+                        return
+                    p = profile.data[0]
+                    if p["status"] == "pending":
+                        st.warning("Your account is still waiting for admin approval.")
+                        return
+                    if p["status"] == "rejected":
+                        st.error("Your access request was rejected. Contact admin.")
+                        return
+                    st.session_state.logged_in = True
+                    st.session_state.user_email = email
+                    st.session_state.user_name = p["name"]
+                    st.session_state.role = p["role"]
+                    st.rerun()
+                except Exception as e:
+                    st.error("Invalid email or password")
+
+        with tab_signup:
+            signup_form()
 
 def logout():
     supabase.auth.sign_out()
@@ -1657,6 +1720,72 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
 
 [data-testid="stElementToolbar"] {
     background: transparent !important;
+}
+
+/* ---------------- LOGIN PAGE ---------------- */
+
+.login-page-wrapper [data-testid="stAppViewContainer"] {
+    background: radial-gradient(circle at 15% 15%, #1a3a6b 0%, #0a1128 40%, #05070f 100%) !important;
+}
+
+.login-card {
+    background: white;
+    border-radius: 18px;
+    padding: 40px 36px 30px 36px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    max-width: 440px;
+    margin: 0 auto;
+}
+
+.login-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f4e79;
+    text-align: center;
+    margin-top: 14px;
+    margin-bottom: 2px;
+}
+
+.login-subtitle {
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.login-page-wrapper [data-testid="stForm"],
+.login-page-wrapper div.stTabs {
+    max-width: 440px;
+    margin: 0 auto;
+}
+
+.login-page-wrapper .stTextInput input {
+    border-radius: 8px !important;
+    border: 1.5px solid #e0e0e0 !important;
+    padding: 10px 12px !important;
+}
+
+.login-page-wrapper .stTextInput input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.15) !important;
+}
+
+.login-page-wrapper div.stButton > button {
+    background: linear-gradient(135deg, #1f4e79, #163a5c) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 11px !important;
+    border: none !important;
+    margin-top: 8px !important;
+}
+
+.login-page-wrapper div.stButton > button:hover {
+    background: linear-gradient(135deg, #163a5c, #0f2a44) !important;
+}
+
+.login-page-wrapper [data-baseweb="tab-list"] {
+    justify-content: center !important;
+    gap: 8px !important;
 }
 </style>
 """, unsafe_allow_html=True)
