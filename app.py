@@ -418,7 +418,18 @@ def generate_client_code():
     return f"CL-{next_number:04d}"
 
 
-def add_client(name, address, contact_number):
+def add_client(
+    name,
+    address,
+    contact_number,
+    postal_code=None,
+    phone_number=None,
+    email=None,
+    sin_primary=None,
+    sin_spouse=None,
+    dob_primary=None,
+    dob_spouse=None
+):
     new_code = generate_client_code()
     response = supabase.table("clients").insert(
         {
@@ -427,7 +438,14 @@ def add_client(name, address, contact_number):
             "contact_number": contact_number,
             "created_by": st.session_state.get("user_name", "Unknown"),
             "client_code": new_code,
-            "status": "active"
+            "status": "active",
+            "postal_code": postal_code,
+            "phone_number": phone_number,
+            "email": email,
+            "sin_primary": sin_primary,
+            "sin_spouse": sin_spouse,
+            "dob_primary": str(dob_primary) if dob_primary else None,
+            "dob_spouse": str(dob_spouse) if dob_spouse else None
         }
     ).execute()
     return response.data[0]["id"]
