@@ -1477,7 +1477,7 @@ st.markdown("""
 <style>
 div.stDownloadButton > button {
     width: 100%;
-    background-color: #c6cacf;
+    background-color: #1f4e79;
     color: white;
     font-size: 16px;
     font-weight: bold;
