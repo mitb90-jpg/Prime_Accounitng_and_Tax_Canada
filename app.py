@@ -307,6 +307,34 @@ with st.sidebar:
 
 # ---------------- DATABASE FUNCTIONS ----------------
 
+def clean_import_text(value):
+    if pd.isna(value):
+        return None
+    text = str(value).strip()
+    if text == "" or text.lower() == "nan":
+        return None
+    return text
+
+
+def clean_import_date(value):
+    if pd.isna(value):
+        return None
+    if isinstance(value, (pd.Timestamp, datetime.datetime, datetime.date)):
+        try:
+            return value.date().isoformat()
+        except AttributeError:
+            return value.isoformat()
+    text = str(value).strip()
+    if text == "" or text.lower() == "nan":
+        return None
+    try:
+        from dateutil import parser as date_parser
+        parsed = date_parser.parse(text, fuzzy=True)
+        return parsed.date().isoformat()
+    except Exception:
+        return None
+
+
 def generate_client_code():
 
     counter = (
@@ -1706,6 +1734,64 @@ if page == "👥 Clients":
         st.info("🏗️ Corporate Tax client management is coming soon. We'll build this out next.")
 
         st.stop()
+
+    if is_admin():
+        with st.expander("📥 Bulk Import Clients (Excel)"):
+
+            st.write(
+                "Excel columns expected: Sr No., Client Name, SIN Primary, SIN Spouse, "
+                "Address, Postal code, dob primary, dob spouse, Phone Number, E-Mail"
+            )
+
+            import_file = st.file_uploader(
+                "Choose Excel file",
+                type=["xlsx"],
+                key="client_import_uploader"
+            )
+
+            if import_file is not None:
+
+                import_df = pd.read_excel(import_file, header=2)
+                import_df = import_df.dropna(subset=["Client Name"])
+
+                st.write(f"Found **{len(import_df)}** client rows ready to import")
+
+                st.dataframe(import_df, use_container_width=True, hide_index=True)
+
+                if st.button("✅ Confirm Import", key="confirm_client_import"):
+
+                    imported_count = 0
+
+                    for _, row in import_df.iterrows():
+
+                        name = clean_import_text(row.get("Client Name"))
+
+                        if not name:
+                            continue
+
+                        new_code = generate_client_code()
+                        phone = clean_import_text(row.get("Phone Number"))
+
+                        supabase.table("clients").insert({
+                            "client_name": name,
+                            "address": clean_import_text(row.get("Address")),
+                            "contact_number": phone,
+                            "created_by": st.session_state.get("user_name", "Unknown"),
+                            "client_code": new_code,
+                            "status": "active",
+                            "sin_primary": clean_import_text(row.get("SIN Primary")),
+                            "sin_spouse": clean_import_text(row.get("SIN Spouse")),
+                            "postal_code": clean_import_text(row.get("Postal code")),
+                            "dob_primary": clean_import_date(row.get("dob primary")),
+                            "dob_spouse": clean_import_date(row.get("dob spouse")),
+                            "phone_number": phone,
+                            "email": clean_import_text(row.get("E-Mail"))
+                        }).execute()
+
+                        imported_count += 1
+
+                    st.success(f"✅ Imported {imported_count} clients successfully")
+                    st.rerun()
 
     if "clients_active_tab" not in st.session_state:
         st.session_state.clients_active_tab = "All Clients"
