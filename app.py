@@ -3459,10 +3459,7 @@ if page == "📊 Reports":
     if "visa_uploader_version" not in st.session_state:
         st.session_state.visa_uploader_version = 0
 
-    uploaded_excel = st.file_uploader(
-        "Upload Excel File",
-        type=["xlsx"]
-    )
+    uploaded_excel = None  # Excel upload option removed
 
     # ---------------- SCOTIA UPLOADER ----------------
 
