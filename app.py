@@ -307,16 +307,81 @@ with st.sidebar:
 
 # ---------------- DATABASE FUNCTIONS ----------------
 
+def generate_client_code():
+
+    counter = (
+        supabase
+        .table("client_code_counter")
+        .select("last_number")
+        .eq("id", 1)
+        .execute()
+    ).data[0]["last_number"]
+
+    next_number = counter + 1
+
+    supabase.table("client_code_counter") \
+        .update({"last_number": next_number}) \
+        .eq("id", 1) \
+        .execute()
+
+    return f"CL-{next_number:04d}"
+
+
 def add_client(name, address, contact_number):
+    new_code = generate_client_code()
     response = supabase.table("clients").insert(
         {
             "client_name": name,
             "address": address,
             "contact_number": contact_number,
-            "created_by": st.session_state.get("user_name", "Unknown")
+            "created_by": st.session_state.get("user_name", "Unknown"),
+            "client_code": new_code,
+            "status": "active"
         }
     ).execute()
     return response.data[0]["id"]
+
+
+def request_deactivate_client(client_id, reason):
+    supabase.table("clients") \
+        .update({
+            "deactivation_requested": True,
+            "deactivation_requested_by": st.session_state.get("user_name", "Unknown"),
+            "deactivation_requested_reason": reason
+        }) \
+        .eq("id", client_id) \
+        .execute()
+
+
+def approve_deactivate_client(client_id, reason):
+    supabase.table("clients") \
+        .update({
+            "status": "inactive",
+            "deactivation_requested": False,
+            "deactivated_by": st.session_state.get("user_name", "Unknown"),
+            "deactivation_reason": reason
+        }) \
+        .eq("id", client_id) \
+        .execute()
+
+
+def reject_deactivate_request(client_id):
+    supabase.table("clients") \
+        .update({"deactivation_requested": False}) \
+        .eq("id", client_id) \
+        .execute()
+
+
+def reactivate_client(client_id):
+    supabase.table("clients") \
+        .update({
+            "status": "active",
+            "deactivation_requested": False,
+            "deactivated_by": None,
+            "deactivation_reason": None
+        }) \
+        .eq("id", client_id) \
+        .execute()
 
 
 
@@ -1742,11 +1807,18 @@ if page == "👥 Clients":
 
             client_df = client_df.rename(columns={
                 "id": "Client ID",
+                "client_code": "Client Code",
                 "client_name": "Client Name",
                 "address": "Address",
                 "contact_number": "Contact Number",
-                "created_by": "Created By"
+                "created_by": "Created By",
+                "status": "Status"
             })
+
+            if "Status" in client_df.columns:
+                client_df["Status"] = client_df["Status"].apply(
+                    lambda x: "🟢 Active" if x == "active" else "🔴 Inactive"
+                )
 
             with search_col:
                 client_search = st.text_input(
@@ -1781,10 +1853,12 @@ if page == "👥 Clients":
                 column_config={
                     "Sr. No": st.column_config.NumberColumn("Sr. No", width="small"),
                     "Client ID": st.column_config.NumberColumn("Client ID", width="small"),
+                    "Client Code": st.column_config.TextColumn("Client Code", width="small"),
                     "Client Name": st.column_config.TextColumn("Client Name", width="medium"),
                     "Address": st.column_config.TextColumn("Address", width="large"),
                     "Contact Number": st.column_config.TextColumn("Contact Number", width="medium"),
                     "Created By": st.column_config.TextColumn("Created By", width="medium"),
+                    "Status": st.column_config.TextColumn("Status", width="small"),
                 }
             )
 
@@ -1877,9 +1951,98 @@ if page == "👥 Clients":
 
                 details = get_client_details_by_id(profile_client_id)
 
+                status_display = "🟢 Active" if details.get("status", "active") == "active" else "🔴 Inactive"
+
+                st.write(f"**Client Code:** {details.get('client_code', 'N/A')}")
                 st.write(f"**Name:** {details['client_name']}")
+                st.write(f"**Status:** {status_display}")
                 st.write(f"**Address:** {details.get('address', '')}")
                 st.write(f"**Contact Number:** {details.get('contact_number', '')}")
+
+                if can_edit():
+
+                    st.divider()
+
+                    st.markdown("**🔄 Client Status**")
+
+                    is_inactive = details.get("status") == "inactive"
+                    is_pending_deactivation = details.get("deactivation_requested")
+
+                    if is_inactive:
+
+                        st.warning(
+                            f"This client is INACTIVE.\n\n"
+                            f"Reason: {details.get('deactivation_reason', '')}\n\n"
+                            f"Deactivated by: {details.get('deactivated_by', '')}"
+                        )
+
+                        if is_admin():
+                            if st.button("🟢 Reactivate Client", key="reactivate_client_btn"):
+                                reactivate_client(details["id"])
+                                st.success("Client reactivated")
+                                st.rerun()
+
+                    elif is_pending_deactivation and is_admin():
+
+                        st.info(
+                            f"⏳ Deactivation request pending your approval\n\n"
+                            f"Requested by: {details.get('deactivation_requested_by', '')}\n\n"
+                            f"Reason: {details.get('deactivation_requested_reason', '')}"
+                        )
+
+                        c1, c2 = st.columns(2)
+
+                        with c1:
+                            if st.button("✅ Approve & Deactivate", key="approve_deactivate_btn"):
+                                approve_deactivate_client(
+                                    details["id"],
+                                    details.get("deactivation_requested_reason", "")
+                                )
+                                st.success("Client marked Inactive")
+                                st.rerun()
+
+                        with c2:
+                            if st.button("❌ Reject Request", key="reject_deactivate_btn"):
+                                reject_deactivate_request(details["id"])
+                                st.info("Request rejected")
+                                st.rerun()
+
+                    elif is_pending_deactivation and not is_admin():
+
+                        st.info(
+                            f"⏳ Deactivation request submitted, waiting for admin approval.\n\n"
+                            f"Reason: {details.get('deactivation_requested_reason', '')}"
+                        )
+
+                    elif is_admin():
+
+                        deactivate_reason = st.text_area(
+                            "Reason for deactivating this client (required)",
+                            key="deactivate_reason_input"
+                        )
+
+                        if st.button("🔴 Deactivate Client", key="deactivate_client_btn"):
+                            if deactivate_reason.strip():
+                                approve_deactivate_client(details["id"], deactivate_reason)
+                                st.success("Client marked Inactive")
+                                st.rerun()
+                            else:
+                                st.warning("Please enter a reason")
+
+                    else:
+
+                        deactivate_request_reason = st.text_area(
+                            "Reason for requesting deactivation (required)",
+                            key="deactivate_request_reason_input"
+                        )
+
+                        if st.button("📨 Request Deactivation", key="request_deactivate_btn"):
+                            if deactivate_request_reason.strip():
+                                request_deactivate_client(details["id"], deactivate_request_reason)
+                                st.success("Deactivation request sent to admin")
+                                st.rerun()
+                            else:
+                                st.warning("Please enter a reason")
 
                 if is_admin():
                     with st.expander("✏️ Edit Client Details"):
