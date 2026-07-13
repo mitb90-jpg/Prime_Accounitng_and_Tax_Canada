@@ -1629,7 +1629,7 @@ div[data-testid="stFileUploader"] button {
 /* ---------------- SIDEBAR: DARK GLOW THEME ---------------- */
 
 section[data-testid="stSidebar"] {
-    background: radial-gradient(circle at 0% 0%, #1a3a6b 0%, #0a1128 35%, #05070f 100%) !important;
+    background: linear-gradient(180deg, #2952a3 0%, #24468f 50%, #1e3d7a 100%) !important;
     border-right: none !important;
 }
 
