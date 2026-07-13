@@ -3243,76 +3243,42 @@ if page == "📄 Invoice History":
                     else:
                         st.warning("Please enter a reason before requesting")
 
-        if "confirm_invoice_delete" not in st.session_state:
+        if is_admin():
 
-            st.session_state.confirm_invoice_delete = False
-
-
-
-        if st.button(
-            "🗑️ Delete Invoice"
-        ):
-
-
-            if selected_invoice != "Select Invoice":
-
-                st.session_state.confirm_invoice_delete = True
-
-
-            else:
-
+            if "confirm_invoice_delete" not in st.session_state:
+                st.session_state.confirm_invoice_delete = False
+            if st.button(
+                "🗑️ Delete Invoice"
+            ):
+                if selected_invoice != "Select Invoice":
+                    st.session_state.confirm_invoice_delete = True
+                else:
+                    st.warning(
+                        "Please select an invoice"
+                    )
+            if st.session_state.confirm_invoice_delete:
                 st.warning(
-                    "Please select an invoice"
+                    f"⚠️ Are you sure you want to delete invoice {selected_invoice}?"
                 )
-
-
-
-        if st.session_state.confirm_invoice_delete:
-
-
-            st.warning(
-                f"⚠️ Are you sure you want to delete invoice {selected_invoice}?"
-            )
-
-
-            c1, c2 = st.columns(2)
-
-
-            with c1:
-
-                if st.button(
-                    "✅ Yes, Delete"
-                ):
-
-
-                    delete_invoice(
-                        selected_invoice
-                    )
-
-
-                    st.session_state.confirm_invoice_delete = False
-
-
-                    st.success(
-                        "Invoice deleted successfully"
-                    )
-
-
-                    st.rerun()
-
-
-
-            with c2:
-
-                if st.button(
-                    "❌ Cancel"
-                ):
-
-
-                    st.session_state.confirm_invoice_delete = False
-
-
-                    st.rerun()
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button(
+                        "✅ Yes, Delete"
+                    ):
+                        delete_invoice(
+                            selected_invoice
+                        )
+                        st.session_state.confirm_invoice_delete = False
+                        st.success(
+                            "Invoice deleted successfully"
+                        )
+                        st.rerun()
+                with c2:
+                    if st.button(
+                        "❌ Cancel"
+                    ):
+                        st.session_state.confirm_invoice_delete = False
+                        st.rerun()
 
 
 
