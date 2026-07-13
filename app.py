@@ -428,7 +428,8 @@ def add_client(
     sin_primary=None,
     sin_spouse=None,
     dob_primary=None,
-    dob_spouse=None
+    dob_spouse=None,
+    client_type="personal"
 ):
     new_code = generate_client_code()
     response = supabase.table("clients").insert(
@@ -445,7 +446,8 @@ def add_client(
             "sin_primary": sin_primary,
             "sin_spouse": sin_spouse,
             "dob_primary": str(dob_primary) if dob_primary else None,
-            "dob_spouse": str(dob_spouse) if dob_spouse else None
+            "dob_spouse": str(dob_spouse) if dob_spouse else None,
+            "client_type": client_type
         }
     ).execute()
     return response.data[0]["id"]
@@ -528,15 +530,19 @@ def update_client(
 
 
 
-def get_clients():
+def get_clients(client_type=None):
 
-    response = (
+    query = (
         supabase
         .table("clients")
         .select("id, client_name")
         .order("client_name")
-        .execute()
     )
+
+    if client_type:
+        query = query.eq("client_type", client_type)
+
+    response = query.execute()
 
     return response.data
 
@@ -1979,7 +1985,7 @@ if page == "👥 Clients":
 
     st.divider()
 
-    clients = get_clients()
+    clients = get_clients("personal")
 
     client_labels = [
         f"{c['client_name']} (ID: {c['id']})"
@@ -1992,6 +1998,12 @@ if page == "👥 Clients":
     if st.session_state.clients_active_tab == "Add Client":
 
         st.subheader("Add New Client")
+
+        client_type_select = st.selectbox(
+            "Client Type",
+            ["Personal Taxes", "Corporate Taxes"],
+            key="new_client_type_select"
+        )
 
         client_name = st.text_input(
             "Client Name"
@@ -2110,7 +2122,8 @@ if page == "👥 Clients":
                     client_sin_primary,
                     client_sin_spouse,
                     client_dob_primary,
-                    client_dob_spouse
+                    client_dob_spouse,
+                    "personal" if client_type_select == "Personal Taxes" else "corporate"
                 )
 
                 for acc in st.session_state.new_client_accounts:
@@ -2575,7 +2588,7 @@ if page == "🧾 Sales":
 
         with col1:
 
-            sales_clients = get_clients()
+            sales_clients = get_clients("personal")
 
             sales_client_labels = [
                 f"{c['client_name']} (ID: {c['id']})"
