@@ -3515,8 +3515,17 @@ if page == "📊 Reports":
 
 elif page == "🏠 Dashboard":
 
-    st.markdown("""
-    <style>
+    col_logo, col_greeting = st.columns([1, 6])
+
+    with col_logo:
+        st.image("Logo.jpeg", width=80)
+
+    with col_greeting:
+        today_display = datetime.date.today().strftime("%A, %B %d, %Y")
+        st.markdown(
+            f"<p style='font-size:16px; color:#1f4e79; margin-top:20px;'>👋 Welcome back — Today is {today_display}</p>",
+            unsafe_allow_html=True
+        )
 
     .main-title {
         font-size:45px;
