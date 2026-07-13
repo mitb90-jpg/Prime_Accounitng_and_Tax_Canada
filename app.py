@@ -757,6 +757,48 @@ def delete_invoice(invoice_number):
         .execute()
 
 
+def void_invoice(invoice_number, reason):
+
+    supabase.table("invoices") \
+        .update(
+            {
+                "is_voided": True,
+                "void_reason": reason,
+                "voided_by": st.session_state.get("user_name", "Unknown"),
+                "voided_at": datetime.datetime.now().isoformat()
+            }
+        ) \
+        .eq("invoice_number", invoice_number) \
+        .execute()
+
+
+def request_void_invoice(invoice_number, reason):
+
+    supabase.table("invoices") \
+        .update(
+            {
+                "void_requested": True,
+                "void_requested_by": st.session_state.get("user_name", "Unknown"),
+                "void_requested_reason": reason,
+                "void_requested_at": datetime.datetime.now().isoformat()
+            }
+        ) \
+        .eq("invoice_number", invoice_number) \
+        .execute()
+
+
+def reject_void_request(invoice_number):
+
+    supabase.table("invoices") \
+        .update(
+            {
+                "void_requested": False
+            }
+        ) \
+        .eq("invoice_number", invoice_number) \
+        .execute()
+
+
 
 # ---------------- ACCOUNT FUNCTIONS ----------------
 
@@ -2253,6 +2295,7 @@ if page == "🧾 Sales":
         inv
         for inv in invoices
         if inv["payment_status"] == "Unpaid"
+        and not inv.get("is_voided")
     ]
 
 
@@ -2456,16 +2499,29 @@ if page == "📄 Invoice History":
             "total": "Total",
             "payment_status": "Payment Status",
             "received_date": "Received Date",
-            "created_at": "Created At"
+            "created_at": "Created At",
+            "is_voided": "Voided"
         })
+
+        if "Voided" in invoice_df.columns:
+            invoice_df["Voided"] = invoice_df["Voided"].apply(
+                lambda x: "🚫 VOID" if x else ""
+            )
 
         display_invoice_df = invoice_df.copy()
 
         for col in ["Amount", "Tax", "Total"]:
             display_invoice_df[col] = display_invoice_df[col].apply(format_amount)
 
+        def highlight_voided(row):
+            if row.get("Voided") == "🚫 VOID":
+                return ["background-color: #fdeaea"] * len(row)
+            return [""] * len(row)
+
+        styled_invoice_df = display_invoice_df.style.apply(highlight_voided, axis=1)
+
         st.dataframe(
-            display_invoice_df,
+            styled_invoice_df,
             use_container_width=True,
             hide_index=True
         )
@@ -2484,6 +2540,43 @@ if page == "📄 Invoice History":
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
+
+        if is_admin():
+
+            pending_void_requests = [
+                inv for inv in invoices
+                if inv.get("void_requested") and not inv.get("is_voided")
+            ]
+
+            if pending_void_requests:
+
+                st.divider()
+
+                st.subheader(f"⏳ Pending Void Requests ({len(pending_void_requests)})")
+
+                for req in pending_void_requests:
+
+                    with st.container(border=True):
+                        st.write(f"**Invoice:** {req['invoice_number']} | **Client:** {req['client_name']}")
+                        st.write(f"**Requested by:** {req.get('void_requested_by', '')}")
+                        st.write(f"**Reason:** {req.get('void_requested_reason', '')}")
+
+                        c1, c2 = st.columns(2)
+
+                        with c1:
+                            if st.button("✅ Approve & Void", key=f"quick_approve_{req['invoice_number']}"):
+                                void_invoice(
+                                    req['invoice_number'],
+                                    req.get('void_requested_reason', '')
+                                )
+                                st.success(f"Invoice {req['invoice_number']} voided")
+                                st.rerun()
+
+                        with c2:
+                            if st.button("❌ Reject", key=f"quick_reject_{req['invoice_number']}"):
+                                reject_void_request(req['invoice_number'])
+                                st.info("Request rejected")
+                                st.rerun()
 
         st.divider()
 
@@ -2515,6 +2608,93 @@ if page == "📄 Invoice History":
                 mime="application/pdf"
             )
 
+        if selected_invoice != "Select Invoice" and can_edit():
+
+            st.divider()
+
+            st.markdown("**🚫 Void Invoice**")
+
+            current_invoice_info = next(
+                inv for inv in invoices
+                if inv["invoice_number"] == selected_invoice
+            )
+
+            already_voided = current_invoice_info.get("is_voided")
+            already_requested = current_invoice_info.get("void_requested")
+
+            if already_voided:
+
+                st.warning(
+                    f"This invoice is already VOID.\n\n"
+                    f"Requested by: {current_invoice_info.get('void_requested_by', 'N/A')}\n\n"
+                    f"Reason: {current_invoice_info.get('void_reason', '')}\n\n"
+                    f"Voided by: {current_invoice_info.get('voided_by', '')} on {current_invoice_info.get('voided_at', '')}"
+                )
+
+            elif already_requested and is_admin():
+
+                st.info(
+                    f"⏳ Void request pending your approval\n\n"
+                    f"Requested by: {current_invoice_info.get('void_requested_by', '')}\n\n"
+                    f"Reason: {current_invoice_info.get('void_requested_reason', '')}"
+                )
+
+                c1, c2 = st.columns(2)
+
+                with c1:
+                    if st.button("✅ Approve & Void", key="approve_void_button"):
+                        void_invoice(
+                            selected_invoice,
+                            current_invoice_info.get("void_requested_reason", "")
+                        )
+                        st.success(f"Invoice {selected_invoice} has been voided")
+                        st.rerun()
+
+                with c2:
+                    if st.button("❌ Reject Request", key="reject_void_button"):
+                        reject_void_request(selected_invoice)
+                        st.info("Void request rejected")
+                        st.rerun()
+
+            elif already_requested and not is_admin():
+
+                st.info(
+                    f"⏳ Void request submitted, waiting for admin approval.\n\n"
+                    f"Requested by: {current_invoice_info.get('void_requested_by', '')}\n\n"
+                    f"Reason: {current_invoice_info.get('void_requested_reason', '')}"
+                )
+
+            elif is_admin():
+
+                void_reason = st.text_area(
+                    "Reason for voiding this invoice (required)",
+                    key="void_reason_input"
+                )
+
+                if st.button("🚫 Void This Invoice", key="void_invoice_button"):
+
+                    if void_reason.strip():
+                        void_invoice(selected_invoice, void_reason)
+                        st.success(f"Invoice {selected_invoice} has been voided")
+                        st.rerun()
+                    else:
+                        st.warning("Please enter a reason before voiding")
+
+            else:
+
+                void_request_reason = st.text_area(
+                    "Reason for requesting void (required)",
+                    key="void_request_reason_input"
+                )
+
+                if st.button("📨 Request Void", key="request_void_button"):
+
+                    if void_request_reason.strip():
+                        request_void_invoice(selected_invoice, void_request_reason)
+                        st.success("Void request sent to admin for approval")
+                        st.rerun()
+                    else:
+                        st.warning("Please enter a reason before requesting")
 
         if "confirm_invoice_delete" not in st.session_state:
 
