@@ -1676,6 +1676,37 @@ if page == "👥 Clients":
 
     st.title("👥 Client Management")
 
+    if "client_category" not in st.session_state:
+        st.session_state.client_category = "Personal Taxes"
+
+    cat_col1, cat_col2 = st.columns(2)
+
+    with cat_col1:
+        if st.button(
+            "👤 Personal Taxes",
+            use_container_width=True,
+            type="primary" if st.session_state.client_category == "Personal Taxes" else "secondary"
+        ):
+            st.session_state.client_category = "Personal Taxes"
+            st.rerun()
+
+    with cat_col2:
+        if st.button(
+            "🏢 Corporate Taxes",
+            use_container_width=True,
+            type="primary" if st.session_state.client_category == "Corporate Taxes" else "secondary"
+        ):
+            st.session_state.client_category = "Corporate Taxes"
+            st.rerun()
+
+    st.divider()
+
+    if st.session_state.client_category == "Corporate Taxes":
+
+        st.info("🏗️ Corporate Tax client management is coming soon. We'll build this out next.")
+
+        st.stop()
+
     if "clients_active_tab" not in st.session_state:
         st.session_state.clients_active_tab = "All Clients"
 
