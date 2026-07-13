@@ -1997,13 +1997,65 @@ if page == "👥 Clients":
             "Client Name"
         )
 
-        client_address = st.text_input(
-            "Address"
-        )
+        col_addr1, col_addr2 = st.columns(2)
 
-        client_contact = st.text_input(
-            "Business Number"
-        )
+        with col_addr1:
+            client_address = st.text_input(
+                "Address"
+            )
+
+        with col_addr2:
+            client_postal = st.text_input(
+                "Postal Code"
+            )
+
+        col_contact1, col_contact2 = st.columns(2)
+
+        with col_contact1:
+            client_contact = st.text_input(
+                "Phone Number"
+            )
+
+        with col_contact2:
+            client_email = st.text_input(
+                "Email"
+            )
+
+        st.markdown("**SIN Numbers**")
+
+        col_sin1, col_sin2 = st.columns(2)
+
+        with col_sin1:
+            client_sin_primary = st.text_input(
+                "SIN (Primary)"
+            )
+
+        with col_sin2:
+            client_sin_spouse = st.text_input(
+                "SIN (Spouse)"
+            )
+
+        st.markdown("**Date of Birth**")
+
+        col_dob1, col_dob2 = st.columns(2)
+
+        with col_dob1:
+            client_dob_primary = st.date_input(
+                "Date of Birth (Primary)",
+                value=None,
+                min_value=datetime.date(1900, 1, 1),
+                max_value=datetime.date.today(),
+                key="new_client_dob_primary"
+            )
+
+        with col_dob2:
+            client_dob_spouse = st.date_input(
+                "Date of Birth (Spouse)",
+                value=None,
+                min_value=datetime.date(1900, 1, 1),
+                max_value=datetime.date.today(),
+                key="new_client_dob_spouse"
+            )
 
         st.markdown("**Account Details (optional)**")
 
@@ -2048,7 +2100,18 @@ if page == "👥 Clients":
 
             if client_name.strip():
 
-                new_client_id = add_client(client_name, client_address, client_contact)
+                new_client_id = add_client(
+                    client_name,
+                    client_address,
+                    client_contact,
+                    client_postal,
+                    client_contact,
+                    client_email,
+                    client_sin_primary,
+                    client_sin_spouse,
+                    client_dob_primary,
+                    client_dob_spouse
+                )
 
                 for acc in st.session_state.new_client_accounts:
 
