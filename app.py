@@ -1529,6 +1529,23 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
 .main .block-container {
     padding-top: 2rem;
 }
+
+/* ---------------- PROFESSIONAL DATA TABLES ---------------- */
+
+[data-testid="stDataFrame"] {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+[data-testid="stDataFrame"] div[data-testid="stDataFrameResizable"] {
+    border-radius: 12px !important;
+}
+
+[data-testid="stElementToolbar"] {
+    background: transparent !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1706,8 +1723,10 @@ if page == "👥 Clients":
 
     if st.session_state.clients_active_tab == "All Clients":
 
-        st.subheader("Existing Clients")
+        header_col, search_col = st.columns([2, 2])
 
+        with header_col:
+            st.subheader("Existing Clients")
 
         if clients:
 
@@ -1729,16 +1748,43 @@ if page == "👥 Clients":
                 "created_by": "Created By"
             })
 
-            client_df.insert(0, "Sr. No", range(1, len(client_df) + 1))
+            with search_col:
+                client_search = st.text_input(
+                    "🔍 Search clients",
+                    key="client_search_box",
+                    placeholder="Search by name, address, or contact..."
+                )
+
+            if client_search.strip():
+                mask = client_df.apply(
+                    lambda row: client_search.lower() in str(row).lower(),
+                    axis=1
+                )
+                filtered_df = client_df[mask].reset_index(drop=True)
+            else:
+                filtered_df = client_df
+
+            filtered_df = filtered_df.drop(columns=["Sr. No"], errors="ignore")
+            filtered_df.insert(0, "Sr. No", range(1, len(filtered_df) + 1))
+
+            st.markdown(
+                f"<p style='color:#888; font-size:13.5px; margin-bottom:8px;'>"
+                f"Showing <b>{len(filtered_df)}</b> of <b>{len(client_df)}</b> clients</p>",
+                unsafe_allow_html=True
+            )
 
             st.dataframe(
-                client_df,
+                filtered_df,
                 hide_index=True,
+                use_container_width=True,
+                height=min(70 + len(filtered_df) * 36, 600),
                 column_config={
-                    "Sr. No": st.column_config.NumberColumn(
-                        "Sr. No",
-                        width="small"
-                    )
+                    "Sr. No": st.column_config.NumberColumn("Sr. No", width="small"),
+                    "Client ID": st.column_config.NumberColumn("Client ID", width="small"),
+                    "Client Name": st.column_config.TextColumn("Client Name", width="medium"),
+                    "Address": st.column_config.TextColumn("Address", width="large"),
+                    "Contact Number": st.column_config.TextColumn("Contact Number", width="medium"),
+                    "Created By": st.column_config.TextColumn("Created By", width="medium"),
                 }
             )
 
