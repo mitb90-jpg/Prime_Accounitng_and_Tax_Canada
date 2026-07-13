@@ -1427,6 +1427,13 @@ section[data-testid="stSidebar"] div.stButton > button {
     box-shadow: none !important;
     border-radius: 8px !important;
     padding: 10px 14px !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+}
+
+section[data-testid="stSidebar"] div.stButton > button p {
+    text-align: left !important;
+    width: 100% !important;
 }
 
 section[data-testid="stSidebar"] div.stButton > button:hover {
@@ -3523,7 +3530,11 @@ elif page == "🏠 Dashboard":
     with col_greeting:
         today_display = datetime.date.today().strftime("%A, %B %d, %Y")
         st.markdown(
-            f"<p style='font-size:16px; color:#1f4e79; margin-top:20px;'>👋 Welcome back — Today is {today_display}</p>",
+            "<h1 style='color:#1f4e79; margin-bottom:0px;'>Prime Accounting and Tax</h1>",
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            f"<p style='font-size:16px; color:#1f4e79; margin-top:0px;'>👋 Welcome back — Today is {today_display}</p>",
             unsafe_allow_html=True
         )
 
