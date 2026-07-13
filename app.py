@@ -101,6 +101,10 @@ def login():
         text-align: center;
         margin-bottom: 20px;
     }
+    .st-key-login_card_container [data-testid="stImage"] {
+        display: flex !important;
+        justify-content: center !important;
+    }
     .st-key-login_card_container .stTextInput input {
         border-radius: 8px !important;
         border: 1.5px solid #e0e0e0 !important;
@@ -128,9 +132,12 @@ def login():
 
     with st.container(key="login_card_container"):
 
-        logo_col1, logo_col2, logo_col3 = st.columns([1, 1, 1])
-        with logo_col2:
-            st.image("Logo.jpeg", width=70)
+        st.markdown(
+            "<div style='text-align:center; margin-bottom:8px;'>",
+            unsafe_allow_html=True
+        )
+        st.image("Logo.jpeg", width=70)
+        st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown('<div class="login-title">Prime Accounting and Tax</div>', unsafe_allow_html=True)
         st.markdown('<div class="login-subtitle">Sign in to your account</div>', unsafe_allow_html=True)
