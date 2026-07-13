@@ -413,14 +413,33 @@ def reactivate_client(client_id):
 
 
 
-def update_client(client_id, new_name, address, contact_number):
+def update_client(
+    client_id,
+    new_name,
+    address,
+    contact_number,
+    postal_code,
+    phone_number,
+    email,
+    sin_primary,
+    sin_spouse,
+    dob_primary,
+    dob_spouse
+):
 
     supabase.table("clients") \
         .update(
             {
                 "client_name": new_name,
                 "address": address,
-                "contact_number": contact_number
+                "contact_number": contact_number,
+                "postal_code": postal_code,
+                "phone_number": phone_number,
+                "email": email,
+                "sin_primary": sin_primary,
+                "sin_spouse": sin_spouse,
+                "dob_primary": str(dob_primary) if dob_primary else None,
+                "dob_spouse": str(dob_spouse) if dob_spouse else None
             }
         ) \
         .eq("id", client_id) \
@@ -2073,8 +2092,14 @@ if page == "👥 Clients":
                 st.write(f"**Client Code:** {details.get('client_code', 'N/A')}")
                 st.write(f"**Name:** {details['client_name']}")
                 st.write(f"**Status:** {status_display}")
-                st.write(f"**Address:** {details.get('address', '')}")
-                st.write(f"**Contact Number:** {details.get('contact_number', '')}")
+                st.write(f"**Address:** {details.get('address', '') or '—'}")
+                st.write(f"**Postal Code:** {details.get('postal_code', '') or '—'}")
+                st.write(f"**Phone Number:** {details.get('phone_number') or details.get('contact_number') or '—'}")
+                st.write(f"**Email:** {details.get('email', '') or '—'}")
+                st.write(f"**SIN (Primary):** {details.get('sin_primary', '') or '—'}")
+                st.write(f"**SIN (Spouse):** {details.get('sin_spouse', '') or '—'}")
+                st.write(f"**Date of Birth (Primary):** {details.get('dob_primary', '') or '—'}")
+                st.write(f"**Date of Birth (Spouse):** {details.get('dob_spouse', '') or '—'}")
 
                 if can_edit():
 
@@ -2172,14 +2197,74 @@ if page == "👥 Clients":
 
                         edit_address = st.text_input(
                             "Address",
-                            value=details.get('address', ''),
+                            value=details.get('address') or '',
                             key=f"edit_client_address_{details['id']}"
                         )
 
                         edit_contact = st.text_input(
                             "Contact Number",
-                            value=details.get('contact_number', ''),
+                            value=details.get('contact_number') or '',
                             key=f"edit_client_contact_{details['id']}"
+                        )
+
+                        edit_postal = st.text_input(
+                            "Postal Code",
+                            value=details.get('postal_code') or '',
+                            key=f"edit_client_postal_{details['id']}"
+                        )
+
+                        edit_phone = st.text_input(
+                            "Phone Number",
+                            value=details.get('phone_number') or '',
+                            key=f"edit_client_phone_{details['id']}"
+                        )
+
+                        edit_email = st.text_input(
+                            "Email",
+                            value=details.get('email') or '',
+                            key=f"edit_client_email_{details['id']}"
+                        )
+
+                        edit_sin_primary = st.text_input(
+                            "SIN (Primary)",
+                            value=details.get('sin_primary') or '',
+                            key=f"edit_client_sin_primary_{details['id']}"
+                        )
+
+                        edit_sin_spouse = st.text_input(
+                            "SIN (Spouse)",
+                            value=details.get('sin_spouse') or '',
+                            key=f"edit_client_sin_spouse_{details['id']}"
+                        )
+
+                        existing_dob_primary = None
+                        if details.get('dob_primary'):
+                            try:
+                                existing_dob_primary = datetime.date.fromisoformat(str(details['dob_primary'])[:10])
+                            except ValueError:
+                                existing_dob_primary = None
+
+                        edit_dob_primary = st.date_input(
+                            "Date of Birth (Primary)",
+                            value=existing_dob_primary,
+                            min_value=datetime.date(1900, 1, 1),
+                            max_value=datetime.date.today(),
+                            key=f"edit_client_dob_primary_{details['id']}"
+                        )
+
+                        existing_dob_spouse = None
+                        if details.get('dob_spouse'):
+                            try:
+                                existing_dob_spouse = datetime.date.fromisoformat(str(details['dob_spouse'])[:10])
+                            except ValueError:
+                                existing_dob_spouse = None
+
+                        edit_dob_spouse = st.date_input(
+                            "Date of Birth (Spouse)",
+                            value=existing_dob_spouse,
+                            min_value=datetime.date(1900, 1, 1),
+                            max_value=datetime.date.today(),
+                            key=f"edit_client_dob_spouse_{details['id']}"
                         )
 
                         if st.button("💾 Save Changes", key="save_client_edit"):
@@ -2188,7 +2273,14 @@ if page == "👥 Clients":
                                 profile_client_id,
                                 edit_name,
                                 edit_address,
-                                edit_contact
+                                edit_contact,
+                                edit_postal,
+                                edit_phone,
+                                edit_email,
+                                edit_sin_primary,
+                                edit_sin_spouse,
+                                edit_dob_primary,
+                                edit_dob_spouse
                             )
 
                             st.success("Client Updated Successfully")
