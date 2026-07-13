@@ -365,51 +365,6 @@ def can_delete():
 def is_admin():
     return st.session_state.role == "admin"
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if not st.session_state.logged_in:
-    login()
-    st.stop()
-
-with st.sidebar:
-
-    st.markdown(
-        "<div class='sidebar-brand'>Prime Accounting and Tax Canada</div>",
-        unsafe_allow_html=True
-    )
-
-    role_badge_class = {
-        "admin": "role-badge-admin",
-        "accountant": "role-badge-accountant",
-        "newbie": "role-badge-newbie"
-    }.get(st.session_state.role, "role-badge-newbie")
-
-    user_initial = st.session_state.user_name[0].upper() if st.session_state.user_name else "?"
-
-    st.markdown(
-        f"""
-        <div class="sidebar-user-card">
-            <div class="sidebar-user-avatar">{user_initial}</div>
-            <div class="sidebar-user-name">{st.session_state.user_name}</div>
-            <span class="role-badge {role_badge_class}">{st.session_state.role}</span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    col_refresh, col_logout = st.columns(2)
-    with col_refresh:
-        if st.button("🔄 Refresh", use_container_width=True):
-            st.rerun()
-    with col_logout:
-        if st.button("🚪 Logout", use_container_width=True):
-            logout()
-
-    if st.session_state.role == "admin":
-        with st.expander("🛂 Manage Requests"):
-            admin_pending_requests()
-
 
 
 # ---------------- DATABASE FUNCTIONS ----------------
@@ -1857,6 +1812,51 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
 }
 </style>
 """, unsafe_allow_html=True)
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    login()
+    st.stop()
+
+with st.sidebar:
+
+    st.markdown(
+        "<div class='sidebar-brand'>Prime Accounting and Tax Canada</div>",
+        unsafe_allow_html=True
+    )
+
+    role_badge_class = {
+        "admin": "role-badge-admin",
+        "accountant": "role-badge-accountant",
+        "newbie": "role-badge-newbie"
+    }.get(st.session_state.role, "role-badge-newbie")
+
+    user_initial = st.session_state.user_name[0].upper() if st.session_state.user_name else "?"
+
+    st.markdown(
+        f"""
+        <div class="sidebar-user-card">
+            <div class="sidebar-user-avatar">{user_initial}</div>
+            <div class="sidebar-user-name">{st.session_state.user_name}</div>
+            <span class="role-badge {role_badge_class}">{st.session_state.role}</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col_refresh, col_logout = st.columns(2)
+    with col_refresh:
+        if st.button("🔄 Refresh", use_container_width=True):
+            st.rerun()
+    with col_logout:
+        if st.button("🚪 Logout", use_container_width=True):
+            logout()
+
+    if st.session_state.role == "admin":
+        with st.expander("🛂 Manage Requests"):
+            admin_pending_requests()
 
 
 # ---------------- APP MENU ----------------
