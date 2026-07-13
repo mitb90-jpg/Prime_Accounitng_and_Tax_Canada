@@ -3527,6 +3527,10 @@ elif page == "🏠 Dashboard":
             unsafe_allow_html=True
         )
 
+    st.markdown("""
+
+    <style>
+
     .main-title {
         font-size:45px;
         font-weight:700;
