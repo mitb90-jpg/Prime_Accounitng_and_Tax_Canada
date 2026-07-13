@@ -267,12 +267,10 @@ if not st.session_state.logged_in:
 
 with st.sidebar:
 
-    st.image("Logo.jpeg", width=70)
     st.markdown(
-        "<h2 style='color:#1f4e79; margin-top:0px;'>Prime Accounting & Tax</h2>",
+        "<div class='sidebar-brand'>Prime Accounting and Tax Canada</div>",
         unsafe_allow_html=True
     )
-    st.markdown("---")
 
     role_badge_class = {
         "admin": "role-badge-admin",
@@ -1350,35 +1348,53 @@ div[data-testid="stFileUploader"] button {
     background-color: #235e5e !important;
 }
 
-/* ---------------- SIDEBAR: CLEAN MINIMAL ---------------- */
+/* ---------------- SIDEBAR: DARK GLOW THEME ---------------- */
+
+section[data-testid="stSidebar"] {
+    background: radial-gradient(circle at 0% 0%, #1a3a6b 0%, #0a1128 35%, #05070f 100%) !important;
+    border-right: none !important;
+}
+
+section[data-testid="stSidebar"] * {
+    color: #cbd5e1 !important;
+}
+
+.sidebar-brand {
+    padding: 6px 0 16px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff !important;
+    letter-spacing: 0.3px;
+    line-height: 1.3;
+}
 
 .sidebar-user-card {
-    padding: 4px 0 18px 0;
-    margin-bottom: 6px;
-    border-bottom: 1px solid #e8e8e8;
+    padding: 14px 0 18px 0;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .sidebar-user-avatar {
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 1.5px solid #1f4e79;
+    background: linear-gradient(135deg, #3b82f6, #1e3a8a);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 15px;
-    font-weight: 600;
-    color: #1f4e79;
+    font-weight: 700;
+    color: white !important;
     float: left;
     margin-right: 12px;
 }
 
 .sidebar-user-name {
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #ffffff !important;
     margin-top: 4px;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
 
 .role-badge {
@@ -1388,40 +1404,49 @@ div[data-testid="stFileUploader"] button {
     text-transform: uppercase;
 }
 
-.role-badge-admin { color: #b8912b; }
-.role-badge-accountant { color: #3a8fa3; }
-.role-badge-newbie { color: #8b96a3; }
+.role-badge-admin { color: #f0c674 !important; }
+.role-badge-accountant { color: #5dc4d6 !important; }
+.role-badge-newbie { color: #8b96a3 !important; }
 
-/* ---------------- SIDEBAR NAV: minimal active state ---------------- */
+.sidebar-menu-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #64748b !important;
+    margin: 4px 0 8px 4px;
+    text-transform: uppercase;
+}
+
+/* ---------------- SIDEBAR NAV: dark theme active state ---------------- */
 
 section[data-testid="stSidebar"] div.stButton > button {
     background-color: transparent !important;
-    color: #444 !important;
+    color: #cbd5e1 !important;
     font-weight: 500 !important;
     text-align: left !important;
     box-shadow: none !important;
-    border-radius: 6px !important;
-    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
 }
 
 section[data-testid="stSidebar"] div.stButton > button:hover {
-    background-color: #f5f6f8 !important;
+    background-color: rgba(255,255,255,0.06) !important;
 }
 
 section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
-    background-color: #f0f4f8 !important;
-    color: #1f4e79 !important;
-    font-weight: 700 !important;
-    border-left: 3px solid #1f4e79 !important;
-    border-radius: 4px !important;
+    background-color: rgba(59,130,246,0.18) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-left: 3px solid #3b82f6 !important;
+    border-radius: 6px !important;
 }
 
-/* ---------------- SIDEBAR STATS: plain rows ---------------- */
+/* ---------------- SIDEBAR STATS: dark theme ---------------- */
 
 .sidebar-stats-card {
     padding-top: 14px;
     margin-top: 10px;
-    border-top: 1px solid #e8e8e8;
+    border-top: 1px solid rgba(255,255,255,0.08);
 }
 
 .sidebar-stat-row {
@@ -1433,33 +1458,16 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
 }
 
 .sidebar-stat-label {
-    color: #888;
+    color: #8b96a3 !important;
 }
 
 .sidebar-stat-value {
     font-weight: 700;
-    color: #1f4e79;
+    color: #5dc4d6 !important;
     font-size: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
-
-# ---------------- HEADER ----------------
-col1, col2 = st.columns([1, 6])
-
-with col1:
-    st.image("Logo.jpeg", width=100)
-
-with col2:
-    st.markdown("<h1 style='color:#1f4e79;'>Prime Accounting and Tax</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:25px; color:gray;'>Turning Transactions Into Insights</p>", unsafe_allow_html=True)
-
-    today_display = datetime.date.today().strftime("%A, %B %d, %Y")
-
-    st.markdown(
-        f"<p style='font-size:16px; color:#1f4e79; margin-top:-10px;'>👋 Welcome back — Today is {today_display}</p>",
-        unsafe_allow_html=True
-    )
 
 
 # ---------------- APP MENU ----------------
@@ -1474,6 +1482,8 @@ nav_items = [
     "📄 Invoice History",    
     "📊 Reports"
 ]
+
+st.sidebar.markdown("<div class='sidebar-menu-label'>Menu</div>", unsafe_allow_html=True)
 
 for item in nav_items:
     is_active = (item == st.session_state.page)
