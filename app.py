@@ -1466,6 +1466,20 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
     color: #5dc4d6 !important;
     font-size: 15px;
 }
+
+/* ---------------- MAIN APP BACKGROUND ---------------- */
+
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(160deg, #f4f7fb 0%, #eef2f9 45%, #e8eef7 100%) !important;
+}
+
+[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+.main .block-container {
+    padding-top: 2rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
