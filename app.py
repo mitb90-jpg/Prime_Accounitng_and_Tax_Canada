@@ -1591,7 +1591,7 @@ div[data-testid="stFileUploader"] button {
 /* ---------------- SIDEBAR: DARK GLOW THEME ---------------- */
 
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #2952a3 0%, #24468f 50%, #1e3d7a 100%) !important;
+    background-color: #01796F !important;
     border-right: none !important;
 }
 
