@@ -114,10 +114,28 @@ def login():
     .login-left-feature {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         font-size: 14px;
         color: #e6f2ef;
-        margin-bottom: 12px;
+        margin-bottom: 14px;
+    }
+    .login-left-feature-icon {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+    .login-maple-leaf {
+        font-size: 22px;
+        display: inline-block;
+        margin-bottom: 10px;
+        opacity: 0.9;
     }
     .st-key-login_right_panel {
         background: white;
@@ -170,6 +188,7 @@ def login():
 
             st.markdown(
                 """
+                <div class="login-maple-leaf">🍁</div>
                 <div class="login-left-eyebrow">Canada · Trusted Since Day One</div>
                 <div class="login-left-title">Prime Accounting<br>and Tax</div>
                 <div class="login-left-subtitle">
@@ -177,9 +196,18 @@ def login():
                     businesses across Canada. Sign in to manage clients, invoices,
                     and reports in one place.
                 </div>
-                <div class="login-left-feature">✅ CRA-compliant recordkeeping</div>
-                <div class="login-left-feature">✅ Role-based secure access</div>
-                <div class="login-left-feature">✅ Real-time financial reporting</div>
+                <div class="login-left-feature">
+                    <span class="login-left-feature-icon">📋</span>
+                    CRA-compliant recordkeeping
+                </div>
+                <div class="login-left-feature">
+                    <span class="login-left-feature-icon">🔐</span>
+                    Role-based secure access
+                </div>
+                <div class="login-left-feature">
+                    <span class="login-left-feature-icon">📊</span>
+                    Real-time financial reporting
+                </div>
                 """,
                 unsafe_allow_html=True
             )
