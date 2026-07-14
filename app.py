@@ -2310,7 +2310,7 @@ if page == "👥 Clients":
         header_col, search_col = st.columns([2, 2])
 
         with header_col:
-            st.subheader("Existing Clients")
+            st.subheader("Existing Personal Clients")
 
         if clients:
 
