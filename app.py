@@ -202,7 +202,7 @@ def login():
     </style>
     """, unsafe_allow_html=True)
 
-    left_col, right_col = st.columns([2, 2], gap="small")
+    left_col, right_col = st.columns([2, 1], gap="small", vertical_alignment="center")
 
     with left_col:
         with st.container(key="login_left_panel"):
