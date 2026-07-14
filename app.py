@@ -2117,7 +2117,7 @@ if page == "👥 Clients":
 
         with tab_col1:
             if st.button(
-                "📋 All Clients",
+                "📋 All Personal Clients",
                 use_container_width=True,
                 type="primary" if st.session_state.clients_active_tab == "All Clients" else "secondary"
             ):
