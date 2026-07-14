@@ -1745,6 +1745,63 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
     background: transparent !important;
 }
 
+/* ---------------- CLIENT PAGE: PROFESSIONAL LOOK ---------------- */
+
+.client-stat-card {
+    background: white;
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.client-stat-label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.client-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f4e79;
+}
+
+.client-stat-value.green { color: #1a9e6f; }
+.client-stat-value.red { color: #c0392b; }
+
+.client-section-header {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f4e79;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+.st-key-client_category_row div.stButton > button {
+    border-radius: 24px !important;
+}
+
+.st-key-client_tabs_row div.stButton > button {
+    border-radius: 10px !important;
+    background-color: #f0f4f8 !important;
+    color: #1f4e79 !important;
+    box-shadow: none !important;
+    font-weight: 600 !important;
+}
+
+.st-key-client_tabs_row div.stButton > button:hover {
+    background-color: #e0e9f2 !important;
+}
+
+.st-key-client_tabs_row div.stButton > button[kind="primary"] {
+    background-color: #1f4e79 !important;
+    color: white !important;
+}
+
 /* ---------------- LOGIN PAGE ---------------- */
 
 .login-page-wrapper [data-testid="stAppViewContainer"] {
@@ -1923,33 +1980,75 @@ if page == "👥 Clients":
     if "client_category" not in st.session_state:
         st.session_state.client_category = "Personal Taxes"
 
-    cat_col1, cat_col2 = st.columns(2)
+    with st.container(key="client_category_row"):
+        cat_col1, cat_col2 = st.columns(2)
 
-    with cat_col1:
-        if st.button(
-            "👤 Personal Taxes",
-            use_container_width=True,
-            type="primary" if st.session_state.client_category == "Personal Taxes" else "secondary"
-        ):
-            st.session_state.client_category = "Personal Taxes"
-            st.rerun()
+        with cat_col1:
+            if st.button(
+                "👤 Personal Taxes",
+                use_container_width=True,
+                type="primary" if st.session_state.client_category == "Personal Taxes" else "secondary"
+            ):
+                st.session_state.client_category = "Personal Taxes"
+                st.rerun()
 
-    with cat_col2:
-        if st.button(
-            "🏢 Corporate Taxes",
-            use_container_width=True,
-            type="primary" if st.session_state.client_category == "Corporate Taxes" else "secondary"
-        ):
-            st.session_state.client_category = "Corporate Taxes"
-            st.rerun()
+        with cat_col2:
+            if st.button(
+                "🏢 Corporate Taxes",
+                use_container_width=True,
+                type="primary" if st.session_state.client_category == "Corporate Taxes" else "secondary"
+            ):
+                st.session_state.client_category = "Corporate Taxes"
+                st.rerun()
 
-    st.divider()
+    st.write("")
 
     if st.session_state.client_category == "Corporate Taxes":
 
         st.info("🏗️ Corporate Tax client management is coming soon. We'll build this out next.")
 
         st.stop()
+
+    all_personal_clients_for_stats = (
+        supabase.table("clients").select("status").eq("client_type", "personal").execute()
+    ).data
+
+    stat_total = len(all_personal_clients_for_stats)
+    stat_active = len([c for c in all_personal_clients_for_stats if c.get("status") == "active"])
+    stat_inactive = stat_total - stat_active
+
+    stat_col1, stat_col2, stat_col3 = st.columns(3)
+
+    with stat_col1:
+        st.markdown(
+            f"""<div class="client-stat-card">
+                <div class="client-stat-label">Total Clients</div>
+                <div class="client-stat-value">{stat_total}</div>
+            </div>""",
+            unsafe_allow_html=True
+        )
+
+    with stat_col2:
+        st.markdown(
+            f"""<div class="client-stat-card">
+                <div class="client-stat-label">Active</div>
+                <div class="client-stat-value green">{stat_active}</div>
+            </div>""",
+            unsafe_allow_html=True
+        )
+
+    with stat_col3:
+        st.markdown(
+            f"""<div class="client-stat-card">
+                <div class="client-stat-label">Inactive</div>
+                <div class="client-stat-value red">{stat_inactive}</div>
+            </div>""",
+            unsafe_allow_html=True
+        )
+
+    st.write("")
+
+    st.divider()
 
     if is_admin():
         with st.expander("📥 Bulk Import Clients (Excel)"):
@@ -2012,22 +2111,39 @@ if page == "👥 Clients":
     if "clients_active_tab" not in st.session_state:
         st.session_state.clients_active_tab = "All Clients"
 
-    tab_col1, tab_col2, tab_col3 = st.columns(3)
+    with st.container(key="client_tabs_row"):
 
-    with tab_col1:
-        if st.button("📋 All Clients", use_container_width=True):
-            st.session_state.clients_active_tab = "All Clients"
+        tab_col1, tab_col2, tab_col3 = st.columns(3)
 
-    with tab_col2:
-        if can_edit():
-            if st.button("➕ Add Client", use_container_width=True):
-                st.session_state.clients_active_tab = "Add Client"
+        with tab_col1:
+            if st.button(
+                "📋 All Clients",
+                use_container_width=True,
+                type="primary" if st.session_state.clients_active_tab == "All Clients" else "secondary"
+            ):
+                st.session_state.clients_active_tab = "All Clients"
+                st.rerun()
 
-    with tab_col3:
-        if st.button("👤 Client Profile", use_container_width=True):
-            st.session_state.clients_active_tab = "Client Profile"
+        with tab_col2:
+            if can_edit():
+                if st.button(
+                    "➕ Add Client",
+                    use_container_width=True,
+                    type="primary" if st.session_state.clients_active_tab == "Add Client" else "secondary"
+                ):
+                    st.session_state.clients_active_tab = "Add Client"
+                    st.rerun()
 
-    st.divider()
+        with tab_col3:
+            if st.button(
+                "👤 Client Profile",
+                use_container_width=True,
+                type="primary" if st.session_state.clients_active_tab == "Client Profile" else "secondary"
+            ):
+                st.session_state.clients_active_tab = "Client Profile"
+                st.rerun()
+
+    st.write("")
 
     clients = get_clients("personal")
 
