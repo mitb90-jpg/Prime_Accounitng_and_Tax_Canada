@@ -74,184 +74,154 @@ def login():
     st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] {
-        background: #ffffff !important;
+        background: #eef2f5 !important;
     }
     [data-testid="stHeader"] {
         background: transparent !important;
     }
-    .st-key-login_left_panel {
-        background: linear-gradient(160deg, #0d2a4a 0%, #01796F 100%);
-        border-radius: 20px 0px 0px 20px;
-        padding: 60px 40px;
-        min-height: 640px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        color: white;
-        box-shadow: 0 15px 45px rgba(0,0,0,0.15);
-    }
-    .login-left-eyebrow {
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #9fd8cf;
-        margin-bottom: 18px;
-    }
-    .login-left-title {
-        font-size: 34px;
-        font-weight: 800;
-        color: white;
-        line-height: 1.25;
-        margin-bottom: 16px;
-    }
-    .login-left-subtitle {
-        font-size: 15.5px;
-        color: #cfe4e0;
-        line-height: 1.6;
-        max-width: 380px;
-        margin-bottom: 36px;
-    }
-    .login-left-feature {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 14px;
-        color: #e6f2ef;
-        margin-bottom: 14px;
-    }
-    .login-left-divider {
-        width: 60px;
-        height: 3px;
-        background: rgba(255,255,255,0.35);
-        border-radius: 2px;
-        margin: 28px 0;
-    }
-    .login-left-quote {
-        font-size: 13.5px;
-        font-style: italic;
-        color: #b9d9d3;
-        border-left: 2px solid rgba(255,255,255,0.3);
-        padding-left: 14px;
-        margin-top: 32px;
-        max-width: 360px;
-    }
-    .login-left-feature-icon {
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.18);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    }
-    .login-maple-leaf {
-        font-size: 22px;
-        display: inline-block;
-        margin-bottom: 10px;
-        opacity: 0.9;
-    }
-    .st-key-login_right_panel {
-        background: white;
-        border-radius: 0px 20px 20px 0px;
-        padding: 60px 50px;
-        min-height: 640px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        box-shadow: 0 15px 45px rgba(0,0,0,0.15);
-        border-left: 1px solid #eee;
-    }
     .main .block-container {
         padding-top: 3rem !important;
-        max-width: 1100px !important;
+        max-width: 720px !important;
     }
-    .login-title {
-        font-size: 24px;
+    .st-key-login_outer_card {
+        position: relative;
+        background: linear-gradient(135deg, #0d2a4a 0%, #01796F 100%);
+        border-radius: 26px;
+        padding: 70px 30px;
+        min-height: 560px;
+        overflow: hidden;
+        box-shadow: 0 30px 70px rgba(0,0,0,0.25);
+    }
+    .login-blob {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+        pointer-events: none;
+    }
+    .login-blob-1 { width: 260px; height: 260px; top: -80px; left: -80px; }
+    .login-blob-2 { width: 180px; height: 180px; bottom: -60px; right: -40px; background: rgba(255,255,255,0.08); }
+    .login-blob-3 { width: 340px; height: 340px; bottom: -180px; left: 40%; background: rgba(255,255,255,0.04); }
+    .login-blob-4 { width: 120px; height: 120px; top: 40px; right: 60px; background: rgba(255,255,255,0.07); }
+
+    .st-key-login_glass_card {
+        position: relative;
+        z-index: 2;
+        background: rgba(255,255,255,0.10);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 20px;
+        padding: 38px 34px 28px 34px;
+        max-width: 380px;
+        margin: 0 auto;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+    .login-glass-eyebrow {
+        font-size: 11px;
         font-weight: 700;
-        color: #1f4e79;
-        margin-top: 12px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #a9d9d1;
+        margin-top: 10px;
         margin-bottom: 2px;
     }
-    .login-subtitle {
-        font-size: 14px;
-        color: #888;
-        margin-bottom: 24px;
+    .login-glass-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 18px;
     }
-    .st-key-login_right_panel .stTextInput input {
-        border-radius: 8px !important;
-        border: 1.5px solid #e0e0e0 !important;
-        padding: 10px 12px !important;
+    .st-key-login_glass_card [data-testid="stImage"] {
+        display: flex !important;
+        justify-content: flex-start !important;
     }
-    .st-key-login_right_panel div.stButton > button {
-        background: linear-gradient(135deg, #1f4e79, #163a5c) !important;
+    .st-key-login_glass_card [data-baseweb="tab-list"] {
+        gap: 6px !important;
+        background: rgba(255,255,255,0.08);
+        border-radius: 10px;
+        padding: 4px;
+    }
+    .st-key-login_glass_card button[data-baseweb="tab"] {
+        color: #dfeeeb !important;
         border-radius: 8px !important;
-        font-weight: 600 !important;
-        padding: 11px !important;
-        border: none !important;
-        margin-top: 6px !important;
-        width: 100% !important;
+    }
+    .st-key-login_glass_card button[aria-selected="true"] {
+        background: rgba(255,255,255,0.18) !important;
         color: white !important;
     }
-    .st-key-login_right_panel div.stButton > button:hover {
-        background: linear-gradient(135deg, #163a5c, #0f2a44) !important;
+    .st-key-login_glass_card [data-baseweb="tab-highlight"] {
+        display: none !important;
+    }
+    .st-key-login_glass_card .stTextInput label {
+        color: #dfeeeb !important;
+        font-size: 13px !important;
+    }
+    .st-key-login_glass_card .stTextInput input {
+        background: rgba(255,255,255,0.12) !important;
+        border: 1px solid rgba(255,255,255,0.25) !important;
+        border-radius: 9px !important;
+        color: white !important;
+        padding: 10px 12px !important;
+    }
+    .st-key-login_glass_card .stTextInput input::placeholder {
+        color: rgba(255,255,255,0.5) !important;
+    }
+    .st-key-login_glass_card .stDateInput input {
+        background: rgba(255,255,255,0.12) !important;
+        border: 1px solid rgba(255,255,255,0.25) !important;
+        border-radius: 9px !important;
+        color: white !important;
+    }
+    .st-key-login_glass_card .stDateInput label {
+        color: #dfeeeb !important;
+        font-size: 13px !important;
+    }
+    .st-key-login_glass_card div.stButton > button {
+        background: white !important;
+        color: #0d2a4a !important;
+        border-radius: 9px !important;
+        font-weight: 700 !important;
+        padding: 11px !important;
+        border: none !important;
+        margin-top: 10px !important;
+        width: 100% !important;
+    }
+    .st-key-login_glass_card div.stButton > button:hover {
+        background: #e8f4f2 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    left_col, right_col = st.columns([2, 1], gap="small", vertical_alignment="center")
+    with st.container(key="login_outer_card"):
 
-    with left_col:
-        with st.container(key="login_left_panel"):
+        st.markdown(
+            """
+            <div class="login-blob login-blob-1"></div>
+            <div class="login-blob login-blob-2"></div>
+            <div class="login-blob login-blob-3"></div>
+            <div class="login-blob login-blob-4"></div>
+            """,
+            unsafe_allow_html=True
+        )
 
-            st.image("Logo.jpeg", width=64)
+        with st.container(key="login_glass_card"):
+
+            st.image("Logo.jpeg", width=48)
 
             st.markdown(
                 """
-                <div class="login-maple-leaf">🍁</div>
-                <div class="login-left-eyebrow">Canada · Trusted Since Day One</div>
-                <div class="login-left-title">Prime Accounting<br>and Tax</div>
-                <div class="login-left-subtitle">
-                    Secure, reliable accounting and tax services for individuals and
-                    businesses across Canada. Sign in to manage clients, invoices,
-                    and reports in one place.
-                </div>
-                <div class="login-left-feature">
-                    <span class="login-left-feature-icon">📋</span>
-                    CRA-compliant recordkeeping
-                </div>
-                <div class="login-left-feature">
-                    <span class="login-left-feature-icon">🔐</span>
-                    Role-based secure access
-                </div>
-                <div class="login-left-feature">
-                    <span class="login-left-feature-icon">📊</span>
-                    Real-time financial reporting
-                </div>
-                <div class="login-left-divider"></div>
-                <div class="login-left-quote">
-                    "Helping Canadian individuals and businesses navigate their taxes
-                    with clarity and confidence."
-                </div>
+                <div class="login-glass-eyebrow">Prime Accounting and Tax</div>
+                <div class="login-glass-title">Welcome back</div>
                 """,
                 unsafe_allow_html=True
             )
 
-    with right_col:
-        with st.container(key="login_right_panel"):
-
-            st.markdown('<div class="login-title">Sign in to your account</div>', unsafe_allow_html=True)
-            st.markdown('<div class="login-subtitle">Enter your credentials to continue</div>', unsafe_allow_html=True)
-
             tab_login, tab_signup = st.tabs(["Login", "Request Access"])
 
             with tab_login:
-                email = st.text_input("Email", key="login_email")
-                password = st.text_input("Password", type="password", key="login_password")
-                if st.button("Login"):
+                email = st.text_input("Email", key="login_email", placeholder="you@example.com")
+                password = st.text_input("Password", type="password", key="login_password", placeholder="••••••••")
+                if st.button("Sign in"):
                     try:
                         result = supabase.auth.sign_in_with_password(
                             {"email": email, "password": password}
