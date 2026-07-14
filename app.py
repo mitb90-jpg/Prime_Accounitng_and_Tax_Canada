@@ -81,13 +81,14 @@ def login():
     }
     .st-key-login_left_panel {
         background: linear-gradient(160deg, #0d2a4a 0%, #01796F 100%);
-        border-radius: 0px;
+        border-radius: 20px 0px 0px 20px;
         padding: 60px 40px;
         min-height: 640px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         color: white;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.15);
     }
     .login-left-eyebrow {
         font-size: 13px;
@@ -139,12 +140,18 @@ def login():
     }
     .st-key-login_right_panel {
         background: white;
-        border-radius: 0px;
+        border-radius: 0px 20px 20px 0px;
         padding: 60px 50px;
         min-height: 640px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+        border-left: 1px solid #eee;
+    }
+    .main .block-container {
+        padding-top: 3rem !important;
+        max-width: 1100px !important;
     }
     .login-title {
         font-size: 24px;
@@ -179,7 +186,7 @@ def login():
     </style>
     """, unsafe_allow_html=True)
 
-    left_col, right_col = st.columns([1, 1], gap="small")
+    left_col, right_col = st.columns([1, 1], gap="none")
 
     with left_col:
         with st.container(key="login_left_panel"):
