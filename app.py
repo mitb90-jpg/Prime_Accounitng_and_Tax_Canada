@@ -1745,6 +1745,13 @@ section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
     background: transparent !important;
 }
 
+/* ---------------- SHARED CARD COLORS ---------------- */
+
+.card-blue { background: #e8f1fb !important; }
+.card-amber { background: #fef3e0 !important; }
+.card-red { background: #fdeaea !important; }
+.card-teal { background: #e3f4f4 !important; }
+
 /* ---------------- CLIENT PAGE: PROFESSIONAL LOOK ---------------- */
 
 .client-stat-card {
@@ -2021,7 +2028,7 @@ if page == "👥 Clients":
 
     with stat_col1:
         st.markdown(
-            f"""<div class="client-stat-card">
+            f"""<div class="client-stat-card card-blue">
                 <div class="client-stat-label">Total Clients</div>
                 <div class="client-stat-value">{stat_total}</div>
             </div>""",
@@ -2030,7 +2037,7 @@ if page == "👥 Clients":
 
     with stat_col2:
         st.markdown(
-            f"""<div class="client-stat-card">
+            f"""<div class="client-stat-card card-teal">
                 <div class="client-stat-label">Active</div>
                 <div class="client-stat-value green">{stat_active}</div>
             </div>""",
@@ -2039,7 +2046,7 @@ if page == "👥 Clients":
 
     with stat_col3:
         st.markdown(
-            f"""<div class="client-stat-card">
+            f"""<div class="client-stat-card card-red">
                 <div class="client-stat-label">Inactive</div>
                 <div class="client-stat-value red">{stat_inactive}</div>
             </div>""",
@@ -2109,7 +2116,7 @@ if page == "👥 Clients":
                     st.rerun()
 
     if "clients_active_tab" not in st.session_state:
-        st.session_state.clients_active_tab = "All Clients"
+        st.session_state.clients_active_tab = None
 
     with st.container(key="client_tabs_row"):
 
@@ -2154,6 +2161,10 @@ if page == "👥 Clients":
 
     def get_client_id_from_label(label):
         return int(label.split("ID: ")[1].rstrip(")"))
+
+    if st.session_state.clients_active_tab is None:
+
+        st.info("👆 Select an option above to get started — view all clients, add a new one, or open a client profile.")
 
     if st.session_state.clients_active_tab == "Add Client":
 
