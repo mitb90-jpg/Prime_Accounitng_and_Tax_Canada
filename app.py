@@ -120,6 +120,22 @@ def login():
         color: #e6f2ef;
         margin-bottom: 14px;
     }
+    .login-left-divider {
+        width: 60px;
+        height: 3px;
+        background: rgba(255,255,255,0.35);
+        border-radius: 2px;
+        margin: 28px 0;
+    }
+    .login-left-quote {
+        font-size: 13.5px;
+        font-style: italic;
+        color: #b9d9d3;
+        border-left: 2px solid rgba(255,255,255,0.3);
+        padding-left: 14px;
+        margin-top: 32px;
+        max-width: 360px;
+    }
     .login-left-feature-icon {
         width: 28px;
         height: 28px;
@@ -214,6 +230,11 @@ def login():
                 <div class="login-left-feature">
                     <span class="login-left-feature-icon">📊</span>
                     Real-time financial reporting
+                </div>
+                <div class="login-left-divider"></div>
+                <div class="login-left-quote">
+                    "Helping Canadian individuals and businesses navigate their taxes
+                    with clarity and confidence."
                 </div>
                 """,
                 unsafe_allow_html=True
