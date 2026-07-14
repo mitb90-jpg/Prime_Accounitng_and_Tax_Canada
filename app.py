@@ -221,6 +221,7 @@ def login():
             with tab_login:
                 email = st.text_input("Email", key="login_email", placeholder="you@example.com")
                 password = st.text_input("Password", type="password", key="login_password", placeholder="••••••••")
+                remember_me = st.checkbox("Remember me", key="login_remember_me")
                 if st.button("Sign in"):
                     try:
                         result = supabase.auth.sign_in_with_password(
