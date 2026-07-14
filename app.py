@@ -157,14 +157,14 @@ def login():
         font-size: 13px !important;
     }
     .st-key-login_glass_card .stTextInput input {
-        background: rgba(255,255,255,0.12) !important;
-        border: 1px solid rgba(255,255,255,0.25) !important;
+        background: rgba(255,255,255,0.85) !important;
+        border: 1px solid rgba(255,255,255,0.4) !important;
         border-radius: 9px !important;
-        color: white !important;
+        color: #1a1a1a !important;
         padding: 10px 12px !important;
     }
     .st-key-login_glass_card .stTextInput input::placeholder {
-        color: rgba(255,255,255,0.5) !important;
+        color: rgba(0,0,0,0.4) !important;
     }
     .st-key-login_glass_card .stDateInput input {
         background: rgba(255,255,255,0.12) !important;
