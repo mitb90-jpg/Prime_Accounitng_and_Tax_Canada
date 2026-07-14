@@ -87,8 +87,8 @@ def login():
         position: relative;
         background: linear-gradient(135deg, #0d2a4a 0%, #01796F 100%);
         border-radius: 26px;
-        padding: 70px 30px;
-        min-height: 560px;
+        padding: 160px 30px;
+        min-height: 850px;
         overflow: hidden;
         box-shadow: 0 30px 70px rgba(0,0,0,0.25);
     }
