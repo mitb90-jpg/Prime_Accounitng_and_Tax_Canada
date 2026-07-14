@@ -74,43 +74,78 @@ def login():
     st.markdown("""
     <style>
     [data-testid="stAppViewContainer"] {
-        background: radial-gradient(circle at 15% 15%, #1a3a6b 0%, #0a1128 40%, #05070f 100%) !important;
+        background: #ffffff !important;
     }
     [data-testid="stHeader"] {
         background: transparent !important;
     }
-    .st-key-login_card_container {
+    .st-key-login_left_panel {
+        background: linear-gradient(160deg, #0d2a4a 0%, #01796F 100%);
+        border-radius: 0px;
+        padding: 60px 40px;
+        min-height: 640px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: white;
+    }
+    .login-left-eyebrow {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #9fd8cf;
+        margin-bottom: 18px;
+    }
+    .login-left-title {
+        font-size: 34px;
+        font-weight: 800;
+        color: white;
+        line-height: 1.25;
+        margin-bottom: 16px;
+    }
+    .login-left-subtitle {
+        font-size: 15.5px;
+        color: #cfe4e0;
+        line-height: 1.6;
+        max-width: 380px;
+        margin-bottom: 36px;
+    }
+    .login-left-feature {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #e6f2ef;
+        margin-bottom: 12px;
+    }
+    .st-key-login_right_panel {
         background: white;
-        border-radius: 18px;
-        padding: 36px 32px 26px 32px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-        max-width: 440px;
-        margin: 40px auto;
+        border-radius: 0px;
+        padding: 60px 50px;
+        min-height: 640px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     .login-title {
         font-size: 24px;
         font-weight: 700;
         color: #1f4e79;
-        text-align: center;
         margin-top: 12px;
         margin-bottom: 2px;
     }
     .login-subtitle {
         font-size: 14px;
         color: #888;
-        text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
     }
-    .st-key-login_card_container [data-testid="stImage"] {
-        display: flex !important;
-        justify-content: center !important;
-    }
-    .st-key-login_card_container .stTextInput input {
+    .st-key-login_right_panel .stTextInput input {
         border-radius: 8px !important;
         border: 1.5px solid #e0e0e0 !important;
         padding: 10px 12px !important;
     }
-    .st-key-login_card_container div.stButton > button {
+    .st-key-login_right_panel div.stButton > button {
         background: linear-gradient(135deg, #1f4e79, #163a5c) !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
@@ -120,65 +155,78 @@ def login():
         width: 100% !important;
         color: white !important;
     }
-    .st-key-login_card_container div.stButton > button:hover {
+    .st-key-login_right_panel div.stButton > button:hover {
         background: linear-gradient(135deg, #163a5c, #0f2a44) !important;
-    }
-    .st-key-login_card_container [data-baseweb="tab-list"] {
-        justify-content: center !important;
-        gap: 8px !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    with st.container(key="login_card_container"):
+    left_col, right_col = st.columns([1, 1], gap="small")
 
-        st.markdown(
-            "<div style='text-align:center; margin-bottom:8px;'>",
-            unsafe_allow_html=True
-        )
-        st.image("Logo.jpeg", width=70)
-        st.markdown("</div>", unsafe_allow_html=True)
+    with left_col:
+        with st.container(key="login_left_panel"):
 
-        st.markdown('<div class="login-title">Prime Accounting and Tax</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">Sign in to your account</div>', unsafe_allow_html=True)
+            st.image("Logo.jpeg", width=64)
 
-        tab_login, tab_signup = st.tabs(["Login", "Request Access"])
+            st.markdown(
+                """
+                <div class="login-left-eyebrow">Canada · Trusted Since Day One</div>
+                <div class="login-left-title">Prime Accounting<br>and Tax</div>
+                <div class="login-left-subtitle">
+                    Secure, reliable accounting and tax services for individuals and
+                    businesses across Canada. Sign in to manage clients, invoices,
+                    and reports in one place.
+                </div>
+                <div class="login-left-feature">✅ CRA-compliant recordkeeping</div>
+                <div class="login-left-feature">✅ Role-based secure access</div>
+                <div class="login-left-feature">✅ Real-time financial reporting</div>
+                """,
+                unsafe_allow_html=True
+            )
 
-        with tab_login:
-            email = st.text_input("Email", key="login_email")
-            password = st.text_input("Password", type="password", key="login_password")
-            if st.button("Login"):
-                try:
-                    result = supabase.auth.sign_in_with_password(
-                        {"email": email, "password": password}
-                    )
-                    user_id = result.user.id
-                    profile = (
-                        supabase.table("profiles")
-                        .select("*")
-                        .eq("id", user_id)
-                        .execute()
-                    )
-                    if not profile.data:
-                        st.error("No profile found. Contact admin.")
-                        return
-                    p = profile.data[0]
-                    if p["status"] == "pending":
-                        st.warning("Your account is still waiting for admin approval.")
-                        return
-                    if p["status"] == "rejected":
-                        st.error("Your access request was rejected. Contact admin.")
-                        return
-                    st.session_state.logged_in = True
-                    st.session_state.user_email = email
-                    st.session_state.user_name = p["name"]
-                    st.session_state.role = p["role"]
-                    st.rerun()
-                except Exception as e:
-                    st.error("Invalid email or password")
+    with right_col:
+        with st.container(key="login_right_panel"):
 
-        with tab_signup:
-            signup_form()
+            st.markdown('<div class="login-title">Sign in to your account</div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-subtitle">Enter your credentials to continue</div>', unsafe_allow_html=True)
+
+            tab_login, tab_signup = st.tabs(["Login", "Request Access"])
+
+            with tab_login:
+                email = st.text_input("Email", key="login_email")
+                password = st.text_input("Password", type="password", key="login_password")
+                if st.button("Login"):
+                    try:
+                        result = supabase.auth.sign_in_with_password(
+                            {"email": email, "password": password}
+                        )
+                        user_id = result.user.id
+                        profile = (
+                            supabase.table("profiles")
+                            .select("*")
+                            .eq("id", user_id)
+                            .execute()
+                        )
+                        if not profile.data:
+                            st.error("No profile found. Contact admin.")
+                            return
+                        p = profile.data[0]
+                        if p["status"] == "pending":
+                            st.warning("Your account is still waiting for admin approval.")
+                            return
+                        if p["status"] == "rejected":
+                            st.error("Your access request was rejected. Contact admin.")
+                            return
+                        st.session_state.logged_in = True
+                        st.session_state.user_email = email
+                        st.session_state.user_name = p["name"]
+                        st.session_state.role = p["role"]
+                        st.rerun()
+                    except Exception as e:
+                        st.error("Invalid email or password")
+
+            with tab_signup:
+                signup_form()
 
 def logout():
     supabase.auth.sign_out()
